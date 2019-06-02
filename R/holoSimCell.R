@@ -5,6 +5,7 @@
 #' @docType package
 #' @author astrand, jrob
 #' @import strataG
+#' @import parallel
 #' @useDynLib holoSimCell
 #' @name holoSimCell
 NULL  

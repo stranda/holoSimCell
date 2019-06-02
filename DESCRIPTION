@@ -18,7 +18,6 @@ Imports: Rcpp (>= 1.0.1),
 	 LDcorSV,
 	 sna,
 	 igraph,
-	 compiler,
 	 parallel,
 	 strataG
 LinkingTo: Rcpp

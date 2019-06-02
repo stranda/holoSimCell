@@ -24,7 +24,7 @@ if(length(args) == 0){
 
 #Read in the scenarios file (alternative parameter combinations for spatial stat evaluation)
 #setwd("~/Google Drive/MSU/TIMBER/Weise_Sims_2019/dist")
-setwd("/mnt/research/TIMBER/spatsimsEW/code")
+#setwd("/mnt/research/TIMBER/spatsimsEW/code")
 parmsets <- read.csv("scenarios.csv", header = TRUE)
 parms <- parmsets[i,]
 
@@ -106,7 +106,8 @@ while(is.null(fscout)) {
 
     #This is a check to see if there are enough variable sites in the dataset...
     if(SNPnum$nvar > loc_parms$nloci) {
-        variableloci <- which(SNPnum$nall == 2)-2
+        variableloci <- which(SNPnum$nall == 2)-2 #why subtract 2?
+        variableloci <- which(SNPnum$nall == 2)   #changed AES 6/2/19
         keeploci <- sample(variableloci,loc_parms$nloci,replace = FALSE)
         fscout <- tmp[,keeploci]
         rm(tmp)
