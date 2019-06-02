@@ -118,6 +118,9 @@ pwise.het <- function(locMAF,locN,cores=1)
     dfmat+t(dfmat)
 }
 
+#' process genotype data
+#' @param out genotype data
+#' @export
 get.gSum = function(out)
 {
     nall=sapply(out@data[names(out@data)[grep("Locus",names(out@data))]],
@@ -127,6 +130,9 @@ get.gSum = function(out)
     list(nall=nall,nvar=nvar)
 }
 
+#' get number of snps
+#' @param out genotype data
+#' @export
 get.nSNP = function(out) {
     get.gSum(out)$nvar
 }

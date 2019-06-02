@@ -97,7 +97,7 @@ while(is.null(fscout)) {
 					label = "test",				#Label for FSC simulation files
 					delete_files = F,		#Logical - clear out .par, .arp, and other FSC outputs?
 					num_cores = 1,				#Number of processors to use for FSC
-					exec = "fsc25",				#Executable for FSC (needs to be in $PATH variable)
+					exec = "fsc251",				#Executable for FSC (needs to be in $PATH variable)
 					loc_parms = loc_parms2,		#Vector of locus parameters
 					found_Ne = found_Ne)				#Founding size 
 
