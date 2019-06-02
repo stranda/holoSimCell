@@ -2,34 +2,34 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 gsl_mult1 <- function(P) {
-    .Call(`_holoSimCell_gsl_mult1`, P)
+    .Call('_holoSimCell_gsl_mult1', PACKAGE = 'holoSimCell', P)
 }
 
 oneMultinomCall <- function(probs) {
-    .Call(`_holoSimCell_oneMultinomCall`, probs)
+    .Call('_holoSimCell_oneMultinomCall', PACKAGE = 'holoSimCell', probs)
 }
 
 whichMultinom <- function(probs) {
-    .Call(`_holoSimCell_whichMultinom`, probs)
+    .Call('_holoSimCell_whichMultinom', PACKAGE = 'holoSimCell', probs)
 }
 
 submat <- function(X, condition) {
-    .Call(`_holoSimCell_submat`, X, condition)
+    .Call('_holoSimCell_submat', PACKAGE = 'holoSimCell', X, condition)
 }
 
 getsrcC <- function(tmat, nv) {
-    .Call(`_holoSimCell_getsrcC`, tmat, nv)
+    .Call('_holoSimCell_getsrcC', PACKAGE = 'holoSimCell', tmat, nv)
 }
 
 getsrcC2 <- function(tmat, nv) {
-    .Call(`_holoSimCell_getsrcC2`, tmat, nv)
+    .Call('_holoSimCell_getsrcC2', PACKAGE = 'holoSimCell', tmat, nv)
 }
 
 makeRmatC <- function(pops, dm, cent) {
-    .Call(`_holoSimCell_makeRmatC`, pops, dm, cent)
+    .Call('_holoSimCell_makeRmatC', PACKAGE = 'holoSimCell', pops, dm, cent)
 }
 
 rcpp_hello_world <- function() {
-    .Call(`_holoSimCell_rcpp_hello_world`)
+    .Call('_holoSimCell_rcpp_hello_world', PACKAGE = 'holoSimCell')
 }
 
