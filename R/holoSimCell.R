@@ -7,6 +7,6 @@
 #' @import strataG
 #' @import parallel
 #' @useDynLib holoSimCell
-#' @exportPattern("^[[:alpha:]]+")
+#' @exportPattern ^[[:alpha:]]+
 #' @name holoSimCell
 NULL  
