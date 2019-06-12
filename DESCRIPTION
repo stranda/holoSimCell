@@ -19,6 +19,9 @@ Depends: cubature,
 	 sna,
 	 igraph,
 	 parallel,
-	 strataG
+	 strataG,
+	 gdata,
+	 adegenet,
+	 ape
 LinkingTo: Rcpp
 RoxygenNote: 6.1.1

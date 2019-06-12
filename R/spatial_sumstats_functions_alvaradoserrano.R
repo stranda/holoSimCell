@@ -27,7 +27,7 @@ stats.AFS = function(data, sstype, nsamples, pops.xy){
   # sstype: type of summary statistics wanted (either 'nss' --> non-spatial ss or 'sss' --> spatial ss)
   # nsamples: number of individual seqs per population (assumes same number of seqs in all populations)
   # pops.xy: coordinates of population samples
-  suppressMessages(require(gdata))
+  #suppressMessages(require(gdata))
   
   #calculating AFS:    
   AFS.fol = matrix(rep(NA, (ceiling(nsamples%/%2)+1)*nrow(pops.xy)), nrow=nrow(pops.xy))      #the ceiling is required to deal with uneven numbers of samples

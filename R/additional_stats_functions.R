@@ -67,7 +67,7 @@ data_reformat <- function(raw_data){
 
 #GSSA calculation and raggedness index calculation
 old_gssa_raggedness <- function(out=NULL,dist_mat=NULL){
-  require(strataG)
+  #require(strataG)
   ##working with the gtypes object to get in into the correct format
   full <- out
   split <- strataSplit(out)
