@@ -50,8 +50,9 @@ data_reformat <- function(raw_data){
   #make a repeat list of ones
   ones <- rep(1:1,each=length(st))
   #turn SNP data into numeric values
-  act_snps <- raw_data[,!c(1,2)]
-  act_snps <- apply(act_snps,2,as.character)
+##    act_snps <- raw_data[,!c(1,2)] #AES: I dont think this construct works
+    act_snps <- raw_data[,-1*c(1,2)] #AES: this uses the correct construct (I think)
+    act_snps <- apply(act_snps,2,as.character)
   act_snps <- apply(act_snps,2,as.numeric)
   act_snps <- apply(act_snps,2,maj_min_fix)
   #cbind all components into one reformatted matrix

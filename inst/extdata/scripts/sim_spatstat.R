@@ -53,7 +53,7 @@ sample_pops <- sort(sample(c(1:225),25,replace=FALSE)) #Randomly sampling pops -
 
 
 #setwd("~/Google Drive/MSU/TIMBER/Weise_Sims_2019/dist/OUT")
-setwd("/mnt/research/TIMBER/spatsimsEW/OUT/")
+#setwd("/mnt/research/TIMBER/spatsimsEW/OUT/")
 
 #for(repl in 1:nreps) {
 
