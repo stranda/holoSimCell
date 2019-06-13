@@ -47,7 +47,7 @@ holoStats = function(out, popDF, extent, cores=1) {
   neinames <- c()
   #This will be different...
   for(pid in 1:(length(popDF$id)-1)) {
-    neinames <- c(neinames, paste0(popDF$id[pid],".", popDF$id[(pid+1):length(popDF$id)]))
+    neinames <- c(neinames, paste0("Nei_", popDF$id[pid],".", popDF$id[(pid+1):length(popDF$id)]))
   }
   
   #!# Naming issue here - popid.popid is also used for Fst - but merge requires same names
@@ -57,7 +57,7 @@ holoStats = function(out, popDF, extent, cores=1) {
   Fstnames.loc = c()
   #This will be different...
   for(pid in 1:(length(popDF$id)-1)) {
-    Fstnames.loc = c(Fstnames.loc, paste0(popDF$id[pid],".", popDF$id[(pid+1):length(popDF$id)]))
+    Fstnames.loc = c(Fstnames.loc, paste0("Fst_", popDF$id[pid],".", popDF$id[(pid+1):length(popDF$id)]))
   }
   
   #!# Naming issue here - popid.popid is also used for Nei - but merge requires same names
@@ -137,11 +137,11 @@ holoStats = function(out, popDF, extent, cores=1) {
   names(pc3.long.stats) <- paste0("pc3long.",c("int","frst","scnd"))
   
   fsts = data.frame(fst=pairFst.loc)
-  fsts = cbind(fsts,data.frame(t(sapply(strsplit(names(pairFst.loc),"\\."),function(nms){c(from=nms[1],to=nms[2])})),stringsAsFactors=F))
+  fsts = cbind(fsts,data.frame(t(sapply(strsplit(names(pairFst.loc),"\\."),function(nms){c(from=strsplit(nms[1],"_")[[1]][2],to=nms[2])})),stringsAsFactors=F))
   fsts = fsts[order(fsts$to,fsts$from),]
   
   neis = data.frame(nei=pairnei)
-  neis = cbind(neis,data.frame(t(sapply(strsplit(names(pairnei),"\\."),function(nms){c(from=nms[1],to=nms[2])})),stringsAsFactors=F))
+  neis = cbind(neis,data.frame(t(sapply(strsplit(names(pairnei),"\\."),function(nms){c(from=strsplit(nms[1],"_")[[1]][2],to=nms[2])})),stringsAsFactors=F))
   neis = neis[order(neis$to,neis$from),]
   
   
@@ -208,7 +208,7 @@ holoStats = function(out, popDF, extent, cores=1) {
   gssa <- gssa_raggedness(out=out,dist_mat = as.matrix(eucdist))
   gssa <- t(unname(gssa))
   gssa <- as.vector(gssa)
-  names(gssa) = paste0("HRi_pop",pops.xy$pop)
+  names(gssa) = paste0("HRi_",pops.xy$pop)
   #message("GSSA done")
 
   #Calculating spatial PCA from the Alvarado-Serrano script + our plotting technique
@@ -235,7 +235,7 @@ holoStats = function(out, popDF, extent, cores=1) {
   euc_moran <- as.matrix(1/dist(pops.xy[,2:3]))
   moran <- Moran.I(x = localSNP,weight = euc_moran)
   moran <- t(moran)
-  moran.names <- colnames(moran)
+  moran.names <- paste0("Moran.",colnames(moran))
   moran <- unlist(c(moran))
   names(moran) <- moran.names
   #message("Moran's I done")
@@ -279,7 +279,7 @@ holoStats = function(out, popDF, extent, cores=1) {
     )
   }
   LD_pop2 <- t(unname(LD_pop))
-  colnames(LD_pop2) <- paste0("LD_pop",pops.xy$pop)
+  colnames(LD_pop2) <- paste0("LD_",pops.xy$pop)
   #apply the polyfit function to LD
   #!# Changed... risky to point back at the out object.  LD was made going through pops.xy, stick with that
   #LD_pop1 <- data.frame(id = unique(out@data$strata), ld = LD_pop$mean_LD_pop)
@@ -307,13 +307,18 @@ holoStats = function(out, popDF, extent, cores=1) {
   #naming stats to be put into the big stats list
   pop_num <- gt_sum$node_stats[,1]
   stats <- t(gt_sum$node_stats[,-1])
-  colnames(stats) <- paste0("pop",pop_num)
+  colnames(stats) <- pop_num
   statnames <- rownames(stats)
   node_stats <- unmatrix(stats)
   
   stats <- gt_sum$edge_stats
   stats1 <- data.frame(edge_between_igraph = stats$edge_between_igraph)
-  rownames(stats1) <- paste0("node",stats$node1,"_",stats$node2)
+  #rownames(stats1) <- paste0("node",stats$node1,"_",stats$node2)
+  edgenames = c()
+  for(pid in 1:length(popDF$id)) {
+    edgenames = c(edgenames, paste0(popDF$id[pid],".", popDF$id[-pid]))
+  }
+  rownames(stats1) <- edgenames
   #!# Naming issue here: Using P1-P25 instead of grid cell ID
   edge_stats <- unmatrix(t(stats1))
   ################################################################
