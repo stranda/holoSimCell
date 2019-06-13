@@ -225,7 +225,7 @@ holoStats = function(out, popDF, extent, cores=1) {
   bcnames.loc = c()
   #This will be different...
   for(pid in 1:(length(popDF$id)-1)) {
-    bcnames.loc = c(bcnames.loc, paste0(popDF$id[pid],".", popDF$id[(pid+1):length(popDF$id)]))
+    bcnames.loc = c(bcnames.loc, paste0("BrayCurt_",popDF$id[pid],".", popDF$id[(pid+1):length(popDF$id)]))
   }
   #!# Naming issue here: popid.popid also used for Nei and Fst
   names(pairbc.loc) <- bcnames.loc
