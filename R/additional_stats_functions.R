@@ -32,7 +32,7 @@ nameStrat = function(fscout, pops, sample_pops, sample_n) {
     parta <- paste0(rep(0,lead0),collapse ="")
     strat_id[str.length == x] = paste0(parta,strat_id[str.length == x])
   }
-  fscout@data$strata <- strat_id
+  fscout@data$strata <- paste0("pop-",strat_id)
   fscout
 }
 
