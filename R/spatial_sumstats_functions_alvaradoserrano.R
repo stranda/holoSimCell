@@ -31,7 +31,8 @@ stats.AFS = function(data, sstype, nsamples, pops.xy){
   
   #calculating AFS:    
   AFS.fol = matrix(rep(NA, (ceiling(nsamples%/%2)+1)*nrow(pops.xy)), nrow=nrow(pops.xy))      #the ceiling is required to deal with uneven numbers of samples
-  rownames(AFS.fol) = seq(nrow(pops.xy))
+  #rownames(AFS.fol) = seq(nrow(pops.xy))
+  rownames(AFS.fol) = as.character(unique(data$st))
   for (I in 1:nrow(AFS.fol)){
     #!# Slight change here, pop names aren't 1-25
     #freqs = colSums(data[which(data[,1]==I),3:ncol(data)]) / nsamples
@@ -49,7 +50,7 @@ stats.AFS = function(data, sstype, nsamples, pops.xy){
       AFS.fol[I,L] = AFS.unfol[L] + AFS.unfol[length(AFS.unfol)-L]
     }
     AFS.fol[I,ncol(AFS.fol)] = AFS.unfol[length(AFS.unfol)]
-    rownames(AFS.fol)[I] = paste('P',I,sep='')
+    #rownames(AFS.fol)[I] = paste('P',I,sep='')
   }
   
   #univariate AFS stats:
@@ -63,13 +64,15 @@ stats.AFS = function(data, sstype, nsamples, pops.xy){
   AFS.uni = unmatrix(t(AFS.unistats))
   
   #pairwise AFS stats:
-  comp = combn(nrow(pops.xy),2)
+  #comp = combn(nrow(pops.xy),2)
+  comp = combn(pops.xy$pop,2)
   AFS.pairstats = matrix(rep(NA,(2*ncol(comp))),ncol=2)
   colnames(AFS.pairstats) = c('W.Mean.Diff', 'W.SD.Diff')
   rownames(AFS.pairstats) = seq(nrow(AFS.pairstats))
   AFS.pairdiffs = NULL
   for (z in 1:ncol(comp)){
-    diff = abs(AFS.fol[paste('P',comp[1,z],sep=''),] - AFS.fol[paste('P',comp[2,z],sep=''),])
+    #diff = abs(AFS.fol[paste('P',comp[1,z],sep=''),] - AFS.fol[paste('P',comp[2,z],sep=''),])
+    diff = abs(AFS.fol[comp[1,z],] - AFS.fol[comp[2,z],])
     AFS.pairdiffs = rbind(AFS.pairdiffs, diff)
     AFS.pairstats[z,1] = mean(diff * seq(ncol(AFS.fol)))
     AFS.pairstats[z,2] = sd(diff * seq(ncol(AFS.fol)))
@@ -151,8 +154,6 @@ sPCA.dist = function(data, pops.xy, nsamples, cpos=2, cneg=2, plot=T){
   # cneg: number of sPCA local components to retain
   # plot: defines whether sPCA plot for global and local (if significant) axes should be plotted
   
-  suppressMessages(require(adegenet))
-  
   #getting the data into a gneind format 
   data2 = data[,3:ncol(data)]
   ###used an alternative way to do names because our data set was incompatible with this naming system
@@ -170,7 +171,9 @@ sPCA.dist = function(data, pops.xy, nsamples, cpos=2, cneg=2, plot=T){
   
   #!# CHANGE HERE: adding pop column to XY object for use later in the b/w and w/i distance calcs
   XY = data.frame(pop=rep(as.character(unique(data[,1])),nsamples),y=rep(pops.xy[,2],nsamples), x= rep(pops.xy[,3],nsamples))
-  XY = XY[order(as.numeric(as.character(XY$pop))),]
+  #XY = XY[order(as.numeric(as.character(XY$pop))),]
+  tmpo <- unlist(strsplit(as.character(XY$pop), "-"))
+  XY = XY[order(as.numeric(tmpo[tmpo != "pop"])),]
   #for (i in 1:nrow(pops.xy)){
   #  row = cbind(as.numeric(pops.xy[i,2]),as.numeric(pops.xy[i,3]))
   #  for (j in 1:nsamples){
