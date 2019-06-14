@@ -205,8 +205,9 @@ holoStats = function(out, popDF, extent, cores=1) {
 
   #GSSA Calculation from Alvarado-Serrano paper
   #function in separate script
-  gssa <- gssa_raggedness(out=out,dist_mat = as.matrix(eucdist))
-  gssa <- t(unname(gssa))
+  geodist <- as.matrix(dist(data.frame(popDF$x, popDF$y)))
+  gssa <- gssa_raggedness(out = out, dist_mat = geodist)
+    gssa <- t(unname(gssa))
   gssa <- as.vector(gssa)
   names(gssa) = paste0("HRi_",pops.xy$pop)
   #message("GSSA done")
