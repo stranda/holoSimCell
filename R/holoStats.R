@@ -315,10 +315,18 @@ holoStats = function(out, popDF, extent, cores=1) {
   stats <- gt_sum$edge_stats
   stats1 <- data.frame(edge_between_igraph = stats$edge_between_igraph)
   #rownames(stats1) <- paste0("node",stats$node1,"_",stats$node2)
-  edgenames = c()
-  for(pid in 1:length(popDF$id)) {
-    edgenames = c(edgenames, paste0(popDF$id[pid],".", popDF$id[-pid]))
+  #edgenames = c()
+  #for(pid in 1:length(popDF$id)) {
+  #  edgenames = c(edgenames, paste0(popDF$id[pid],".", popDF$id[-pid]))
+  #}
+  
+  tmpedge <- data.frame(node1 = rep(NA, length(stats$node1)), node2 = rep(NA, length(stats$node2)))	
+  for(x in 1:length(popDF$id)) {
+	  tmpedge$node1[stats$node1 == x] <- levels(popDF$id)[x]
+  	tmpedge$node2[stats$node2 == x] <- levels(popDF$id)[x]
   }
+  edgenames <- paste0(tmpedge$node1,".",tmpedge$node2)
+  
   rownames(stats1) <- edgenames
   #!# Naming issue here: Using P1-P25 instead of grid cell ID
   edge_stats <- unmatrix(t(stats1))
