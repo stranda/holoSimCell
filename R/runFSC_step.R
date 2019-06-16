@@ -155,8 +155,16 @@ runFSC_step = function(
 
 	hist_ev <- fscHistEv(num.gen = allevents$time, source.deme = allevents$source, sink.deme = allevents$sink, prop.migrants = allevents$prop_m, new.sink.size = allevents$new_size, new.sink.growth = allevents$new_growth, new.mig.mat = allevents$new_mig)
 	hist_ev1 <- fscHistEv(num.gen = ngens, source.deme = FSCpops$pop[FSCpops$arrive == ngens], sink.deme = FSCpops$pop[FSCpops$arrive == ngens], prop.migrants = 0, new.sink.size = 1, new.sink.growth = 0, new.mig.mat = "nomig")
-	hist_ev2 <- fscHistEv(num.gen = preLGMparms$preLGM_t[1], source.deme = FSCpops$pop[FSCpops$arrive == ngens], sink.deme = FSCpops$pop[FSCpops$arrive == ngens], prop.migrants = 0, new.sink.size = round(preLGMparms$preLGM_Ne/preLGMparms$ref_Ne,5), new.sink.growth = 0, new.mig.mat = "nomig")
-	hist_ev <- rbind(hist_ev, hist_ev1, hist_ev2)
+	
+	if(length(FSCpops$pop[FSCpops$arrive == ngens]) == 1) {
+		hist_ev2 <- fscHistEv(num.gen = preLGMparms$preLGM_t[1], source.deme = FSCpops$pop[FSCpops$arrive == ngens], sink.deme = FSCpops$pop[FSCpops$arrive == ngens], prop.migrants = 0, new.sink.size = round(preLGMparms$preLGM_Ne/preLGMparms$ref_Ne,5), new.sink.growth = 0, new.mig.mat = "nomig")
+		hist_ev <- rbind(hist_ev, hist_ev1, hist_ev2)
+	} else {
+		arb.preLGM.pop <- FSCpops$pop[FSCpops$arrive == ngens][1]
+		hist_ev2 <- fscHistEv(num.gen = preLGMparms$preLGM_t[1]-1, source.deme = FSCpops$pop[FSCpops$arrive == ngens][-1], sink.deme = arb.preLGM.pop, prop.migrants = 1, new.sink.size = 1, new.sink.growth = 0, new.mig.mat = "nomig")
+		hist_ev3 <- fscHistEv(num.gen = preLGMparms$preLGM_t[1], source.deme = arb.preLGM.pop, sink.deme = arb.preLGM.pop, prop.migrants = 0, new.sink.size = round(preLGMparms$preLGM_Ne/preLGMparms$ref_Ne,5), new.sink.growth = 0, new.mig.mat = "nomig")
+		hist_ev <- rbind(hist_ev, hist_ev1, hist_ev2, hist_ev3)
+	}
 	
 	fscout <- fastsimcoal(label = label, pop.info = pop_info, locus.params = locus_params, mig.rates = migmat, hist.ev = hist_ev, num.cores = num_cores, delete.files = delete_files, exec = exec)
 
