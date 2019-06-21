@@ -278,7 +278,7 @@ graph_theory <- function(data_frame,pops){
   #require(igraph)
   #require(sna)
   #making sure there's no negative in the data frame - if there are, turn to zero
-  df_adj <- data_frame
+  df_adj <- 1-data_frame
   for(i in 1:length(df_adj)){
     if(df_adj[i] <= 0){
       df_adj[i] = 0
