@@ -36,7 +36,7 @@ loc_parms <- data.frame(marker = "snp",
                         mu = parms$mu)
 
 loc_parms2 <- loc_parms     #Will use this object for simulations, increase # of loci until we get loc_parms$nloci SNPs
-loc_parms2$nloci <- loc_parms2$nloci*1.25 	#Simulate more loci than needed to account for monomorphic sites
+loc_parms2$nloci <- round(loc_parms2$nloci*1.25) 	#Simulate more loci than needed to account for monomorphic sites
 
 preLGMparms <- data.frame(preLGM_t = parms$preLGM_t/parms$G,
                     preLGM_Ne = parms$preLGM_Ne,
