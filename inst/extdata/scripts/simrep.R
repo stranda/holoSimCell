@@ -132,8 +132,10 @@ for(repl in 1:nreps) {
                             extent = c(pops$struct["xdim"], pops$struct["ydim"]), 
                             cores = 1) 
 
+    BVmax <- max(bioticVelocity(pops, metrics = "centroid")$centroidVelocity)
+    
     #!# IS THIS OUTPUT IN THE FORMAT THAT WE WANT??
-    all_out <- c(rep = repl, date = date(), parms_out, stats_out)
+    all_out <- c(rep = repl, date = date(), parms_out, BVmax, stats_out)
     all_out <- all_out[c(3,1,2,4:length(all_out))]
     all_out$refs <- paste(eval(parse(text=as.character(parms$refs))), collapse = ".")
 
