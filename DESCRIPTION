@@ -23,7 +23,11 @@ Depends: cubature,
 	 gdata,
 	 adegenet,
 	 ape,
+	 omnibus,
+	 statisfactory,
 	 enmSdm
-Remotes: adamlilith/enmSdm
+Remotes: adamlilith/omnibus,
+	 adamlilith/statisfactory,
+	 adamlilith/enmSdm
 LinkingTo: Rcpp
 RoxygenNote: 6.1.1
