@@ -25,7 +25,8 @@ Depends: cubature,
 	 ape,
 	 omnibus,
 	 statisfactory,
-	 enmSdm
+	 enmSdm,
+	 shiny
 Remotes: adamlilith/omnibus,
 	 adamlilith/statisfactory,
 	 adamlilith/enmSdm
