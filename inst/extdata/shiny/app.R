@@ -17,7 +17,8 @@ ui <- fluidPage(
    sidebarLayout(
       sidebarPanel(
  
-         numericInput("lambda","lambda",value=1.03,min=0.5,max=1.5),
+          actionButton("doplot","Run simulation and plot"),
+          numericInput("lambda","lambda",value=1.03,min=0.5,max=1.5),
 
          sliderInput("K",
                      "carry capacity",
@@ -30,7 +31,7 @@ ui <- fluidPage(
          sliderInput("ssh",
                      "Shape of short-dist",
                      min = 0.01,
-                     max = 0.6,
+                     max = 1.0,
                      value = 0.6),
          sliderInput("nmn",
                      "Scale of long-dist",
@@ -40,7 +41,7 @@ ui <- fluidPage(
          sliderInput("mix",
                      "proportion of long-dist",
                      min = 0,
-                     max = 0.5,
+                     max = 0.2,
                      value = 0.00),
                  sliderInput("gens",
                      "Number of time clicks:",
@@ -75,33 +76,42 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
    
-   output$histplot <- renderPlot({
-       pops <- getpophist.cells(h=input$xdim*input$ydim,          ##demography, num habitats
-                         xdim=input$xdim,        ##num cols
-                         ydim=input$ydim,        ##num rows
-                         maxtime=input$gens,  ##num time clicks to simulate (yrs, decades cents?) (call em decades here)
-                          lambda=input$lambda, ##intrisic rate of growth (discrete-time...right? can be modified with deltLambda)
-                                         #deltLambda: see function definition
-                         K=input$K,        ##carry capacity (can be modified with deltK)
-                                         #deltK: see function definition
-                         refs=input$ref,    ##pop ids of refugia
-                         refsz=c(input$refsize), ##sizes of refugia indicated in refs
-                         sz=input$sz,   ##number of spatial units per grid cell
+    output$histplot <- renderPlot({
+        input$doplot
+        isolate({
+            pops <- getpophist.cells(h=input$xdim*input$ydim,          ##demography, num habitats
+                                     xdim=input$xdim,        ##num cols
+                                     ydim=input$ydim,        ##num rows
+                                     maxtime=input$gens,  ##num time clicks to simulate (yrs, decades cents?) (call em decades here)
+                                     lambda=input$lambda, ##intrisic rate of growth (discrete-time...right? can be modified with deltLambda)
+                                        #deltLambda: see function definition
+                                     K=input$K,        ##carry capacity (can be modified with deltK)
+                                        #deltK: see function definition
+                                     refs=input$ref,    ##pop ids of refugia
+                                     refsz=c(input$refsize), ##sizes of refugia indicated in refs
+                                     sz=input$sz,   ##number of spatial units per grid cell
                                         #dispersal traits
-                         distance.fun=distancePDF, #takes a length and 5 parameters and creates mig matrix
-                         shortscale=input$ssc, #scale of short distance weibull
-                         longmean=input$nmn,      #mean of long-distance norm (var is the same as the mean)
-                         shortshape=input$ssh,    #shape of short-distance
-                         mix=input$mix,         #proportion of LDD
-                         popDispInfl=function(x){log(x+1)},
-                         samptime = 1,  #!# sample every X generations
-                         CVn = NULL,       #!# coefficient of variation X% 
-                         pois.var = FALSE, #!# Poisson distribution for demographic stochasticity
-                         extFUN = NULL,
-                         hab_suit = NULL
-                         )
-
-       plothist(pops$pophist)
+                                     distance.fun=distancePDF, #takes a length and 5 parameters and creates mig matrix
+                                     shortscale=input$ssc, #scale of short distance weibull
+                                     longmean=input$nmn,      #mean of long-distance norm (var is the same as the mean)
+                                     shortshape=input$ssh,    #shape of short-distance
+                                     mix=input$mix,         #proportion of LDD
+                                     popDispInfl=function(x){log(x+1)},
+                                     samptime = 1,  #!# sample every X generations
+                                     CVn = NULL,       #!# coefficient of variation X% 
+                                     pois.var = FALSE, #!# Poisson distribution for demographic stochasticity
+                                     extFUN = NULL,
+                                     hab_suit = NULL
+                                     )
+            if (sum(!is.na(pops$pophist$source))>1)
+                plothist(pops$pophist)
+            else
+            {
+                plot(1~1,xlab="",ylab="",type="n")
+                text(1,1,"No populations colonized!" )
+            }
+            
+        })
    })
 }
 
