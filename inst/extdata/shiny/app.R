@@ -83,7 +83,7 @@ server <- function(input, output) {
     output$histplot <- renderPlot({
         input$doplot
         isolate({
-            if (input$ref1>0)&(input$ref2>0)
+            if ((input$ref1>0)&(input$ref2>0))
             {
                 refs=c(input$ref1,input$ref2)
                 refsz=c(input$ref1size,input$ref2size)
