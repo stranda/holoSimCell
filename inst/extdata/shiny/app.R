@@ -55,7 +55,7 @@ ui <- fluidPage(
          sliderInput("sz",
                      "Number of measurement units across each grid cell (km?)",
                      min = 1,
-                     max = 1000,
+                     max = 2000,
                      value = 150),
 
          numericInput("ref","Refugium pop num",value=10),
