@@ -31,7 +31,7 @@ ui <- fluidPage(
          sliderInput("ssh",
                      "Shape of short-dist",
                      min = 0.01,
-                     max = 1.0,
+                     max = 10,
                      value = 0.6),
          sliderInput("nmn",
                      "Scale of long-dist",
