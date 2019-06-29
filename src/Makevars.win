@@ -1,8 +1,7 @@
 
-GSL_CFLAGS = @GSL_CFLAGS@
-RcppGSL_CFLAGS = @RcppGSL_CFLAGS@
-GSL_LIBS = @GSL_LIBS@
 
+GSL_CFLAGS=‘${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe -e "RcppGSL:::CFlags()"‘
+GSL_LIBS=‘${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe -e "RcppGSL:::LdFlags()"‘
 
-PKG_CPPFLAGS= -I../inst/include $(GSL_CFLAGS)  $(RcppGSL_CFLAGS)
+PKG_CPPFLAGS= -I../inst/include $(GSL_CFLAGS) 
 PKG_LIBS= -lgsl -lgslcblas  $(GSL_LIBS)
