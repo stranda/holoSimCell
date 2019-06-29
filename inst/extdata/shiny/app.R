@@ -18,31 +18,36 @@ ui <- fluidPage(
       sidebarPanel(
  
           actionButton("doplot","Run simulation and plot"),
-          numericInput("lambda","lambda",value=1.03,min=0.5,max=1.5),
-
-         sliderInput("K",
-                     "carry capacity",
-                     min=10,max=50000,value=500),
          sliderInput("ssc",
-                     "Scale of short-dist",
-                     min = 1,
-                     max = 100,
-                     value = 10),
+                     "Scale of short-dist (percent of cell width)",
+                     min = 0,
+                     max = 200,
+                     value = 4),
          sliderInput("ssh",
                      "Shape of short-dist",
                      min = 0.01,
                      max = 10,
-                     value = 0.6),
+                     value = 1),
          sliderInput("nmn",
-                     "Scale of long-dist",
-                     min = 1,
-                     max = 10000,
-                     value = 150),
+                     "Scale of long-dist (percent cell width)",
+                     min = 0,
+                     max = 400,
+                     value = 35),
          sliderInput("mix",
                      "proportion of long-dist",
                      min = 0,
-                     max = 0.2,
-                     value = 0.00),
+                     max = 0.1,
+                     value = 0.001),
+         sliderInput("sz",
+                     "Number of measurement units across each grid cell (km?)",
+                     min = 1,
+                     max = 2000,
+                     value = 150),
+          numericInput("lambda","lambda",value=1.01,min=0.5,max=1.5),
+
+         sliderInput("K",
+                     "carry capacity",
+                     min=10,max=50000,value=500),
          sliderInput("gens",
                      "Number of time clicks:",
                      min = 1,
@@ -52,12 +57,6 @@ ui <- fluidPage(
          numericInput("xdim","number of X grids",value=15,min=1,max=100),
          
          numericInput("ydim","number of Y grids",value=15,min=1,max=100),
-
-         sliderInput("sz",
-                     "Number of measurement units across each grid cell (km?)",
-                     min = 1,
-                     max = 2000,
-                     value = 150),
          
          numericInput("ref1","Refugium pop num",value=10),
 
@@ -85,14 +84,16 @@ server <- function(input, output) {
     output$dispkern <- renderPlot({
         thresh = 1e-9
         dom=0:100000
-        dens <- distancePDF(dom,ssh=input$ssh,ssc=input$ssc,lmn=input$nmn,
+        dens <- distancePDF(dom,ssh=input$ssh,ssc=(input$ssc/100)*input$sz,
+                            lmn=(input$nmn/100)*input$sz,
                             lsd=sqrt(input$nmn),mix=input$mix)
         nonzero.dens <- dens[1:max(which(dens>thresh))]
         nonzero.dom <- dom[1:max(which(dens>thresh))]
-        prop.dom = nonzero.dom/input$sz
+        prop.dom = nonzero.dom
         plot(nonzero.dens ~ prop.dom,
-             type="l", xlab="Dispersal distance as a proportion of cell width",
+             type="l", xlab="Dispersal distance in same units as cell width",
              ylab="Density")
+        text(0.9*max(nonzero.dom),0.9*max(nonzero.dens),paste("Only densities >",thresh,"shown"))
     })
     
     output$histplot <- renderPlot({
@@ -127,8 +128,8 @@ server <- function(input, output) {
                                          sz=input$sz,   ##number of spatial units per grid cell
                                         #dispersal traits
                                          distance.fun=distancePDF, #takes a length and 5 parameters and creates mig matrix
-                                         shortscale=input$ssc, #scale of short distance weibull
-                                         longmean=input$nmn,      #mean of long-distance norm (var is the same as the mean)
+                                         shortscale=(input$ssc/100)*input$sz, #scale of short distance weibull
+                                         longmean=(input$nmn/100)*input$sz,      #mean of long-distance norm (var is the same as the mean)
                                          shortshape=input$ssh,    #shape of short-distance
                                          mix=input$mix,         #proportion of LDD
                                          popDispInfl=function(x){log(x+1)},
