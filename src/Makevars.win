@@ -1,0 +1,10 @@
+## Use the R_HOME indirection to support installations of multiple R version
+PKG_LIBS = $(shell "${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" -e "Rcpp:::LdFlags()")
+
+GSL_CFLAGS = @GSL_CFLAGS@
+RcppGSL_CFLAGS = @RcppGSL_CFLAGS@
+GSL_LIBS = @GSL_LIBS@
+
+
+PKG_CPPFLAGS=-I$(LIB_GSL)/include -I../inst/include $(GSL_CFLAGS)  $(RcppGSL_CFLAGS)
+PKG_LIBS=-L$(LIB_GSL)/lib/x64 -lgsl -lgslcblas  $(GSL_LIBS)
