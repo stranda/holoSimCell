@@ -2,6 +2,7 @@
 
 GSL_CFLAGS=$(shell "${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" -e "RcppGSL:::CFlags()" )
 GSL_LIBS=$(shell "${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" -e "RcppGSL:::LdFlags()" )
+RcppGSL_CFLAGS=$(shell "${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" -e "system.file('include',package='RcppGSL')" )
 
-PKG_CPPFLAGS= -I../inst/include -I/include $(GSL_CFLAGS)
+PKG_CPPFLAGS= -I../inst/include -I/include $(GSL_CFLAGS) $RcppGSL_CFLAGS
 PKG_LIBS= -L/lib -lgsl -lgslcblas $(GSL_LIBS)
