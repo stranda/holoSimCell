@@ -5,17 +5,6 @@
 
 using namespace Rcpp;
 
-// gsl_mult1
-Rcpp::NumericVector gsl_mult1(Rcpp::NumericVector P);
-RcppExport SEXP _holoSimCell_gsl_mult1(SEXP PSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type P(PSEXP);
-    rcpp_result_gen = Rcpp::wrap(gsl_mult1(P));
-    return rcpp_result_gen;
-END_RCPP
-}
 // oneMultinomCall
 IntegerVector oneMultinomCall(NumericVector probs);
 RcppExport SEXP _holoSimCell_oneMultinomCall(SEXP probsSEXP) {
@@ -87,26 +76,14 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// rcpp_hello_world
-List rcpp_hello_world();
-RcppExport SEXP _holoSimCell_rcpp_hello_world() {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(rcpp_hello_world());
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_holoSimCell_gsl_mult1", (DL_FUNC) &_holoSimCell_gsl_mult1, 1},
     {"_holoSimCell_oneMultinomCall", (DL_FUNC) &_holoSimCell_oneMultinomCall, 1},
     {"_holoSimCell_whichMultinom", (DL_FUNC) &_holoSimCell_whichMultinom, 1},
     {"_holoSimCell_submat", (DL_FUNC) &_holoSimCell_submat, 2},
     {"_holoSimCell_getsrcC", (DL_FUNC) &_holoSimCell_getsrcC, 2},
     {"_holoSimCell_getsrcC2", (DL_FUNC) &_holoSimCell_getsrcC2, 2},
     {"_holoSimCell_makeRmatC", (DL_FUNC) &_holoSimCell_makeRmatC, 3},
-    {"_holoSimCell_rcpp_hello_world", (DL_FUNC) &_holoSimCell_rcpp_hello_world, 0},
     {NULL, NULL, 0}
 };
 

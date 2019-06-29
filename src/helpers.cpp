@@ -1,42 +1,11 @@
 #include <Rcpp.h>
 #include <Rcpp/Benchmark/Timer.h>
 
-// [[Rcpp::depends(RcppGSL)]]
-
-#include <RcppGSL.h>
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
-#include <unistd.h>
 
 #define ROUND_2_INT(f) ((int)(f >= 0.0 ? (f + 0.5) : (f - 0.5)))
 
 using namespace Rcpp;
 using namespace sugar;
-
-
-
- Rcpp::IntegerVector rmn(unsigned int N, Rcpp::NumericVector p, gsl_rng* r){
-
-    size_t K = p.size();
-
-    Rcpp::IntegerVector x(K);
-    gsl_ran_multinomial(r, K, N, p.begin(), (unsigned int *) x.begin());
-    return x;             // return results vector
-}
-
-
-// [[Rcpp::export]]
-Rcpp::NumericVector gsl_mult1(Rcpp::NumericVector P){
-  //int j;
-    gsl_rng * r = gsl_rng_alloc (gsl_rng_mt19937);
-    long seed = rand()/(((double)RAND_MAX + 1)/10000000) * getpid();
-    NumericVector X(1);
-
-    gsl_rng_set (r, seed);
-    X = which_max(rmn(1, P, r));
-    gsl_rng_free (r);
-    return X;
-}
 
 
 // [[Rcpp::export]]
@@ -90,8 +59,8 @@ IntegerVector getsrcC(NumericMatrix tmat, NumericVector nv) {
       
       //      Rprintf("i %i, out[i], %i, mprb[i], %g\n",i,out[i],mprb[i]);
       
-      //choice = whichMultinom(mprb);
-      choice = gsl_mult1(mprb)[0];
+      choice = whichMultinom(mprb);
+      //choice = gsl_mult1(mprb)[0];
       
       //      Rprintf("out[i] %i \n",out[i]);
       
@@ -104,7 +73,7 @@ IntegerVector getsrcC(NumericMatrix tmat, NumericVector nv) {
   return(out);
 }
 
-
+//not used currently
 // [[Rcpp::export]]
 IntegerVector getsrcC2(NumericMatrix tmat, NumericVector nv) { 
   int i;
@@ -127,8 +96,8 @@ IntegerVector getsrcC2(NumericMatrix tmat, NumericVector nv) {
 	    {
 	      mprb(i)= sum(mprb)*(home/(1-home));
 	      mprb=mprb/sum(mprb);
-	      //choice = whichMultinom(mprb);
-	      choice = gsl_mult1(mprb)[0];
+	      choice = whichMultinom(mprb);
+	      //choice = gsl_mult1(mprb)[0];
 	      out[i]=choice+1;
 	    } else {out[i]=i+1;}  //there are no source populations
 	} else //this population has been colonized
