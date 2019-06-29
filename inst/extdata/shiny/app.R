@@ -70,8 +70,9 @@ ui <- fluidPage(
       
       # Show a plot of the generated distribution
       mainPanel(
+          h3("Current dispersal kernel"),
           plotOutput("dispkern"),
-          h2("hotter colors are more recent events"),
+          h3("Map of colonization history. Hotter colors are more recent"),
          plotOutput("histplot",height="900px")
       )
    )
