@@ -43,13 +43,14 @@ ui <- fluidPage(
                      min = 0,
                      max = 0.2,
                      value = 0.00),
-                 sliderInput("gens",
+         sliderInput("gens",
                      "Number of time clicks:",
                      min = 1,
                      max = 100000,
                      value = 500),
 
          numericInput("xdim","number of X grids",value=15,min=1,max=100),
+         
          numericInput("ydim","number of Y grids",value=15,min=1,max=100),
 
          sliderInput("sz",
@@ -57,20 +58,20 @@ ui <- fluidPage(
                      min = 1,
                      max = 2000,
                      value = 150),
-
+         
          numericInput("ref1","Refugium pop num",value=10),
 
          numericInput("ref1size","Refugium pop size",value=100),
-
-         numericInput("ref2","Refugium pop num",value=0),
-
-         numericInput("ref2size","Refugium pop size",value=0)
          
+         numericInput("ref2","Refugium pop num",value=0),
+         
+         numericInput("ref2size","Refugium pop size",value=0)
          
       ),
       
       # Show a plot of the generated distribution
       mainPanel(
+          plotOutput("dispkern"),
           h2("hotter colors are more recent events"),
          plotOutput("histplot",height="900px")
       )
@@ -80,6 +81,20 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
    
+
+    output$dispkern <- renderPlot({
+        thresh = 1e-9
+        dom=0:100000
+        dens <- distancePDF(dom,ssh=input$ssh,ssc=input$ssc,lmn=input$nmn,
+                            lsd=sqrt(input$nmn),mix=input$mix)
+        nonzero.dens <- dens[1:max(which(dens>thresh))]
+        nonzero.dom <- dom[1:max(which(dens>thresh))]
+        prop.dom = nonzero.dom/input$sz
+        plot(nonzero.dens ~ prop.dom,
+             type="l", xlab="Dispersal distance as a proportion of cell width",
+             ylab="Density")
+    })
+    
     output$histplot <- renderPlot({
         input$doplot
         isolate({

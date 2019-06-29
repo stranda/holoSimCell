@@ -12,7 +12,7 @@
 #' each population to determine dispersal into the others.
 #' 
 #' @export
-integratedDispMat <- function(xnum=4,ynum=4,xsz=100,ysz=100,sshp=1,ssc=10,mix=0.1,nmean=100,nvar=nmean)
+integratedDispMat <- function(xnum=4,ynum=4,xsz=100,ysz=100,sshp=1,ssc=10,mix=0.1,nmean=100,nvar=(nmean))
 {
 
     if (FALSE)

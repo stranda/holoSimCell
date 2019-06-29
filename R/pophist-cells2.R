@@ -1,6 +1,11 @@
 ###
 ### dispersal kernel
 ###
+#' simple distance density function for short and ldd
+#'
+#' returns a density for a vector of x's
+#'
+#' @export
 distancePDF <- function(x, ssh=1,ssc=1,lmn=100,lsd=100,mix=0)
     {
         (1-mix)*dweibull(x,shape=ssh,scale=ssc)+mix*dnorm(x,mean=lmn,sd=lsd)
