@@ -67,6 +67,13 @@ getpophist.cells <- function(h=225, #humber of habitats (populations)
         popDispInfl=function(x){return (x)}
         pois.var = FALSE
     }
+
+    if (!is.null(hab_suit))
+        if ((ydim*xdim)!=dim(hab_suit)[2])
+        {
+            stop("x and y dimensions must be the same as the undelying hab_suit")
+        }
+    
     
     print(paste("starting...",date()))
         struct <- c(
