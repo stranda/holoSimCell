@@ -179,7 +179,7 @@ getpophist.cells <- function(h=225, #humber of habitats (populations)
             pops$source[as.numeric(disp$snk)] <- disp$src
             Nvec[disp$snk] <- 1
 
-            print(paste("len disp$snk",length(disp$snk)))
+#            print(paste("len disp$snk",length(disp$snk)))
 
             
             colhist[[gen]] <- pops[as.numeric(disp$snk),]
@@ -239,7 +239,7 @@ getpophist.cells <- function(h=225, #humber of habitats (populations)
     print(paste("simulating done...",date()))
                                         #pops  #!# output is below
 
-    out <- list(pophist = pops, Nvecs = Nvec_hist, tmat = tmat, struct = struct, hab_suit=hab_suit, colhist=colhist)   #!# output is now a list
+    out <- list(pophist = pops, Nvecs = Nvec_hist, tmat = tmat, struct = struct, hab_suit=hab_suit, coalhist=parseColhist(colhist))   #!# output is now a list
     
     return(out)
 }
