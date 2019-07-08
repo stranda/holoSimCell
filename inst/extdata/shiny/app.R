@@ -54,6 +54,8 @@ ui <- fluidPage(
                      max = 100000,
                      value = 500),
 
+         checkboxInput("usehab","Use habitat suitability layer?",FALSE),
+
          numericInput("xdim","number of X grids",value=15,min=1,max=100),
          
          numericInput("ydim","number of Y grids",value=15,min=1,max=100),
@@ -79,9 +81,19 @@ ui <- fluidPage(
 )
 
 # Define server logic required to draw a histogram
-server <- function(input, output) {
-   
+server <- function(input, output,session) {
 
+    habgrid <- reactive({ashland})
+
+    observeEvent(input$usehab,{
+        hg <- habgrid()
+        details <- hg$details
+        updateNumericInput(session,"ref1",max=details[1,"ncells"])
+        updateNumericInput(session,"ref2",max=details[1,"ncells"])
+        updateNumericInput(session,"xdim",value=details[1,"x.dim"])
+        updateNumericInput(session,"ydim",value=details[1,"y.dim"])
+    })
+    
     output$dispkern <- renderPlot({
         thresh = 1e-9
         dom=0:100000
@@ -115,8 +127,10 @@ server <- function(input, output) {
                 }
                 
             }
+
+            if (input$usehab) hs=habgrid() else hs=NULL
             
-                pops <- getpophist.cells(h=input$xdim*input$ydim,          ##demography, num habitats
+            ph <- getpophist.cells(h=input$xdim*input$ydim,          ##demography, num habitats
                                          xdim=input$xdim,        ##num cols
                                          ydim=input$ydim,        ##num rows
                                          maxtime=input$gens,  ##num time clicks to simulate (yrs, decades cents?) (call em decades here)
@@ -138,15 +152,18 @@ server <- function(input, output) {
                                          CVn = NULL,       #!# coefficient of variation X% 
                                          pois.var = FALSE, #!# Poisson distribution for demographic stochasticity
                                          extFUN = NULL,
-                                         hab_suit = NULL
-                                         )
-                if (sum(!is.na(pops$pophist$source))>1)
-                    plothist(pops$pophist)
+                                         hab_suit = hs
+                                       )
+#            print(ph$coalhist)
+            print("about to plot")
+                if (sum(!is.na(ph$pophist$source))>1)
+                    plothist(ph)
                 else
                 {
                     plot(1~1,xlab="",ylab="",type="n")
                     text(1,1,"No populations colonized!" )
                 }
+            print("plotting done")
             
         })
    })

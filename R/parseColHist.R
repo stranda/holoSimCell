@@ -6,6 +6,11 @@
 
 parseColhist <- function(ch)
 {
+    if (length(ch) == sum(sapply(ch,is.null))) #there are no colonizations
+    {
+        NULL
+    } else {
+    
     coaldemo <- data.frame(do.call(rbind,lapply(length(ch):1,function(x)
     {
         tch <- ch[[x]]
@@ -52,7 +57,8 @@ parseColhist <- function(ch)
         ret
     })))
     cd <- rbind(cd.norep,needed.rep[,-which(names(needed.rep)=="keep")])
-    cd [with(cd,order(-time,src,snk)),]
+        cd [with(cd,order(-time,src,snk)),]
+        }
 }
 
 
