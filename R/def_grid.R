@@ -14,7 +14,7 @@
 #' Takes multiple spatial inputs (range shapefiles, enm rasters) and makes a grid for the genetic simulations
 #' @param pred is a 3d matrix with layers of hab suitability indexed by the third dimension
 #' @param samppts locations of actual genetic samples.  Dataframe and must have 'long' and 'lat' columns in wgs84
-#' @param init.ext vector with the number of columns and rows expected  in output
+#' @param init.ext vector with the number of columns and rows hoping for in output (usually is altered in run)
 #' @param range.epsg the epsg number to impose on the shapefile containing range (if not already specified) defaults wgs84)
 #' @param raster.proj the proj.4 string to impose on the raster enm (if not already specified) (defaults albers)
 #' @param sim.epsg the epsg number that the sim runs in and upon which the resulting grid is calculated
@@ -64,9 +64,28 @@ def_grid_pred= function(pred=NULL, samppts = NULL,
     
     if (!is.null(init.ext)) ### there is a size to resample to.  Will do for every 3rd dim layer
     {
-        newr <- raster(ncol=init.ext[1],nrow=init.ext[2],crs=raster.proj,
+
+        ##try to get new cells square
+        r <- setRasterExtent(pred[dim(pred)[1]:1,,1],corners=corners)
+        asp=aspRaster(r)
+        er <- c("x"=abs(diff(extent(r)[1:2])),"y"=abs(diff(extent(r)[3:4])))
+        cx=init.ext[1]
+        cy=init.ext[2]
+        dx=er["x"]/cx
+        dy=er["y"]/cy
+        if (asp>1)
+        {
+            cx=round(er["x"]/dy)
+        } else
+            if (asp<1)
+            {
+                cy=round(er["y"]/dx)
+            }
+        out.ext <- c(cx,cy)
+
+        newr <- raster(ncol=out.ext[1],nrow=out.ext[2],crs=raster.proj,
                        xmn=rste[1],xmx=rste[2],ymn=rste[3],ymx=rste[4])
-        newpred <- array(NA,dim=c(init.ext[2],init.ext[1],dim(pred)[3]))
+        newpred <- array(NA,dim=c(out.ext[2],out.ext[1],dim(pred)[3]))
         for (i in 1:dim(pred)[3])
         {
             p <- pred[,,i]
@@ -115,7 +134,8 @@ def_grid_pred= function(pred=NULL, samppts = NULL,
     sampstruct[["sampled"]] = samp_pops
     sampstruct[["hab_suit"]] = habSuit
     sampstruct[["sumrast"]]=r
-    sampstruct[["samplocs"]]=samplocs
+    sampstruct[["samplocsrast"]]=samplocs
+    sampstruct[["samplocs"]]=samps
     
     sampstruct
 }
@@ -157,4 +177,12 @@ cell2coords <- function(x,nrow,ncol)
 coords2cell <- function(r,c,ncol)
 {
     (r-1) * ncol +  c
+}
+
+#' gets the aspect ratio of a raster
+#' @param r a raster object
+#' @export
+aspRaster <- function(r)
+{
+ res(r)[2]/res(r)[1]
 }

@@ -26,7 +26,7 @@ distancePDF <- function(x, ssh=1,ssc=1,lmn=100,lsd=100,mix=0)
 getpophist.cells <- function(h=225, #humber of habitats (populations)
                              xdim=15, #x -extent
                              ydim=15, #y-extent
-                             maxtime=10000, 
+                             maxtime=1000, 
                              distance.fun=distancePDF,   # unlike previous versions, needs the dispersal
                              shortscale=0.35,longmean=3, # parameters along with landscape
                              shortshape=1,mix=0.01,        #weibull shape for short distance, mix
@@ -35,14 +35,17 @@ getpophist.cells <- function(h=225, #humber of habitats (populations)
                              CVn=NULL, #!# coefficient of variation in population size (demographic stochasticity) 
                              pois.var = FALSE, #!# if TRUE, population size each generation is drawn from a Poisson
                              extFUN=NULL, #!# Function passed to extirpate() to implement local extinction due to demographic stochasticity - 2 arguments
-                             hab_suit = NULL, #!# matrix of habitat suitability (0-1), npops rows and maxtime/samptime columns
+                             ##hab_suit = NULL, #!# matrix of habitat suitability (0-1), npops rows and maxtime/samptime columns
+                             hab_suit = NULL, #object returned from def_grid_pred
                              K=10000, #underlying carrying capacity per pop
                              deltK = rep(1,h), #!# per population adjustment to K
                              refs=c(2), #population number of the refuges
                              refsz=c(1000),#the size of each refuge
                              popDispInfl=function(x){return (x)}, #function that maps pop size to col ability
                              sz=1,  #size of each cell
+                             enmstep=NULL, #vector of the number of time clicks for each habitat
                              samptime=0 #if zero runs through.  If >zero reports every samptime
+                             
                              )
 {
 
@@ -66,35 +69,54 @@ getpophist.cells <- function(h=225, #humber of habitats (populations)
         samptime=5 #!# census the population every 5 generations
         popDispInfl=function(x){return (x)}
         pois.var = FALSE
+        enmstep=NULL
+        CVn=NULL #!# coefficient of variation in population size (demographic stochasticity)
+        extFUN=NULL #!# Function passed to extirpate() to implement local extinction due to demographic stochasticity - 2 arguments
+
     }
 
     if (!is.null(hab_suit))
-        if ((ydim*xdim)!=dim(hab_suit)[2])
+    {
+        if ((ydim*xdim)!=dim(hab_suit$hab_suit)[2])
         {
-            stop("x and y dimensions must be the same as the undelying hab_suit")
+            warning("x and y dimensions must be the same as the undelying hab_suit; changing them")
+            
         }
-    
+        if (h!=dim(hab_suit$hab_suit)[2])
+        {
+            warning("h must be the same as the length of underlying hab_suit; changing")
+        }
+        xdim=hab_suit$details$x.dim[1]
+        ydim=hab_suit$details$y.dim[1]
+        h <- hab_suit$details$ncells[1]
+        deltLambda=rep(0,h); #adjustment to pop growth per population
+        deltK = rep(1,h) #!# per population adjustment to K
+        if (is.null(enmstep)) {enmstep <- 1:dim(hab_suit$hab_suit)[1]; maxtime=length(enmstep)}
+    }
     
     print(paste("starting...",date()))
-        struct <- c(
-            xdim=xdim,
-            ydim=ydim,
-            maxtime=maxtime,
-            shortscale=shortscale,
-            longmean=longmean,
-            shortshape=shortshape,
-            mix=mix,
-            #deltLambda=deltLambda,
-            K=K,
-            #deltK=deltK,
-            refs=refs,
-            refsz=refsz,
-            sz=sz,
-            samptime=samptime,
-            pois.var=pois.var)
+    struct <- c(
+        xdim=xdim,
+        ydim=ydim,
+        maxtime=maxtime,
+        shortscale=shortscale,
+        longmean=longmean,
+        shortshape=shortshape,
+        mix=mix,
+                                        #deltLambda=deltLambda,
+        K=K,
+                                        #deltK=deltK,
+        refs=refs,
+        refsz=refsz,
+        sz=sz,
+        samptime=samptime,
+        pois.var=pois.var)
 
-        pops <- cbind(data.frame(pop=1:(xdim*ydim)),expand.grid(col=1:xdim,row=1:ydim), arrive = NA, source = NA)  #!# adding in the arrive and source here, list element 1
-        
+    pops <- cbind(data.frame(pop=1:(xdim*ydim)),expand.grid(col=1:xdim,row=1:ydim),
+                  arrive = NA, source = NA)  #!# adding in the arrive and source here, list element 1
+
+    
+    
     ##Set initial popsizevec
     Nvec <- rep(0,dim(pops)[1])
     npop <- length(Nvec)
@@ -118,7 +140,12 @@ getpophist.cells <- function(h=225, #humber of habitats (populations)
         Nvec_hist <- NULL
     }       
 
-        
+
+###create an object that can hold the entire pophistory
+###has to be a flexible object, choosing 3d matrix
+    colhist <- vector("list",maxtime)
+#    colhist <- array(NA,dim=c(nrow(pops),2,maxtime))
+#    dimnames(colhist) <- list(1:dim(colhist)[1],c("from","to"),1:dim(colhist)[3])
 ###this is supposed to be the among-population migration matrix
 ###should represent the prob of movement from the center of pop i to the center of pop j
     tmat <- integratedMigMat(landx=xdim,landy=ydim,xnum=5,ynum=5,ysz=sz,xsz=sz,
@@ -126,71 +153,96 @@ getpophist.cells <- function(h=225, #humber of habitats (populations)
         
     #pops$arrive <- NA  #!# both of these are now done in the definition of pops
     #pops$source <- NA
+
+    if (!is.null(hab_suit)) enmcnt=0  #which enm hindcast are we using each time step? If any
     
     print(paste("setup done; simulating...",date()))
 
 ####added to record complete histories
-    
-        for (gen in 1:maxtime)
+
+    for (gen in 1:maxtime)
+    {
+#        print(paste("gen:",gen))
+        src <- getsrcC(tmat,popDispInfl(Nvec))
+        if (sum(src!=1:npop)!=0)  #some cells had movement
         {
-            src <- getsrcC(tmat,popDispInfl(Nvec))
-            if (sum(src!=1:npop)!=0)  #some cells had movement
-            {
-                disp <- data.frame(src=src[src!=(1:npop)],snk=c(1:npop)[src!=(1:npop)])
-                disp <- disp[Nvec[disp$snk]==0,]
-                disp <- disp[Nvec[disp$src]>0,]
-                
-#                dn <- disp$src
-#                names(dn) <- disp$snk
-                
-                                
-                pops$arrive[as.numeric(disp$snk)] <- gen
-                pops$source[as.numeric(disp$snk)] <- disp$src
-                Nvec[disp$snk] <- 1
-                
-            } #end if cells had movement
-            #if ((samptime>0)&((gen==1) |(!(gen %% samptime)))) #do something every 'samptime' time units
-            #!# changed above logical slightly... fill in a column of Nvec_hist every samptime generations
-            if(samptime > 0) {
-                if(!(gen %% samptime)) 
-                {
-                #print(gen)
-                #print(Nvec)
-                Nvec_hist[,paste0("gen",gen)] <- Nvec
-                }
-            }
-
-            #!# Implementing habitat suitability, if it's passed as an argument to the function
-            if(!is.null(hab_suit)) {
-                Nvec <- growpops(Nvec, lambda = lambda, deltLambda = deltLambda, K=K, deltK=hab_suit[,gen], CVn=CVn, pois.var = pois.var)   #!# If CVn is not null, implements a stochastic model of population growth (see below)
-            } else {
-                Nvec <- growpops(Nvec, lambda = lambda, deltLambda = deltLambda, K=K, deltK=deltK, CVn=CVn, pois.var = pois.var)
-            }
-
-            #!# Use 'extirpate' function to model extinction due to demographic stochasticity at small population sizes
-            if(!is.null(extFUN)) {
-                Nvec <- extirpate(Nvec, extFUN=extFUN)
-            }
-
-            #!# Deal with extinctions - only record most recent colonization event in pops
-            #extinct <- which(Nvec == 0 & !is.na(pops$arrive)) 
-            extinct <- which(Nvec == 0)
+            dispersed=T
+            disp <- data.frame(src=src[src!=(1:npop)],snk=c(1:npop)[src!=(1:npop)])
+            disp <- disp[Nvec[disp$snk]==0,]  #sink empty
+            disp <- disp[Nvec[disp$src]>0,]   #source had some individuals
             
-            if(length(extinct) > 0) {
-                pops$arrive[extinct] <- NA
-                Nvec_hist[extinct,] <- 0   #!# This is new, may need to be eliminated  Do we zero population size after extinction (for previous generations?)
-                #pops$source[extinct] <- NA   #Turn this off to keep track of sources for populations that went extinct - they may have had a role in colonization prior to extinction!
-            }
-            #Nvec <- growpops(Nvec,lambda=lambda,deltLambda=deltLambda,K=K,deltK=deltK)  #!# see above for growpops line
-            #if (min(Nvec)>0) break;  #!# don't want to do this anymore if we have habitat suitability, always simulate all maxtime generations
+                                        #                dn <- disp$src
+                                        #                names(dn) <- disp$snk
+            
+            
+            pops$arrive[as.numeric(disp$snk)] <- gen
+            pops$source[as.numeric(disp$snk)] <- disp$src
+            Nvec[disp$snk] <- 1
+
+            print(paste("len disp$snk",length(disp$snk)))
+
+            
+            colhist[[gen]] <- pops[as.numeric(disp$snk),]
+            
+        } else {#end if cells had movement
+            dispersed <- F
         }
-    print(paste("simulating done...",date()))
-    #pops  #!# output is below
+        
+                                        #if ((samptime>0)&((gen==1) |(!(gen %% samptime)))) #do something every 'samptime' time units
+                                        #!# changed above logical slightly... fill in a column of Nvec_hist every samptime generations
+        if(samptime > 0) {
+            if(!(gen %% samptime)) 
+            {
+                                        #print(gen)
+                                        #print(Nvec)
+                Nvec_hist[,paste0("gen",gen)] <- Nvec
+            }
+        }
+        
+###!# Implementing habitat suitability, if it's passed as an argument to the function
+        if(!is.null(hab_suit)) {
+            if (gen %in% enmstep) {enmcnt <- enmcnt+1}
+            dk <- hab_suit$hab_suit[enmcnt,]/max(hab_suit$hab_suit,na.rm=T)
+            Nvec <- growpops(Nvec, lambda = lambda, deltLambda = deltLambda, K=K, deltK=dk,
+                             CVn=CVn, pois.var = pois.var)   #!# If CVn is not null, implements a stochastic model of population growth (see below)
+        } else {
+            Nvec <- growpops(Nvec, lambda = lambda, deltLambda = deltLambda, K=K, deltK=deltK, CVn=CVn, pois.var = pois.var)
+        }
+        
+                                        #!# Use 'extirpate' function to model extinction due to demographic stochasticity at small population sizes
+        if(!is.null(extFUN)) {
+            Nvec <- extirpate(Nvec, extFUN=extFUN)
+        }
+        
+                                        #!# Deal with extinctions - only record most recent colonization event in pops
+                                        #extinct <- which(Nvec == 0 & !is.na(pops$arrive)) 
+        extinct <- which(Nvec == 0)
+        
+        if(length(extinct) > 0) {
+            pops$arrive[extinct] <- NA
+#            print(extinct)
+#            print(dim(Nvec_hist))
+            
+            Nvec_hist[extinct,] <- 0   #!# This is new, may need to be eliminated  Do we zero population size after extinction (for previous generations?)
+###pops$source[extinct] <- NA   #Turn this off to keep track of sources for populations that went extinct - they may have had a role in colonization prior to extinction!
+        }
+###Nvec <- growpops(Nvec,lambda=lambda,deltLambda=deltLambda,K=K,deltK=deltK)  #!# see above for growpops line
 
-    out <- list(pophist = pops, Nvecs = Nvec_hist, tmat = tmat, struct = struct)   #!# output is now a list
-
+        if (dispersed)
+        {
+            p1 <- pops[as.numeric(disp$snk),]
+            p2 <- cbind(p1,N=Nvec[p1$pop])#[Nvec[disp$snk]>0,]
+            colhist[[gen]] <- p2[!is.na(p2$arrive),]
+        } else    colhist[[gen]] <- NULL
 
     }
+    print(paste("simulating done...",date()))
+                                        #pops  #!# output is below
+
+    out <- list(pophist = pops, Nvecs = Nvec_hist, tmat = tmat, struct = struct, hab_suit=hab_suit, colhist=colhist)   #!# output is now a list
+    
+    return(out)
+}
 
 
 

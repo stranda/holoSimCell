@@ -15,7 +15,7 @@ def_grid_pred(pred = NULL, samppts = NULL, init.ext = NULL,
 
 \item{samppts}{locations of actual genetic samples.  Dataframe and must have 'long' and 'lat' columns in wgs84}
 
-\item{init.ext}{vector with the number of columns and rows expected  in output}
+\item{init.ext}{vector with the number of columns and rows hoping for in output (usually is altered in run)}
 
 \item{raster.proj}{the proj.4 string to impose on the raster enm (if not already specified) (defaults albers)}
 
