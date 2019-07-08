@@ -40,7 +40,6 @@ plothist <- function(ph)
                        lwd=2,
                        length=0.1
                        )
-                print(c(x1,x0,y1,y0))
                 ch$coldist[i] <- sqrt((y0-y1)^2 + (x0-x1)^2)
                                         #           print(ch$coldist[i])
             }
