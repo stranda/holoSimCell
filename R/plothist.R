@@ -10,7 +10,7 @@ plothist <- function(ph)
     pops=ph$pophist
 
     ch=merge(ch,pops,by.x="src",by.y="pop")[,c(-6,-7)]
-    ch=ch[with(ch,order(time,src,snk)),]
+    ch=ch[with(ch,order(-time,src,snk)),]
     ch=rbind(data.frame(src=pops$pop[(!is.na(pops$arrive))&(pops$arrive==0)],
                         time=pops$arrive[(!is.na(pops$arrive))&(pops$arrive==0)],
                         snk=pops$source[(!is.na(pops$arrive))&(pops$arrive==0)],
