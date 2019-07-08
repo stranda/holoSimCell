@@ -28,22 +28,26 @@ plothist <- function(ph)
     points(row~col,pops,pch=16,cex=log(dim(pops)[1])/6)
     for (i in 1:dim(ch)[1])
     {
-            x1=ch[i,"col"]
-            y1=ch[i,"row"]
-            x0= ch[ch$src==ch[i,"snk"],"col"]
-            y0= ch[ch$src==ch[i,"snk"],"row"]
-#            print(c(x0,y0,x1,y1))
-            arrows(x0,y0,x1,y1,
-                   col=heat.colors(max(ch$time,na.rm=T))[ch$time[i]],
-                   lwd=2,
-                   length=0.1
-               )
-            ch$coldist[i] <- sqrt((y0-y1)^2 + (x0-x1)^2)
-        
+        if (!is.na(ch$snk[i]))
+            {
+                x1=ch[i,"col"]
+                y1=ch[i,"row"]
+                x0= ch[ch$src==ch[i,"snk"],"col"][1]
+                y0= ch[ch$src==ch[i,"snk"],"row"][1]
+                                        #            print(c(x0,y0,x1,y1))
+                arrows(x0,y0,x1,y1,
+                       col=heat.colors(max(ch$time,na.rm=T))[ch$time[i]],
+                       lwd=2,
+                       length=0.1
+                       )
+                print(c(x1,x0,y1,y0))
+                ch$coldist[i] <- sqrt((y0-y1)^2 + (x0-x1)^2)
+                                        #           print(ch$coldist[i])
+            }
     }
 
     hist(ch$coldist,xlab="Colonization distance",main="")
-    hist(ch$arrive,xlab="Colonization time",main="")
+    hist(ch$time,xlab="Colonization time",main="")
     layout(matrix(1))
 }
 
