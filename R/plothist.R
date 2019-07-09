@@ -6,7 +6,6 @@
 plothist <- function(ph)
 {
     ch=ph$coalhist
-
     pops=ph$pophist
 
     ch=merge(ch,pops,by.x="src",by.y="pop")[,c(-6,-7)]
@@ -21,11 +20,28 @@ plothist <- function(ph)
     
     layout(matrix(c(1,1,1,1,2,3),nrow=3,ncol=2,byrow=T))
     rows <- min(pops$row):max(pops$row)
+    rw <- max(rows)
+    
     cols <- min(pops$col):max(pops$col)
+    cl <- max(cols)
+    
     ch$coldist=NA
     plot(1,type="n",ylab="",xlab="",ylim=range(rows),xlim=range(cols),axes=F,asp=1)
     rect(par("usr")[1],par("usr")[3],par("usr")[2],par("usr")[4],col = "gray") #gray background
-    points(row~col,pops,pch=16,cex=log(dim(pops)[1])/6)
+###    points(row~col,pops,pch=16,cex=log(dim(pops)[1])/6)
+
+    ((pops$pop-1) %/% cl) +1->row
+    ((pops$pop-1) %% cl) +1 ->col
+    
+    if ((!is.null(ph$Nvecs))&(min(dim(ph$Nvecs))>0))
+    {
+        harmmean <- function(x){1/mean(1/x)}
+        sz <- apply(ph$Nvecs+1,1,harmmean)-1
+        pops$sz <- sz
+    } else {sz <- log(dim(pops)[1])/6}
+
+    points(row~col,pops,pch=16,cex=log(sz+1))
+
     for (i in 1:dim(ch)[1])
     {
         if (!is.na(ch$snk[i]))
@@ -48,6 +64,7 @@ plothist <- function(ph)
     hist(ch$coldist,xlab="Colonization distance",main="")
     hist(ch$time,xlab="Colonization time",main="")
     layout(matrix(1))
+    
 }
 
 
