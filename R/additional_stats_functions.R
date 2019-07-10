@@ -235,7 +235,11 @@ psiCalc = function(data, samplen=20) {
     varloci <- which(rowSums(tmp_locMAF == 1) == 0)
     if(length(varloci) > 0) {
       tmp_locMAF <- tmp_locMAF[varloci,]
-      psi[pair] = (1/samplen)*((samplen*mean(tmp_locMAF[,1]))-(samplen*mean(tmp_locMAF[,2])))
+      if(length(varloci) == 1) {
+        psi[pair] = (1/samplen)*((samplen*mean(tmp_locMAF[1]))-(samplen*mean(tmp_locMAF[2])))
+      } else {
+        psi[pair] = (1/samplen)*((samplen*mean(tmp_locMAF[,1]))-(samplen*mean(tmp_locMAF[,2])))
+      }
     } else {
       psi[pair] = NA
     }
