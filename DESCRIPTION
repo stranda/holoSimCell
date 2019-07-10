@@ -28,7 +28,8 @@ Depends: cubature,
 	 shiny,
 	 raster,
 	 sf,
-	 network
+	 network,
+	 plyr
 Remotes: adamlilith/omnibus,
 	 adamlilith/statisfactory,
 	 adamlilith/enmSdm
