@@ -4,12 +4,13 @@
 \alias{getpophist.cells}
 \title{cell-based getpophist}
 \usage{
-getpophist.cells(h = 225, xdim = 15, ydim = 15, maxtime = 10000,
+getpophist.cells(h = 225, xdim = 15, ydim = 15, maxtime = 1000,
   distance.fun = distancePDF, shortscale = 0.35, longmean = 3,
   shortshape = 1, mix = 0.01, lambda = 1.01, deltLambda = rep(0,
   h), CVn = NULL, pois.var = FALSE, extFUN = NULL, hab_suit = NULL,
   K = 10000, deltK = rep(1, h), refs = c(2), refsz = c(1000),
-  popDispInfl = function(x) {     return(x) }, sz = 1, samptime = 0)
+  popDispInfl = function(x) {     return(x) }, sz = 1,
+  enmstep = NULL, samptime = 0)
 }
 \description{
 creates a population history on a landscape

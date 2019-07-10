@@ -4,10 +4,10 @@
 \alias{plothist}
 \title{plot the population history}
 \usage{
-plothist(pops)
+plothist(ph)
 }
 \arguments{
-\item{pops}{population history}
+\item{ph}{population history object (direct output from gepophist.cells)}
 }
 \description{
 plot the population history

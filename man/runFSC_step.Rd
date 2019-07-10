@@ -4,8 +4,8 @@
 \alias{runFSC_step}
 \title{run fastsimcoal}
 \usage{
-runFSC_step(popsobj = NULL, preLGMparms = NULL, sample_pops = NULL,
-  sample_n = NULL, label = "test", delete_files = TRUE,
+runFSC_step(ph = ph, l = landscape, sample_n = NULL,
+  preLGMparms = NULL, label = "test", delete_files = TRUE,
   num_cores = 1, exec = "fsc25", loc_parms = NULL, found_Ne = NULL)
 }
 \description{
