@@ -149,7 +149,7 @@ getpophist.cells <- function(h=225, #humber of habitats (populations)
 ###this is supposed to be the among-population migration matrix
 ###should represent the prob of movement from the center of pop i to the center of pop j
     tmat <- integratedMigMat(landx=xdim,landy=ydim,xnum=5,ynum=5,ysz=sz,xsz=sz,
-                             sshp=shortshape,ssc=shortscale,mix=mix,nmean=longmean)
+                             sshp=shortshape,ssc=shortscale,mix=mix,nmean=longmean,nvar=longmean^2)
         
     #pops$arrive <- NA  #!# both of these are now done in the definition of pops
     #pops$source <- NA
