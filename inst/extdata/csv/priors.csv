@@ -14,4 +14,3 @@ preLGM_t,100000,150000,uniform,TRUE
 preLGM_Ne,10000,100000,uniform,TRUE
 found_Ne,10,50,uniform,TRUE
 ref_Ne,100,Ne,conditional,TRUE
-marker,"""snp""",NA,character,FALSE
