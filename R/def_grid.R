@@ -119,7 +119,14 @@ def_grid_pred= function(pred=NULL, samppts = NULL,
     
     occ_pops = which(colSums(habSuit,na.rm=T)>0)
     empty_pops = which(colSums(habSuit,na.rm=T)==0)
-    samp_pops = which(t(as.matrix(samplocs))>=0)
+
+    samprowcol <-  as.data.frame(rowColFromCell(samplocs,cellFromXY(samplocs,as(samps,"Spatial"))))
+
+    samprowcol$row <- dim(samplocs)[1]-samprowcol$row + 1
+    samprowcol$abbrev <- as.character(samps$abbrev)
+    samprowcol$cell <- (samprowcol$row -1)* dim(samplocs)[2] +  samprowcol$col
+
+    samp_pops = samprowcol$cell
 
     
     sampstruct = list()
@@ -136,6 +143,7 @@ def_grid_pred= function(pred=NULL, samppts = NULL,
     sampstruct[["sumrast"]]=r
     sampstruct[["samplocsrast"]]=samplocs
     sampstruct[["samplocs"]]=samps
+    sampstruct[["sampdf"]]=samprowcol
     
     sampstruct
 }
