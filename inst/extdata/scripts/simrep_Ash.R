@@ -73,7 +73,9 @@ for(repl in 1:nreps) {
 
     #Logical parameter of teh simulation, use hab_suit or not...
     if(parms$use.hab_suit == 0) {
-        landscape = NULL
+        #landscape = NULL   #Don't do it this way, entire matrix is habitable
+        landscape$hab_suit[!is.na(landscape$hab_suit)] <- 1  #This way ignores the glacier
+        #landscape$hab_suit[landscape$hab_suit > 0] <- 1   #This way maintains the 0 suitability for glaciated cells
     } 
 
     ph = getpophist.cells(hab_suit=landscape,samptime=1,refs=parms$refs,refsz=parms$ref_Ne,
