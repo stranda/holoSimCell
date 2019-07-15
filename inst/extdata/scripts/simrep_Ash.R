@@ -121,7 +121,7 @@ for(repl in 1:nreps) {
                         l = landscape,
                         sample_n = poptbl[1],
                         preLGMparms = preLGMparms,
-                        label = paste0("Ash_", round(runif(1),5)),
+                        label = paste0("Ash_", round(runif(1, min=1, max=1e6))),
                         delete_files = TRUE,
                         num_cores = 1,
                         exec = "fsc26",
