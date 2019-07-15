@@ -35,6 +35,8 @@ drawParms <- function(control = NULL) {
 			parms[p] <- as.numeric(as.character(priors$min[p]))
 		} else if(priors$type[p] == "character") {
 			parms[p] <- as.character(priors$min[p])
+		} else if(priors$type[p] == "logical") {
+			parms[p] <- sample(c(0,1), 1, replace = FALSE)
 		}	
 		
 		if(priors$is.int[p] == TRUE) {
