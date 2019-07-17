@@ -16,13 +16,21 @@ who <- as.character(args[3])
 
 if(length(args) == 0){
     i <- 1
-    nreps <- 10
+    nreps <- 1
     who <- "JDR"
     #refs <- 5
 }
 
+if (file.exists("/.dockerenv")) #running in a container
+{
+simdir <- "/tmp/hs"
+outdir <- "/tmp/hs/out"
+} else { #running on another machine (MSU cluster)
 simdir <- system("echo $TMPDIR", intern = TRUE)
 outdir <- "/mnt/research/TIMBER/Ash/OUT" 
+}
+
+
 
 library(holoSimCell)
 
@@ -206,3 +214,4 @@ for(repl in 1:nreps) {
     }
 
 }
+
