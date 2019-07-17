@@ -92,6 +92,7 @@ server <- function(input, output,session) {
         updateNumericInput(session,"ref2",max=details[1,"ncells"])
         updateNumericInput(session,"xdim",value=details[1,"x.dim"])
         updateNumericInput(session,"ydim",value=details[1,"y.dim"])
+        updateNumericInput(session,"gens",value=dim(hg)[1])
     })
     
     output$dispkern <- renderPlot({
