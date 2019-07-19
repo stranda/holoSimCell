@@ -23,13 +23,14 @@ if(length(args) == 0){
 
 if (file.exists("/.dockerenv")) #running in a container
 {
-simdir <- "/tmp/hs/sim"
-outdir <- "/tmp/hs/out"
+simdir <- "."
+outdir <- "."
 } else { #running on another machine (MSU cluster)
 simdir <- system("echo $TMPDIR", intern = TRUE)
 outdir <- "/mnt/research/TIMBER/Ash/OUT" 
 }
 
+print (paste("simdir",simdir,"\noutdir",outdir,"\nnreps",nreps,"\ni",i))
 
 
 library(holoSimCell)
