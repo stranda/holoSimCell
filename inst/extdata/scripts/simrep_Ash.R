@@ -23,8 +23,11 @@ if(length(args) == 0){
 
 if (file.exists("/.dockerenv")) #running in a container
 {
-simdir <- "."
-outdir <- "."
+simdir <- "/tmp/hs"
+outdir <- "/tmp/hs"
+i=round(runif(1,0,100000000))
+nreps <- 1
+who <- "DOC"
 } else { #running on another machine (MSU cluster)
 simdir <- system("echo $TMPDIR", intern = TRUE)
 outdir <- "/mnt/research/TIMBER/Ash/OUT" 
