@@ -20,14 +20,39 @@ if(length(args) == 0){
     who <- "JDR"
     #refs <- 5
 }
-
-simdir <- system("echo $TMPDIR", intern = TRUE)
-outdir <- "/mnt/research/TIMBER/Ash/OUT" 
+simdir <- "."
+outdir <- "." 
+#simdir <- system("echo $TMPDIR", intern = TRUE)
+#outdir <- "/mnt/research/TIMBER/Ash/OUT" 
 
 library(holoSimCell)
 
 
+### imputed, popmap (individualID->pop mapping), pts (sample locations) and ashpred
+### are now built into holoSimCell
+### as built in dataframes (in data/ directory)
 
+rownames(popmap) <- popmap[,1]
+table(popmap[gsub("fp","",names(imputed)),2])
+imputed.pruned=imputed[,-which(gsub("fp","",names(imputed))%in%popmap[popmap$abbrev=="Michigan","id"])]
+imputed.pruned=imputed.pruned[,-which(gsub("fp","",names(imputed.pruned))%in%popmap[popmap$abbrev=="UNK","id"])]
+imputed.pruned=imputed.pruned[,-which(gsub("fp","",names(imputed.pruned))%in%popmap[popmap$abbrev=="MO1","id"])]
+imputed.pruned=imputed.pruned[,-which(gsub("fp","",names(imputed.pruned))%in%popmap[popmap$abbrev=="ON1","id"])]
+imputed.pruned=imputed.pruned[,-which(gsub("fp","",names(imputed.pruned))%in%popmap[popmap$abbrev=="VA1","id"])]
+imputed.pruned=imputed.pruned[,-which(gsub("fp","",names(imputed.pruned))%in%popmap[popmap$abbrev=="MB1","id"])]
+removes <- c()
+popids <- popmap[gsub("fp","",names(imputed.pruned)),2]
+table(popids)
+for (a in unique(popids))
+{
+    if (sum(popids==a)>14)
+    {
+        removes <- c(removes,sample(which(popids==a),1))
+    }
+}
+imputed.pruned <- imputed.pruned[,-1*removes]
+
+poptbl <- table(popmap[gsub("fp","",names(imputed.pruned)),2])
 
 
 for(repl in 1:nreps) {
@@ -40,18 +65,18 @@ for(repl in 1:nreps) {
     parms$mu <- 1e-6  #!!!# Bumping up mutation rate!!  Does this help with speeds?
 
     if (FALSE) #don't run any without suitability
-        {
-    #Logical parameter of teh simulation, use hab_suit or not...
-    if(parms$use.hab_suit == 0) {
-        #landscape = NULL   #Don't do it this way, entire matrix is habitable
-        landscape$hab_suit[!is.na(landscape$hab_suit)] <- 1  #This way ignores the glacier
-        #landscape$hab_suit[landscape$hab_suit > 0] <- 1   #This way maintains the 0 suitability for glaciated cells
+    {
+                                        #Logical parameter of teh simulation, use hab_suit or not...
+        if(parms$use.hab_suit == 0) {
+                                        #landscape = NULL   #Don't do it this way, entire matrix is habitable
+            landscape$hab_suit[!is.na(landscape$hab_suit)] <- 1  #This way ignores the glacier
+                                        #landscape$hab_suit[landscape$hab_suit > 0] <- 1   #This way maintains the 0 suitability for glaciated cells
+        }
     } else { #but set the model number to 2 for use.hab_suit
-        parms$use.hab_suit = 2
-        }
+            parms$use.hab_suit = 2
+    }
 
-            
-        }
+    
     ph = getpophist.cells(hab_suit=landscape,samptime=1,refs=parms$refs,refsz=parms$ref_Ne,
                       mix=parms$mix,
                       shortscale=parms$shortscale,shortshape=parms$shortshape,
