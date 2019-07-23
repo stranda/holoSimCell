@@ -1,0 +1,14 @@
+###
+### quick script to integrate Andrias pollen interpolations
+###
+pollen_pred <- readRDS("habitat_suitability_pollen.RDS")
+pollen_pred <- pollen_pred/max(pollen_pred,na.rm=T)
+pextent <- readRDS("habitat_suitability_pollen_xyvals.RDS")
+left <- min(pextent$xvals)
+right <- max(pextent$xvals)
+bot <- min(pextent$yvals)
+top <- max(pextent$yvals)
+corners <- matrix(c(left, top,
+                    left, bot,
+                    right, bot,
+                    right, top), ncol = 2, byrow = T)
