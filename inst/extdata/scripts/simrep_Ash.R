@@ -20,10 +20,9 @@ if(length(args) == 0){
     who <- "JDR"
     #refs <- 5
 }
-simdir <- "."
-outdir <- "." 
-#simdir <- system("echo $TMPDIR", intern = TRUE)
-#outdir <- "/mnt/research/TIMBER/Ash/OUT" 
+
+simdir <- system("echo $TMPDIR", intern = TRUE)
+outdir <- "/mnt/research/TIMBER/Ash/OUT" 
 
 library(holoSimCell)
 
@@ -122,7 +121,7 @@ for(repl in 1:nreps) {
                         preLGMparms = preLGMparms,
                         label = paste0("Ash_", round(runif(1, min=1, max=1e6))),
                         delete_files = TRUE,
-                        num_cores = 1,
+                        num_cores = 2,
                         exec = "fsc26",
                         loc_parms = loc_parms2,
                         found_Ne = parms$found_Ne)
