@@ -60,7 +60,7 @@ for(repl in 1:nreps) {
     ## ashland is a stored R object as well
     if (!exists("ashland"))
     {
-        landscape <- def_grid_pred(pred=ashpred[,,701:1],samppts=samppts,init.ext=c(18,18),keep.thresh=0.05)
+
     } else landscape <- ashland
 
     ph = getpophist.cells(hab_suit=landscape,samptime=1,refs=parms$refs,refsz=parms$ref_Ne,
