@@ -1,6 +1,6 @@
 ###
 ###
-pollen_pred <- readRDS("habitat_suitability_pollen_v2.RDS")
+pollen_pred <- readRDS("habitat_suitability_pollen_ICE_v1.RDS")
 pextent <- readRDS("habitat_suitability_pollen_xyvals.RDS")
 left <- min(pextent$xvals)
 right <- max(pextent$xvals)
