@@ -49,7 +49,8 @@ runFSC_step = function(
   
   #Remove them from the migration matrix
   #empty_pops <- sort(unique(c(l$empty, which(rowSums(simhist) == 0))))
-  empty_pops <- l$empty
+  #empty_pops <- l$empty
+  empty_pops <- sort(unique(c(l$empty, pops$pop[!pops$pop %in% coalhist$src & !pops$pop %in% coalhist$snk & !pops$pop %in% l$empty])))
   empty_pops2 <- sort(unique(c(l$empty, which(rowSums(simhist) == 0))))    #Don't allow migration with populations that went extinct!
   if(length(empty_pops2) > 0) {
     simhist <- simhist[-empty_pops,]
