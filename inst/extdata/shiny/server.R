@@ -1,89 +1,18 @@
-
-library(shiny)
-#library(Rcpp)
-#sourceCpp("helpers.cpp") #this is the c++ code, sourceCpp compiles it and makes functions available
-#source("pophist-cells.R") #implements getpophist.cells
-#source("integrate-mig-mat.R") # does a better job of specifying colonization probs, but still needs work
-#source("plothist.R") #same ol' as always
-
+require(holoSimCell)
+require(shiny)
 
 # Define UI for application that draws a histogram
-ui <- fluidPage(
-   
-   # Application title
-   titlePanel("Forward-time simulation visualizer"),
-   
-   # Sidebar with a slider input for number of bins 
-   sidebarLayout(
-      sidebarPanel(
- 
-          actionButton("doplot","Run simulation and plot"),
-         sliderInput("ssc",
-                     "Scale of short-dist (percent of cell width)",
-                     min = 0,
-                     max = 200,
-                     value = 4),
-         sliderInput("ssh",
-                     "Shape of short-dist",
-                     min = 0.01,
-                     max = 10,
-                     value = 1),
-         sliderInput("nmn",
-                     "Scale of long-dist (percent cell width)",
-                     min = 0,
-                     max = 400,
-                     value = 35),
-         sliderInput("mix",
-                     "proportion of long-dist",
-                     min = 0,
-                     max = 0.1,
-                     value = 0.001),
-         sliderInput("sz",
-                     "Number of measurement units across each grid cell (km?)",
-                     min = 1,
-                     max = 2000,
-                     value = 150),
-          numericInput("lambda","lambda",value=1.01,min=0.5,max=1.5),
-
-         sliderInput("K",
-                     "carry capacity",
-                     min=10,max=50000,value=500),
-         sliderInput("gens",
-                     "Number of time clicks:",
-                     min = 1,
-                     max = 100000,
-                     value = 500),
-
-         checkboxInput("usehab","Use habitat suitability layer?",FALSE),
-
-         numericInput("xdim","number of X grids",value=15,min=1,max=100),
-         
-         numericInput("ydim","number of Y grids",value=15,min=1,max=100),
-         
-         numericInput("ref1","Refugium pop num",value=10),
-
-         numericInput("ref1size","Refugium pop size",value=100),
-         
-         numericInput("ref2","Refugium pop num",value=0),
-         
-         numericInput("ref2size","Refugium pop size",value=0)
-         
-      ),
-      
-      # Show a plot of the generated distribution
-      mainPanel(
-          h3("Current dispersal kernel"),
-          plotOutput("dispkern"),
-          h3("Map of colonization history. Hotter colors are more recent"),
-         plotOutput("histplot",height="900px")
-      )
-   )
-)
 
 # Define server logic required to draw a histogram
 server <- function(input, output,session) {
 
-    habgrid <- reactive({ashland})
+    habgrid <- reactive({
+        if (input$usehab=="Pollen")
+        {
+            ashpollen
+        } else {
+            ashenm
+        }})
 
     observeEvent(input$usehab,{
         hg <- habgrid()
@@ -129,7 +58,7 @@ server <- function(input, output,session) {
                 
             }
 
-            if (input$usehab) hs=habgrid() else hs=NULL
+            if (input$usehab!="None") hs=habgrid() else hs=NULL
             
             ph <- getpophist.cells(h=input$xdim*input$ydim,          ##demography, num habitats
                                          xdim=input$xdim,        ##num cols
