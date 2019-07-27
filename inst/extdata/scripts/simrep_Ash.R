@@ -182,7 +182,8 @@ for(repl in 1:nreps) {
     colnames(popDF)[colnames(popDF)=="abbrev"] <- "id"
     popDF$grid.cell <- plyr::mapvalues(popDF$cell, oldID, newID, warn_missing = FALSE)
     popDF$sample.size <- as.vector(poptbl[match(popDF$id,names(poptbl))])
-    
+    popDF <- popDF[match(strataNames(fscout), popDF$id),]
+
     stats_out <- holoStats(out = fscout, 
                        popDF = popDF,
                        extent = c(ph$struct["xdim"], ph$struct["ydim"]), 
