@@ -344,7 +344,7 @@ holoStats = function(out, popDF, extent, cores=1) {
             he.lat.stats, he.long.stats,
             pc1.lat.stats, pc1.long.stats,
             pc2.lat.stats, pc2.long.stats,
-            pc3.lat.stats, pc3.long.stats
+            pc3.lat.stats, pc3.long.stats,
             NSS_as,SSS_as,gssa,sPCA_sum_stats,pairbc.loc,moran,monmonier,semivar[1,],ld_stats[1,],psi,node_stats,edge_stats)
   
   stats1 = matrix(data=stats, nrow = 1)
