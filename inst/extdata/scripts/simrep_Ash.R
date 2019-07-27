@@ -56,26 +56,20 @@ poptbl <- table(popmap[gsub("fp","",names(imputed.pruned)),2])
 
 for(repl in 1:nreps) {
 
-    landscape <- ashpollen
+    landscape <- ashenm
     
     #Draw parms
     parms <- drawParms(control = system.file("extdata/csv","priors.csv",package="holoSimCell"))
     #parms$refs <- refs   #!!# If we want to have the refuge location passed as part of the command line
     parms$mu <- 1e-6  #!!!# Bumping up mutation rate!!  Does this help with speeds?
-
-    if (FALSE) #don't run any without suitability
-    {
-                                        #Logical parameter of teh simulation, use hab_suit or not...
-        if(parms$use.hab_suit == 0) {
-                                        #landscape = NULL   #Don't do it this way, entire matrix is habitable
-            landscape$hab_suit[!is.na(landscape$hab_suit)] <- 1  #This way ignores the glacier
-                                        #landscape$hab_suit[landscape$hab_suit > 0] <- 1   #This way maintains the 0 suitability for glaciated cells
-        }
-    } else { #but set the model number to 2 for use.hab_suit
-            parms$use.hab_suit = 2
-    }
-
-    
+    parms$use.hab_suit <- sample(c(0,1,2),1,replace=FALSE)
+    #Logical parameter of teh simulation, use hab_suit or not...
+    if(parms$use.hab_suit == 0) {
+        landscape$hab_suit[!is.na(landscape$hab_suit)] <- 1  #This way ignores the glacier
+    } else if(parms$use.hab_suit == 2) {
+        landscape <- ashpollen
+    } 
+        
     ph = getpophist.cells(hab_suit=landscape,samptime=1,refs=parms$refs,refsz=parms$ref_Ne,
                       mix=parms$mix,
                       shortscale=parms$shortscale,shortshape=parms$shortshape,
