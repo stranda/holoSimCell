@@ -171,23 +171,17 @@ for(repl in 1:nreps) {
     #also seems to be some error check in strataG that was causing problems (none of the specified ids were found in the specified strata)
     #nameStrat is deprecated
     #fscout <- nameStrat(fscout = fscout, pops = ph, sample_pops = sample_pops, sample_n = as.vector(poptbl))
-    #fscout@data$strata <- paste0("pop-", sapply(strsplit(fscout@data$ids,"_"), function(x){x[1]}))
+    fscout@data$strata <- paste0("pop-", sapply(strsplit(fscout@data$ids,"_"), function(x){x[1]}))
     #The line above is probably more flexible than it looks, FSC gives the fsc popid as the first part of the individual name  
 
     #Build popDF for stat calculation
-    #strat_order <- order(as.character(sample_pops))
-    #popDF <- data.frame(id = unique(fscout@data$strata),
-    #                        grid.cell = sample_pops[strat_order],
-    #                        sample.size = as.vector(poptbl)[strat_order],
-    #                        col = ph$pophist$col[sample_pops[strat_order]],
-    #                        row = ph$pophist$row[sample_pops[strat_order]])
-    #popDF <- popDF[order(popDF$grid.cell),]
-
-    #New popDF built around landscape$sampdf
-    popDF <- landscape$sampdf
-    colnames(popDF)[colnames(popDF)=="abbrev"] <- "id"
-    popDF$grid.cell <- plyr::mapvalues(popDF$cell, oldID, newID, warn_missing = FALSE)
-    popDF$sample_size <- as.vector(poptbl[match(popDF$id,names(poptbl))])
+    strat_order <- order(as.character(sample_pops))
+    popDF <- data.frame(id = unique(fscout@data$strata),
+                            grid.cell = sample_pops[strat_order],
+                            sample.size = as.vector(poptbl)[strat_order],
+                            col = ph$pophist$col[sample_pops[strat_order]],
+                            row = ph$pophist$row[sample_pops[strat_order]])
+    popDF <- popDF[order(popDF$grid.cell),]
 
     stats_out <- holoStats(out = fscout, 
                        popDF = popDF,
