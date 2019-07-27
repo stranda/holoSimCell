@@ -172,6 +172,7 @@ runFSC_step = function(
   #Then map these old ID's back to the abbreviation of the sampled population
   FSCabbrev <- plyr::mapvalues(FSCgridid,l$sampdf$cell,l$sampdf$abbrev)
   fscout@data$strata <- FSCabbrev
+  fscout@data$ids <- paste0(fscout@data$strata, "_", c(1:length(fscout@data[,1])))
 
   fscout
   
