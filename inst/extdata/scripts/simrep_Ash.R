@@ -167,7 +167,7 @@ for(repl in 1:nreps) {
     newID <- c(1:length(oldID))-1
     sample_pops <- plyr::mapvalues(landscape$sampled, oldID, newID, warn_missing = FALSE)
 
-    #This is simpler, more reliable
+    #This is simpler, more reliable - well, not exactly...
     #also seems to be some error check in strataG that was causing problems (none of the specified ids were found in the specified strata)
     #nameStrat is deprecated
     #fscout <- nameStrat(fscout = fscout, pops = ph, sample_pops = sample_pops, sample_n = as.vector(poptbl))
@@ -182,7 +182,6 @@ for(repl in 1:nreps) {
                             col = ph$pophist$col[sample_pops[strat_order]],
                             row = ph$pophist$row[sample_pops[strat_order]])
     popDF <- popDF[order(popDF$grid.cell),]
-
 
     stats_out <- holoStats(out = fscout, 
                        popDF = popDF,
