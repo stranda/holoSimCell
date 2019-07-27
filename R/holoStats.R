@@ -20,21 +20,22 @@ holoStats = function(out, popDF, extent, cores=1) {
   split_out <- strataSplit(out) #list of strataG objects for each pop
   ###    locMAF = sapply(split_out,function(o){mafreq(o)})
   locMAF <- do.call(cbind,mclapply(split_out,mc.cores=cores,function(o){mafreq(o)}))
-  colnames(locMAF) <- names(split_out)
+#  colnames(locMAF) <- names(split_out)
   locHe <- colMeans(2*locMAF*(1-locMAF))
   varlocHe <- apply(2*locMAF*(1-locMAF),2,var)
   
   locN <- sapply(split_out,function(o){length(o@data$ids)})
-  names(locN) <- popid
+#  names(locN) <- popid
   
   localSNP <- apply(locMAF,2,function(x){sum(x<1)})
   
-  names(localSNP) <- paste0("S.", popid)
- 
+#  names(localSNP) <- paste0("S.", popid)
+  names(localSNP) <- paste0("S.", names(localSNP))
   ##not sure we need this, does not seem to be variable and costs some time
   privateSNP <- colSums(privateAlleles(out))
   #privateSNP = privateSNP[sample.order]
-  names(privateSNP) <- paste0("pS.", popid)
+#  names(privateSNP) <- paste0("pS.", popid)
+  names(privateSNP) <- paste0("pS.", names(privateSNP))
 
   total_priv = sum(privateSNP)
   names(total_priv) <- "tot_priv"
@@ -46,21 +47,31 @@ holoStats = function(out, popDF, extent, cores=1) {
   pairnei <- as.vector(neimat)
   neinames <- c()
   #This will be different...
-  for(pid in 1:(length(popDF$id)-1)) {
-    neinames <- c(neinames, paste0("Nei_", popDF$id[pid],".", popDF$id[(pid+1):length(popDF$id)]))
+  #for(pid in 1:(length(popDF$id)-1)) {
+  #  neinames <- c(neinames, paste0("Nei_", popDF$id[pid],".", popDF$id[(pid+1):length(popDF$id)]))
+  #}
+  neimat_names <- attr(neimat, "Labels")
+  for(pid in 1:(length(neimat_names)-1)) {
+    neinames <- c(neinames, paste0("Nei_", neimat_names[pid],".", neimat_names[(pid+1):length(neimat_names)]))
   }
-
   
   #!# Naming issue here - popid.popid is also used for Fst - but merge requires same names
   names(pairnei) = neinames
   
+  #pairFst.loc = as.vector(FstMat.loc)
+  #Fstnames.loc = c()
+  #This will be different...
+  #for(pid in 1:(length(popDF$id)-1)) {
+  #  Fstnames.loc = c(Fstnames.loc, paste0("Fst_", popDF$id[pid],".", popDF$id[(pid+1):length(popDF$id)]))
+  #}
+  attr(FstMat.loc,"Labels") <- attr(neimat,"Labels")  
+  FstMat_names <- attr(FstMat.loc,"Labels")
   pairFst.loc = as.vector(FstMat.loc)
   Fstnames.loc = c()
   #This will be different...
-  for(pid in 1:(length(popDF$id)-1)) {
-    Fstnames.loc = c(Fstnames.loc, paste0("Fst_", popDF$id[pid],".", popDF$id[(pid+1):length(popDF$id)]))
-  }
-	
+  for(pid in 1:(length(FstMat_names)-1)) {
+    Fstnames.loc = c(Fstnames.loc, paste0("Fst_", FstMat_names[pid],".", FstMat_names[(pid+1):length(FstMat_names)]))
+  }	
   #!# Naming issue here - popid.popid is also used for Nei - but merge requires same names
   names(pairFst.loc) = Fstnames.loc
   
@@ -72,18 +83,23 @@ holoStats = function(out, popDF, extent, cores=1) {
   paireuc = as.vector(eucdist)
   eucnames = c()
   dnames = attr(eucdist,"Labels")
+  #for(pid in 1:(length(popDF$id)-1)) {
+  #  eucnames = c(eucnames, paste0(popDF$id[pid],".", popDF$id[(pid+1):length(popDF$id)]))
+  #}
   for(pid in 1:(length(popDF$id)-1)) {
-    eucnames = c(eucnames, paste0(popDF$id[pid],".", popDF$id[(pid+1):length(popDF$id)]))
+    eucnames = c(eucnames, paste0(dnames[pid],".", dnames[(pid+1):length(dnames)]))
   }
-
+	
   names(paireuc) <- eucnames
   ########### some spatially focused stats
   ###     get pop coords:
-  pops1=t(matrix(1:prod(extent),ncol=extent[1]))
-  popcrd=data.frame(t(sapply(popDF$grid.cell,function(i) {which(pops1==i,arr.ind=T)})))
-  names(popcrd)=c("y","x")
-  popDF=cbind(popDF,popcrd)
-  
+  #pops1=t(matrix(1:prod(extent),ncol=extent[1]))
+  #popcrd=data.frame(t(sapply(popDF$grid.cell,function(i) {which(pops1==i,arr.ind=T)})))
+  #names(popcrd)=c("y","x")
+  #popDF=cbind(popDF,popcrd)
+  popDF$y <- popDF$row
+  popDF$x <- popDF$col
+	
   ###     get pairwise geo distances
   pdist=as.matrix(dist(popDF[,c("x","y")]))
   colnames(pdist) <- popDF$id
@@ -107,7 +123,8 @@ holoStats = function(out, popDF, extent, cores=1) {
   #                                               function(x) mean(x$Hexp))))
   he_by_pop <- colMeans(2*locMAF*(1-locMAF))
   
-  hedf <- data.frame(he=he_by_pop, id=unique(out@data$strata),stringsAsFactors=F)
+#  hedf <- data.frame(he=he_by_pop, id=unique(out@data$strata),stringsAsFactors=F)
+  hedf <- data.frame(he=he_by_pop, id=names(he_by_pop),stringsAsFactors=F)
 
   pr=prcomp(t(locMAF))
   pcadf <- data.frame(id=rownames(predict(pr)),pc1=predict(pr)[,1],pc2=predict(pr)[,2],pc3=predict(pr)[,3])
@@ -174,6 +191,9 @@ holoStats = function(out, popDF, extent, cores=1) {
   ibdedist.int <- c(coef(IBDedist)[1])
   bsedist <- segmentGLM(c(dsts$d),log(c(dsts$edist+1)))
   
+	
+  #Turning off spatial stats for now... some issues (JDR 7/26/19)
+  if(FALSE) {
   ##Spatial Statistics: written by Ellie Weise
   ##incorporated Dec 19, 2018
   #getting data into a usable format for the stats to calculate
@@ -333,7 +353,7 @@ holoStats = function(out, popDF, extent, cores=1) {
   rownames(stats1) <- edgenames
   #!# Naming issue here: Using P1-P25 instead of grid cell ID
   edge_stats <- unmatrix(t(stats1))
-  
+  }
   ################################################################
   
   stats = c(SNPs, localSNP, privateSNP, total_priv, pairFst.loc, pairnei,tot_Fst,
@@ -344,8 +364,8 @@ holoStats = function(out, popDF, extent, cores=1) {
             he.lat.stats, he.long.stats,
             pc1.lat.stats, pc1.long.stats,
             pc2.lat.stats, pc2.long.stats,
-            pc3.lat.stats, pc3.long.stats,
-            NSS_as,SSS_as,gssa,sPCA_sum_stats,pairbc.loc,moran,monmonier,semivar[1,],ld_stats[1,],psi,node_stats,edge_stats)
+            pc3.lat.stats, pc3.long.stats)
+            #NSS_as,SSS_as,gssa,sPCA_sum_stats,pairbc.loc,moran,monmonier,semivar[1,],ld_stats[1,],psi,node_stats,edge_stats)
   
   stats1 = matrix(data=stats, nrow = 1)
   colnames(stats1) = names(stats)
