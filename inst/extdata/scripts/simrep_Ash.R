@@ -187,7 +187,7 @@ for(repl in 1:nreps) {
     popDF <- landscape$sampdf
     colnames(popDF)[colnames(popDF)=="abbrev"] <- "id"
     popDF$grid.cell <- plyr::mapvalues(popDF$cell, oldID, newID, warn_missing = FALSE)
-    popDF$sample_size <- as.vector(poptbl[match(popDF$id,names(poptbl))])
+    popDF$sample.size <- as.vector(poptbl[match(popDF$id,names(poptbl))])
     
     stats_out <- holoStats(out = fscout, 
                        popDF = popDF,
@@ -197,7 +197,7 @@ for(repl in 1:nreps) {
     BVmax <- max(bioticVelocity(ph, metrics = "centroid")$centroidVelocity)
     
     #!# IS THIS OUTPUT IN THE FORMAT THAT WE WANT??
-    all_out <- c(date = date(), i, repl, parms_out, BVmax, stats_out)
+    all_out <- c(date = date(), node=i, rep=repl, parms_out, BVmax=BVmax, stats_out)
     all_out$refs <- paste(eval(parse(text=as.character(ph$struct["refs"]))), collapse = ".")
 
     #Write a file, if none exists, or append to file, if present
