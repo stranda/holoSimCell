@@ -30,12 +30,12 @@ holoStats = function(out, popDF, extent, cores=1) {
   localSNP <- apply(locMAF,2,function(x){sum(x<1)})
   
   names(localSNP) <- paste0("S.", popid)
-  
+ 
   ##not sure we need this, does not seem to be variable and costs some time
   privateSNP <- colSums(privateAlleles(out))
   #privateSNP = privateSNP[sample.order]
   names(privateSNP) <- paste0("pS.", popid)
-  
+
   total_priv = sum(privateSNP)
   names(total_priv) <- "tot_priv"
   
@@ -49,6 +49,7 @@ holoStats = function(out, popDF, extent, cores=1) {
   for(pid in 1:(length(popDF$id)-1)) {
     neinames <- c(neinames, paste0("Nei_", popDF$id[pid],".", popDF$id[(pid+1):length(popDF$id)]))
   }
+
   
   #!# Naming issue here - popid.popid is also used for Fst - but merge requires same names
   names(pairnei) = neinames
@@ -59,7 +60,7 @@ holoStats = function(out, popDF, extent, cores=1) {
   for(pid in 1:(length(popDF$id)-1)) {
     Fstnames.loc = c(Fstnames.loc, paste0("Fst_", popDF$id[pid],".", popDF$id[(pid+1):length(popDF$id)]))
   }
-  
+	
   #!# Naming issue here - popid.popid is also used for Nei - but merge requires same names
   names(pairFst.loc) = Fstnames.loc
   
@@ -74,6 +75,7 @@ holoStats = function(out, popDF, extent, cores=1) {
   for(pid in 1:(length(popDF$id)-1)) {
     eucnames = c(eucnames, paste0(popDF$id[pid],".", popDF$id[(pid+1):length(popDF$id)]))
   }
+
   names(paireuc) <- eucnames
   ########### some spatially focused stats
   ###     get pop coords:
@@ -106,6 +108,7 @@ holoStats = function(out, popDF, extent, cores=1) {
   he_by_pop <- colMeans(2*locMAF*(1-locMAF))
   
   hedf <- data.frame(he=he_by_pop, id=unique(out@data$strata),stringsAsFactors=F)
+
   pr=prcomp(t(locMAF))
   pcadf <- data.frame(id=rownames(predict(pr)),pc1=predict(pr)[,1],pc2=predict(pr)[,2],pc3=predict(pr)[,3])
   
@@ -330,6 +333,7 @@ holoStats = function(out, popDF, extent, cores=1) {
   rownames(stats1) <- edgenames
   #!# Naming issue here: Using P1-P25 instead of grid cell ID
   edge_stats <- unmatrix(t(stats1))
+  
   ################################################################
   
   stats = c(SNPs, localSNP, privateSNP, total_priv, pairFst.loc, pairnei,tot_Fst,
