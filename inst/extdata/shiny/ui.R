@@ -69,7 +69,7 @@ ui <- fluidPage(
       mainPanel(
           h3("Current dispersal kernel"),
           plotOutput("dispkern"),
-          h3("Map of colonization history. Hotter colors are more recent"),
+          h3("Map of colonization history. Red oldest, white most recent"),
          plotOutput("histplot",height="900px")
       )
    )

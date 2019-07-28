@@ -21,7 +21,7 @@ server <- function(input, output,session) {
         updateNumericInput(session,"ref2",max=details[1,"ncells"])
         updateNumericInput(session,"xdim",value=details[1,"x.dim"])
         updateNumericInput(session,"ydim",value=details[1,"y.dim"])
-        updateNumericInput(session,"gens",value=dim(hg)[1])
+        updateNumericInput(session,"gens",value=dim(hg$hab_suit)[1])
     })
     
     output$dispkern <- renderPlot({
@@ -86,13 +86,16 @@ server <- function(input, output,session) {
                                        )
 #            print(ph$coalhist)
             print("about to plot")
-                if (sum(!is.na(ph$pophist$source))>1)
-                    plothist(ph)
-                else
-                {
-                    plot(1~1,xlab="",ylab="",type="n")
-                    text(1,1,"No populations colonized!" )
-                }
+            if (sum(!is.na(ph$pophist$source))>1)
+            {
+                if (input$sc2mxTime) mxt = input$gens else mxt= NULL 
+                plothist(ph,maxtime=mxt)
+            }
+            else
+            {
+                plot(1~1,xlab="",ylab="",type="n")
+                text(1,1,"No populations colonized!" )
+            }
             print("plotting done")
             
         })

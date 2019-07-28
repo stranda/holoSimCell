@@ -3,7 +3,7 @@
 #' @param ph population history object (direct output from gepophist.cells)
 #' @export
 #' 
-plothist <- function(ph)
+plothist <- function(ph, maxtime=NULL)
 {
     ch=ph$coalhist
     pops=ph$pophist
@@ -18,7 +18,13 @@ plothist <- function(ph)
              ch)
                         
     
-    layout(matrix(c(1,1,1,1,2,3),nrow=3,ncol=2,byrow=T))
+    layout(matrix(c(2,1,1,1,
+                    2,1,1,1,
+                    2,1,1,1,
+                    0,3,4,5),nrow=4,ncol=4,byrow=T),
+           widths=c(0.22,0.26,0.26,0.26)) #plot 3 as null
+
+    
     rows <- min(pops$row):max(pops$row)
     rw <- max(rows)
     
@@ -26,6 +32,11 @@ plothist <- function(ph)
     cl <- max(cols)
     
     ch$coldist=NA
+
+    
+    mai = par("mai")
+    par(mai=c(0.1,0.1,0.1,0.1))
+    
     plot(1,type="n",ylab="",xlab="",ylim=range(rows),xlim=range(cols),axes=F,asp=1)
     rect(par("usr")[1],par("usr")[3],par("usr")[2],par("usr")[4],col = "gray") #gray background
 ###    points(row~col,pops,pch=16,cex=log(dim(pops)[1])/6)
@@ -51,8 +62,12 @@ plothist <- function(ph)
                 x0= ch[ch$src==ch[i,"snk"],"col"][1]
                 y0= ch[ch$src==ch[i,"snk"],"row"][1]
                                         #            print(c(x0,y0,x1,y1))
+                if (is.null(maxtime))
+                    clrs = heat.colors(max(ch$time,na.rm=T))[ch$time[i]]  else
+                    clrs = heat.colors(maxtime)[ch$time[i]]
+                
                 arrows(x0,y0,x1,y1,
-                       col=heat.colors(max(ch$time,na.rm=T))[ch$time[i]],
+                       col=clrs,
                        lwd=2,
                        length=0.1
                        )
@@ -60,9 +75,37 @@ plothist <- function(ph)
                                         #           print(ch$coldist[i])
             }
     }
+    mxt <- ifelse(is.null(maxtime),max(ch$time,na.rm=T),maxtime)
+steps=5
+    lgd <- round(seq(1,mxt,length.out=steps))
 
-    hist(ch$coldist,xlab="Colonization distance",main="")
-    hist(ch$time,xlab="Colonization time",main="")
+    par(mai=c(0.5,0.6,0.5,0.6))
+    
+    barplot(matrix(rep(diff(lgd)[1],steps),ncol=1),col=heat.colors(mxt)[lgd],axes=F,
+            main="Event Age \n(from start)")
+    for (lvl in 1:steps)
+    {
+        text(x=0.5,y=lgd[lvl]+(diff(lgd)[1]/2),labels=lgd[lvl],cex=2,adj=0.5)
+        }
+#    plot(1~1,type="p",axes=F,xlab="",ylab="")
+#    legend(x=-2, y=max(ch[,"row"])/2, legend=lgd, col=heat.colors(mxt)[lgd],lwd=2)
+par(mai=mai)
+
+    hist(ch$coldist,xlab="Colonization distance",main="Realized colonization distances")
+    hist(ch$time,xlab="Colonization time",main="Realized colonization times")
+
+
+    cent <- bioticVelocity(ph,metrics="centroid")$centroidVelocity
+    ncent <- bioticVelocity(ph,metrics="nCentroid")$nCentroidVelocity
+    both <- c(cent,ncent)
+    both <- both[!is.na(both)|is.finite(both)]
+
+    plot(cent,type="l",
+         xlab="Time (bigger more recent)",ylab="Centroid velocity",
+         main="Range movement",ylim=range(c(both)))
+    points(ncent,type="l",col="red")
+    legend(x=0.4*length(cent),y=0.6*max(both),legend=c("Center","North margin"),col=c(1,2),lty=c(1,1))
+
     layout(matrix(1))
     
 }
