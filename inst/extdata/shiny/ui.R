@@ -36,7 +36,7 @@ ui <- fluidPage(
                      min = 1,
                      max = 2000,
                      value = 150),
-          numericInput("lambda","lambda",value=1.01,min=0.5,max=1.5),
+         numericInput("lambda","lambda",value=1.01,min=0.5,max=1.5),
 
          sliderInput("K",
                      "carry capacity",
@@ -47,7 +47,7 @@ ui <- fluidPage(
                      max = 100000,
                      value = 500),
 
-#         checkboxInput("usehab","Use habitat suitability layer?",FALSE),
+         checkboxInput("sc2mxTime","Scale colors to full simulation period",TRUE),
 
          radioButtons("usehab","Which habitat suitability",c("None","ENM","Pollen")),
          
