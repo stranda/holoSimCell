@@ -47,7 +47,7 @@ ui <- fluidPage(
                      max = 100000,
                      value = 500),
 
-         checkboxInput("sc2mxTime","Scale colors to full simulation period",TRUE),
+         checkboxInput("sc2mxTime","Scale colors to full simulation period",FALSE),
 
          radioButtons("usehab","Which habitat suitability",c("None","ENM","Pollen")),
          
