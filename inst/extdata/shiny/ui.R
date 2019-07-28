@@ -32,7 +32,7 @@ ui <- fluidPage(
                      max = 0.1,
                      value = 0.001),
          sliderInput("sz",
-                     "Number of measurement units across each grid cell (km?)",
+                     "Number of measurement units across cells",
                      min = 1,
                      max = 2000,
                      value = 150),
@@ -40,11 +40,11 @@ ui <- fluidPage(
 
          sliderInput("K",
                      "carry capacity",
-                     min=10,max=50000,value=500),
+                     min=10,max=5000,value=500),
          sliderInput("gens",
                      "Number of time clicks:",
                      min = 1,
-                     max = 100000,
+                     max = 10000,
                      value = 500),
 
          checkboxInput("sc2mxTime","Scale colors to full simulation period",FALSE),
