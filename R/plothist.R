@@ -17,12 +17,14 @@ plothist <- function(ph, maxtime=NULL)
                         row=pops$row[(!is.na(pops$arrive))&(pops$arrive==0)]),
              ch)
                         
-    
-    layout(matrix(c(2,1,1,1,
-                    2,1,1,1,
-                    2,1,1,1,
-                    0,3,4,5),nrow=4,ncol=4,byrow=T),
-           widths=c(0.22,0.26,0.26,0.26)) #plot 3 as null
+
+    lw <- 0.1
+    layout(matrix(c(2,1,1,1,1,
+                    2,1,1,1,1,
+                    2,1,1,1,1,
+                    2,1,1,1,1,
+                    0,3,4,5,5),nrow=4,ncol=4,byrow=T),
+           widths=c(lw,rep((1-lw)/4,4)) #plot 3 as null
 
     
     rows <- min(pops$row):max(pops$row)
