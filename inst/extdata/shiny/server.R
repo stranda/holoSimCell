@@ -10,8 +10,17 @@ server <- function(input, output,session) {
         if (input$usehab=="Pollen")
         {
             ashpollen
-        } else {
-            ashenm
+        } else if (input$usehab=="ENM")
+            {
+                ashenm
+            } else if (input$usehab=="Workshop ENM")
+            {
+                workshop_enm_landscape
+            } else if (input$usehab=="Workshop Pollen")
+            {
+                workshop_pollen_landscape
+            } else {NULL}
+        
         }})
 
     observeEvent(input$usehab,{
@@ -58,7 +67,7 @@ server <- function(input, output,session) {
                 
             }
 
-            if (input$usehab!="None") hs=habgrid() else hs=NULL
+            hs=habgrid() #hab suit unless NULL
             
             ph <- getpophist.cells(h=input$xdim*input$ydim,          ##demography, num habitats
                                          xdim=input$xdim,        ##num cols
