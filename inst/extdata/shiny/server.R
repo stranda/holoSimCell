@@ -18,7 +18,7 @@ server <- function(input, output,session) {
                 workshop_enm_landscape
             } else if (input$usehab=="Workshop Pollen")
             {
-                workshop_pollen_landscape
+                ashpollen
             } else {NULL}
         
         })
