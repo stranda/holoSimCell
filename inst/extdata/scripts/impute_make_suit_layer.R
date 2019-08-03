@@ -27,3 +27,4 @@ imputed.pruned <- imputed.pruned[,-1*removes]
 
 poptbl <- table(popmap[gsub("fp","",names(imputed.pruned)),2])
 
+samppts <- pts[pts$abbrev %in% names(poptbl),]
