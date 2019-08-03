@@ -21,7 +21,7 @@ server <- function(input, output,session) {
                 workshop_pollen_landscape
             } else {NULL}
         
-        }})
+        })
 
     observeEvent(input$usehab,{
         hg <- habgrid()
