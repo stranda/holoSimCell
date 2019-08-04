@@ -14,7 +14,7 @@ ui <- fluidPage(
          sliderInput("ssc",
                      "Scale of short-dist (percent of cell width)",
                      min = 0,
-                     max = 200,
+                     max = 20,
                      value = 4),
          sliderInput("ssh",
                      "Shape of short-dist",
@@ -25,18 +25,18 @@ ui <- fluidPage(
                      "Scale of long-dist (percent cell width)",
                      min = 0,
                      max = 400,
-                     value = 35),
+                     value = 20),
          sliderInput("mix",
                      "proportion of long-dist",
                      min = 0,
-                     max = 0.1,
+                     max = 0.2,
                      value = 0.001),
          sliderInput("sz",
                      "Number of measurement units across cells",
                      min = 1,
                      max = 2000,
                      value = 150),
-         numericInput("lambda","lambda",value=1.01,min=0.5,max=1.5),
+         numericInput("lambda","lambda",value=1.01,min=0.5,max=2.0),
 
          sliderInput("K",
                      "carry capacity",
@@ -55,7 +55,7 @@ ui <- fluidPage(
          
          numericInput("ydim","number of Y grids",value=15,min=1,max=100),
          
-         numericInput("ref1","Refugium pop num",value=10),
+         numericInput("ref1","Refugium pop num",value=5),
 
          numericInput("ref1size","Refugium pop size",value=100),
          
