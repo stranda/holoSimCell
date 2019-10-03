@@ -34,6 +34,7 @@ Depends: cubature,
 Remotes: adamlilith/omnibus,
 	 adamlilith/statisfactory,
 	 adamlilith/enmSdm
+Suggests: testthat
 LinkingTo: Rcpp
 RoxygenNote: 6.1.1
 LazyData: true

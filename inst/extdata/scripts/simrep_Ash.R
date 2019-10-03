@@ -17,12 +17,16 @@ who <- as.character(args[3])
 if(length(args) == 0){
     i <- 1
     nreps <- 1
-    who <- "JDR"
+    who <- "AES"
     #refs <- 5
 }
 
-simdir <- system("echo $TMPDIR", intern = TRUE)
-outdir <- "/mnt/research/TIMBER/Ash/OUT" 
+#simdir <- system("echo $TMPDIR", intern = TRUE)
+#outdir <- "/mnt/research/TIMBER/Ash/OUT" 
+
+
+outdir <- "~/GoogleDrive/src/holoSimCell/inst/extdata/scripts/holostats"
+simdir <- outdir
 
 library(holoSimCell)
 
