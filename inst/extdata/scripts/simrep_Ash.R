@@ -60,26 +60,20 @@ poptbl <- table(popmap[gsub("fp","",names(imputed.pruned)),2])
 
 for(repl in 1:nreps) {
 
-    landscape <- ashpollen
+    landscape <- ashenm
     
     #Draw parms
     parms <- drawParms(control = system.file("extdata/csv","priors.csv",package="holoSimCell"))
     #parms$refs <- refs   #!!# If we want to have the refuge location passed as part of the command line
     parms$mu <- 1e-6  #!!!# Bumping up mutation rate!!  Does this help with speeds?
-
-    if (FALSE) #don't run any without suitability
-    {
-                                        #Logical parameter of teh simulation, use hab_suit or not...
-        if(parms$use.hab_suit == 0) {
-                                        #landscape = NULL   #Don't do it this way, entire matrix is habitable
-            landscape$hab_suit[!is.na(landscape$hab_suit)] <- 1  #This way ignores the glacier
-                                        #landscape$hab_suit[landscape$hab_suit > 0] <- 1   #This way maintains the 0 suitability for glaciated cells
-        }
-    } else { #but set the model number to 2 for use.hab_suit
-            parms$use.hab_suit = 2
-    }
-
-    
+    parms$use.hab_suit <- sample(c(0,1,2),1,replace=FALSE)
+    #Logical parameter of teh simulation, use hab_suit or not...
+    if(parms$use.hab_suit == 0) {
+        landscape$hab_suit[!is.na(landscape$hab_suit)] <- 1  #This way ignores the glacier
+    } else if(parms$use.hab_suit == 2) {
+        landscape <- ashpollen
+    } 
+        
     ph = getpophist.cells(hab_suit=landscape,samptime=1,refs=parms$refs,refsz=parms$ref_Ne,
                       mix=parms$mix,
                       shortscale=parms$shortscale,shortshape=parms$shortshape,
@@ -175,17 +169,24 @@ for(repl in 1:nreps) {
     #also seems to be some error check in strataG that was causing problems (none of the specified ids were found in the specified strata)
     #nameStrat is deprecated
     #fscout <- nameStrat(fscout = fscout, pops = ph, sample_pops = sample_pops, sample_n = as.vector(poptbl))
-    fscout@data$strata <- paste0("pop-", sapply(strsplit(fscout@data$ids,"_"), function(x){x[1]}))
+    #fscout@data$strata <- paste0("pop-", sapply(strsplit(fscout@data$ids,"_"), function(x){x[1]}))
     #The line above is probably more flexible than it looks, FSC gives the fsc popid as the first part of the individual name  
 
     #Build popDF for stat calculation
-    strat_order <- order(as.character(sample_pops))
-    popDF <- data.frame(id = unique(fscout@data$strata),
-                            grid.cell = sample_pops[strat_order],
-                            sample.size = as.vector(poptbl)[strat_order],
-                            col = ph$pophist$col[sample_pops[strat_order]],
-                            row = ph$pophist$row[sample_pops[strat_order]])
-    popDF <- popDF[order(popDF$grid.cell),]
+    #strat_order <- order(as.character(sample_pops))
+    #popDF <- data.frame(id = unique(fscout@data$strata),
+    #                        grid.cell = sample_pops[strat_order],
+    #                        sample.size = as.vector(poptbl)[strat_order],
+    #                        col = ph$pophist$col[sample_pops[strat_order]],
+    #                        row = ph$pophist$row[sample_pops[strat_order]])
+    #popDF <- popDF[order(popDF$grid.cell),]
+
+    #Build popDF from landscape$sampdf
+    popDF <- landscape$sampdf
+    colnames(popDF)[colnames(popDF)=="abbrev"] <- "id"
+    popDF$grid.cell <- plyr::mapvalues(popDF$cell, oldID, newID, warn_missing = FALSE)
+    popDF$sample.size <- as.vector(poptbl[match(popDF$id,names(poptbl))])
+    popDF <- popDF[match(strataNames(fscout), popDF$id),]
 
     stats_out <- holoStats(out = fscout, 
                        popDF = popDF,
@@ -195,7 +196,7 @@ for(repl in 1:nreps) {
     BVmax <- max(bioticVelocity(ph, metrics = "centroid")$centroidVelocity)
     
     #!# IS THIS OUTPUT IN THE FORMAT THAT WE WANT??
-    all_out <- c(date = date(), i, repl, parms_out, BVmax, stats_out)
+    all_out <- c(date = date(), node=i, rep=repl, parms_out, BVmax=BVmax, stats_out)
     all_out$refs <- paste(eval(parse(text=as.character(ph$struct["refs"]))), collapse = ".")
 
     #Write a file, if none exists, or append to file, if present
