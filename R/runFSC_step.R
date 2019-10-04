@@ -166,7 +166,14 @@ runFSC_step = function(
   }
   
   fscout <- fastsimcoal(label = label, pop.info = pop_info, locus.params = locus_params, mig.rates = migmat, hist.ev = hist_ev, num.cores = num_cores, delete.files = delete_files, exec = exec)
-	
+  #Naming strata prior to output
+  FSCid <- sapply(strsplit(fscout@data$ids,"_"), function(x){x[1]})
+  FSCgridid <- plyr::mapvalues(FSCid,newID,oldID,warn_missing=FALSE)
+  #Then map these old ID's back to the abbreviation of the sampled population
+  FSCabbrev <- plyr::mapvalues(FSCgridid,l$sampdf$cell,l$sampdf$abbrev)
+  fscout@data$strata <- FSCabbrev
+  fscout@data$ids <- paste0(fscout@data$strata, "_", c(1:length(fscout@data[,1])))
+
   fscout
   
 }
