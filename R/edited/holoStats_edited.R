@@ -205,7 +205,8 @@ holoStats = function(out, popDF, extent, cores=1) {
   
   print("this far3")
   
-  IBDfst <- lm(log(fst+1)~log(d),dsts)
+#  IBDfst <- lm(log(fst+1)~log(d),dsts)  
+  IBDfst <- lm((fst/(1-fst))~log(d),dsts) #changed from the previous line to implement Rousset's (1997) version 
   ibdfst.slope <- c(coef(IBDfst)[2])
   ibdfst.int <- c(coef(IBDfst)[1])
   bsfst <- segmentGLM(c(dsts$d),log(c(dsts$fst+1)))
