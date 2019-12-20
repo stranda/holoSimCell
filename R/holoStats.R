@@ -19,16 +19,46 @@ holoStats = function(out, popDF, extent, cores=1) {
   names(SNPs) <- "tot_SNPs"
   split_out <- strataSplit(out) #list of strataG objects for each pop
   ###    locMAF = sapply(split_out,function(o){mafreq(o)})
-  locMAF <- do.call(cbind,mclapply(split_out,mc.cores=cores,function(o){mafreq(o)}))
+#!#  locMAF <- do.call(cbind,mclapply(split_out,mc.cores=cores,function(o){mafreq(o)}))
+
+  #!# Error here in locMAF -- just because it's the local minor allele doesn't mean it's the global minor allele
+  #!# Exploit the names of allMAF to ID the global minor allele
+  minor <- sapply(names(allMAF), FUN=function(x){strsplit(x, split = "[.]")[[1]][2]})
+  #!# A new function for the locMAF -- this is a big change... does it work with all things that depend on locMAF??
+  loc.mafreq <- function(split_out = NULL, minor = NULL) {
+    out <- matrix(data = NA, nrow = length(grep("Locus",names(split_out[[1]]@data))), ncol = length(split_out))
+    rownames(out) <- names(split_out[[1]]@data)[grep("Locus",names(split_out[[1]]@data))]
+    colnames(out) <- names(split_out)
+
+    for(pop in 1:length(split_out)) {
+      
+      geno <- split_out[[pop]]@data[,-c(1,2)]
+      geno <- apply(geno,2,as.character)
+      geno <- apply(geno,2,as.numeric)
+
+      for(loc in 1:length(out[,1])) {
+        out[loc,pop] <- length(which(geno[,loc] == minor[loc]))/length(geno[,loc])
+      }
+
+      rm(geno)
+    }
+
+    out
+  }
+
+  locMAF <- loc.mafreq(split_out, minor)
+
+
 #  colnames(locMAF) <- names(split_out)
   locHe <- colMeans(2*locMAF*(1-locMAF))
   varlocHe <- apply(2*locMAF*(1-locMAF),2,var)
   
   locN <- sapply(split_out,function(o){length(o@data$ids)})
 #  names(locN) <- popid
-  
-  localSNP <- apply(locMAF,2,function(x){sum(x<1)})
-  
+  #!# Change here for new locMAF
+  #localSNP <- apply(locMAF,2,function(x){sum(x<1)})
+  localSNP <- apply(locMAF,2,function(x){sum(x<1 & x>0)})
+
 #  names(localSNP) <- paste0("S.", popid)
   names(localSNP) <- paste0("S.", names(localSNP))
   ##not sure we need this, does not seem to be variable and costs some time
@@ -175,7 +205,8 @@ holoStats = function(out, popDF, extent, cores=1) {
   
   print("this far3")
   
-  IBDfst <- lm(log(fst+1)~log(d),dsts)
+#  IBDfst <- lm(log(fst+1)~log(d),dsts)  
+  IBDfst <- lm((fst/(1-fst))~log(d),dsts) #changed from the previous line to implement Rousset's (1997) version 
   ibdfst.slope <- c(coef(IBDfst)[2])
   ibdfst.int <- c(coef(IBDfst)[1])
   bsfst <- segmentGLM(c(dsts$d),log(c(dsts$fst+1)))
@@ -257,6 +288,8 @@ holoStats = function(out, popDF, extent, cores=1) {
   #Moran's I estimate:
   #getting the distance and fst matrices into moran format
   euc_moran <- as.matrix(1/dist(pops.xy[,2:3]))
+  #!# Slight change here, adding names to euc_moran for bookkeeping
+  attr(euc_moran, "dimnames") <- list(pops.xy$pop, pops.xy$pop)
   moran <- Moran.I(x = localSNP,weight = euc_moran)
   moran <- t(moran)
   moran.names <- paste0("Moran.",colnames(moran))
@@ -266,7 +299,9 @@ holoStats = function(out, popDF, extent, cores=1) {
 
   #calculating boundaries for monmonier's algorithm
   pops_xy1 <- pops.xy[,2:3]
-  colnames(pops_xy1) <- c("x","y")
+#!# Fix here, these column names need to be capitalized for the monmonier fxn!!
+  #colnames(pops_xy1) <- c("x","y")
+  colnames(pops_xy1) <- c("X","Y")
   monmonier <- monmonier_SSS(NSS=FstMat.loc, xy=pops_xy1,boundLength = 2)
   monmonier <- t(monmonier)
   monmonier.names <- colnames(monmonier)
@@ -276,7 +311,9 @@ holoStats = function(out, popDF, extent, cores=1) {
 
   #Mantel Test:
   #mantel test with Alvarado-Serrano function (vegan mantel test + summary stats)
-  mantel_sum <- mantel_SSS(FstMat.loc,pops.xy)
+#!# Slight change here to avoid warnings, XY argument to mantel.correlog should just be x and y positions
+  #mantel_sum <- mantel_SSS(FstMat.loc,pops.xy)
+  mantel_sum <- mantel_SSS(FstMat.loc, pops.xy[,-1])
   #message("Mantel done")
 
   #semi-variogram stat
@@ -289,6 +326,7 @@ holoStats = function(out, popDF, extent, cores=1) {
   ##calculating LD per population
   LD_pop <- NULL
   i <- 1
+
   #calculate mean LD for each population
   for(i in 1:npops){
     #!# Change here: names aren't 1:npops
