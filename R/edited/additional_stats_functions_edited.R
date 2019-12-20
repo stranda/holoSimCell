@@ -140,15 +140,14 @@ gssa_raggedness <- function(out=NULL,dist_mat=NULL){
   #require(strataG)
   #require(matrixStats)
   ##working with the gtypes object to get in into the correct format
-  full <- out
   split <- strataSplit(out)
   
   #First, need to ID the minor alleles for each locus
   maID <- function(x) {
-    as.numeric(names(which(table(x) == min(table(x)))))
+    as.numeric(names(which(table(x) == min(table(x)))))[1]
   }
   
-  ma_vec <- apply(full@data[,-c(1,2)], 2, maID)
+  ma_vec <- apply(out@data[,-c(1,2)], 2, maID)
   
   #Next make a table with npops columns and nloci rows that will give the frequencies of minor alleles in each population at each locus
   getMAFreq <- function(x=NULL, ma=NULL) {
@@ -168,13 +167,14 @@ gssa_raggedness <- function(out=NULL,dist_mat=NULL){
     #First add the 0's for all minor alleles with freq > 1 in the focal population
     #For each of these there are (n(n-1))/2 0's added to the GSSA vector
 ################################
-# This doesn't do what it says above... and I'm not sure if it should.
+# This doesn't do what it says above... and I'm not sure if it should... IT SHOULD!  Pairwise comparisons!
 # Should this be allele copy number of 0's?
-# In Fig 1 example it's not n choose 2, it's just n
-# Maybe this is correct as is, but it would be good to verify this
+# In Fig 1 example it's not n choose 2, it's just n (not true, it is pairwise comparisons)
+# Maybe this is correct as is, but it would be good to verify this (it was wrong, fixed below now)
 ################################
-    tmp = rep(0, sum(ma_freq_mat[ma_freq_mat[,pop] > 1,pop]))   #Logical to exclude singletons!
-    
+    #tmp = rep(0, sum(ma_freq_mat[ma_freq_mat[,pop] > 1,pop]))   #Logical to exclude singletons!
+    tmp = rep(0, sum(sapply(ma_freq_mat[ma_freq_mat[,pop] > 1,pop],choose,k=2)))
+
     gssa_vecs[[pop]] = append(gssa_vecs[[pop]],tmp)
     
     #Then loop through each of the OTHER pops and add to the GSSA vector
@@ -190,10 +190,8 @@ gssa_raggedness <- function(out=NULL,dist_mat=NULL){
   
   
   #calculate the number of bins for the population
-  bins <- nclass.Sturges(dist_mat)
-#!# Change here... JDR 8/20/19
-#This relies too much on hist... revising the way this is done...
-  breakpts <- hist(dist_mat, breaks = "Sturges")$breaks
+  breakpts = seq(range(dist_mat)[1],range(dist_mat)[2],length=nclass.Sturges(dist_mat))
+
   #mean, variance, skew and kurtosis(measures spread of a distribution) per population
   
   
@@ -221,6 +219,7 @@ gssa_raggedness <- function(out=NULL,dist_mat=NULL){
     #takes a linear regression of the snp bin scheme compared to the distance binning scheme
     gen_bin_corr <- abs(lm(as.numeric(snps_bins)~as.numeric(dist_bins))$residuals)
     
+    #RESUME REVIEW DOWN HERE!!
     #actually calculate the raggedness index for one population
     non_zero_bins <- as.numeric(which(dist_bins!=0.0))
     snps_bin1 <- gen_bin_corr[non_zero_bins]
