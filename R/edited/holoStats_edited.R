@@ -261,9 +261,16 @@ holoStats = function(out, popDF, extent, cores=1) {
   #function in separate script
   geodist <- as.matrix(dist(data.frame(popDF$x, popDF$y)))
   gssa <- gssa_raggedness(out = out, dist_mat = geodist)
-    gssa <- t(unname(gssa))
-  gssa <- as.vector(gssa)
-  names(gssa) = paste0("HRi_",pops.xy$pop)
+  gssa_HRi <- t(unname(gssa$HRi))     #Tweaks to naming, gssa output now has HRi, mean, & var - JDR 1/17/2020
+  gssa_HRi <- as.vector(gssa_HRi)
+  names(gssa_HRi) = paste0("HRi_",pops.xy$pop)
+  gssa_mean <- t(unname(gssa$gssa_mean))
+  gssa_mean <- as.vector(gssa_mean)
+  names(gssa_mean) = paste0("gssa_mean_", pops.xy$pop)
+  gssa_var <- t(unname(gssa$gssa_var))
+  gssa_var <- as.vector(gssa_var)
+  names(gssa_var) = paste0("gssa_var_", pops.xy$pop)
+	  
   #message("GSSA done")
 
   #Calculating spatial PCA from the Alvarado-Serrano script + our plotting technique
@@ -402,8 +409,8 @@ holoStats = function(out, popDF, extent, cores=1) {
             he.lat.stats, he.long.stats,
             pc1.lat.stats, pc1.long.stats,
             pc2.lat.stats, pc2.long.stats,
-            pc3.lat.stats, pc3.long.stats)
-            #NSS_as,SSS_as,gssa,sPCA_sum_stats,pairbc.loc,moran,monmonier,semivar[1,],ld_stats[1,],psi,node_stats,edge_stats)
+            pc3.lat.stats, pc3.long.stats,
+            NSS_as,SSS_as,gssa_HRi,gssa_mean,gssa_var,sPCA_sum_stats,pairbc.loc,moran,monmonier,semivar[1,],ld_stats[1,],psi,node_stats,edge_stats)
   
   stats1 = matrix(data=stats, nrow = 1)
   colnames(stats1) = names(stats)
