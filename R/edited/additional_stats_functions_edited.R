@@ -200,7 +200,9 @@ gssa_raggedness <- function(out=NULL,dist_mat=NULL){
   ##output is a grid of all 5 statistics
   #making a blank data frame to fill in the 
   index <- as.data.frame(rep(0,nrow(dist_mat)))
-  colnames(index) <- "HRi"
+  colnames(index) <- "HRi"  
+  index$gssa_mean <- NA  #Adding mean and var - JDR & AES 1/17/2020
+  index$gssa_var <- NA  #Adding mean and var - JDR & AES 1/17/2020
   i <- 1
   for(i in 1:nrow(dist_mat)){
     #make a histogram with the binning scheme
@@ -223,12 +225,18 @@ gssa_raggedness <- function(out=NULL,dist_mat=NULL){
     #actually calculate the raggedness index for one population
     non_zero_bins <- as.numeric(which(dist_bins!=0.0))
     snps_bin1 <- gen_bin_corr[non_zero_bins]
+    snps_bin1 <- snps_bin1/sum(snps_bin1)    #Nomralizing to unit area - JDR & AES 1/17/2020
     comb <- combn(length(snps_bin1),2)
     paired <- combn(snps_bin1,2)
     paired <- paired[,which(colDiffs(comb)==1)]
     diffs2 <- (colDiffs(paired))^2
-    ragged <- sum(diffs2)/(length(non_zero_bins)-1)
+    #ragged <- sum(diffs2)/(length(non_zero_bins)-1)   #Turning off averaging - JDR & AES 1/17/2020
+    ragged <- sum(diffs2)
     index$HRi[i] <- ragged
+    
+    #Adding calculations of moments off the vector of distances over which alleles are shared
+    index$gssa_mean[i] <- mean(gssa_vecs[[i]])
+    index$gssa_var[i] <- var(gssa_vecs[[i]])
   }
   index
 }
