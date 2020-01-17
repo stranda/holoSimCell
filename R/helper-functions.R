@@ -106,7 +106,7 @@ pwise.het <- function(locMAF,locN,cores=1)
         tlm = locMAF[,colnames(locMAF) %in% c(df$x[i],df$y[i])]
         ns = locN[colnames(locMAF) %in% c(df$x[i],df$y[i])]
         jaf = (tlm[,1]*ns[1]+tlm[,2]*ns[2]) / sum(ns)
-        mean(2*jaf*(1-jaf)^2)
+        mean(2*jaf*(1-jaf))
     }))
 
     df <- merge(df,alldf,all.y=T)
