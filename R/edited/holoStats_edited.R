@@ -105,9 +105,9 @@ holoStats = function(out, popDF, extent, cores=1) {
   #!# Naming issue here - popid.popid is also used for Nei - but merge requires same names
   names(pairFst.loc) = Fstnames.loc
   
-  tot_Fst = as.numeric(statFst(out)$result[1])
+  #tot_Fst = as.numeric(statFst(out)$result[1]) #Dropping total Fst - JDR 1/17/2020
   
-  names(tot_Fst) = "tot_Fst"
+  #names(tot_Fst) = "tot_Fst"
   
   eucdist = dist(t(locMAF))
   paireuc = as.vector(eucdist)
@@ -401,7 +401,7 @@ holoStats = function(out, popDF, extent, cores=1) {
   }
   ################################################################
   
-  stats = c(SNPs, localSNP, privateSNP, total_priv, pairFst.loc, pairnei,tot_Fst,
+  stats = c(SNPs, localSNP, privateSNP, total_priv, pairFst.loc, pairnei,
             ibdfst.slope=ibdfst.slope,ibdfst.int=ibdfst.int,bsfst.break=bsfst[1],bsfst.ll=bsfst[2],
             ibdedist.slope=ibdedist.slope,ibdedist.int=ibdedist.int,bsedist.break=bsedist[1],bsedist.ll=bsedist[2],
             ibdnei.slope=ibdnei.slope,ibdnei.int=ibdnei.int,bsnei.break=bsnei[1],bsnei.ll=bsnei[2],
