@@ -133,16 +133,19 @@ stats.AFS = function(data, sstype, nsamples, pops.xy){
     for (r in 1:nrow(Matrix)){
       #using formula (13) from Smouse and Peakall 2009
       #Cov.mat is the original version from Diego's code
-      Cov.mat[r,c] = (-Matrix[r,c] + (sum(Matrix[,c]) + sum(Matrix[r,]))/length(Matrix)
-                      - sum(Matrix)/(length(Matrix)^2))
-
+      #Cov.mat[r,c] = (-Matrix[r,c] + (sum(Matrix[,c]) + sum(Matrix[r,]))/length(Matrix)
+      #                - sum(Matrix)/(length(Matrix)^2))
+      #!# fixing - length(Matrix) and length(Matrix)^2
+      Cov.mat[r,c] = (-Matrix[r,c] + (sum(Matrix[,c]) + sum(Matrix[r,]))/nrow(Matrix)
+                      - sum(Matrix)/(nrow(Matrix)^2))
+      
       #!# Change here, I think there were some errors in the Cov.Mat calclation
       #!# Still not sure about this equation though, no square on the distances??
       #Formula 13 from Smouse & Peakall 1999?
       #Cov.mat2 is a version that follows the Smouse & Peakall 1999 paper more closely
       partA <- -Matrix[r,c]
-      partB <- (sum(Matrix[,c]) + sum(Matrix[r,]))/length(Matrix[1,])
-      partC <- sum(Matrix)/length(Matrix)
+      partB <- (sum(Matrix[,c]) + sum(Matrix[r,]))/nrow(Matrix)
+      partC <- sum(Matrix)/nrow(Matrix)^2
       Cov.mat2[r,c] <- (partA + partB - partC)/2
       rm(partA, partB,partC)
 
@@ -150,8 +153,8 @@ stats.AFS = function(data, sstype, nsamples, pops.xy){
       #Cov.mat3 is a version that uses equation 3 in Appendix I, but keeps the divided by 2 part from Peakall & Smouse
       #I don't think the divided by 2 part matters for the calculation of the r coefficients... they come out the same?
       partA <- -(Matrix[r,c]^2)
-      partB <- (sum(Matrix[,c]^2) + sum(Matrix[r,]^2))/length(Matrix[1,])
-      partC <- sum(Matrix^2)/length(Matrix)^2
+      partB <- (sum(Matrix[,c]^2) + sum(Matrix[r,]^2))/nrow(Matrix)
+      partC <- sum(Matrix^2)/nrow(Matrix)^2
       Cov.mat3[r,c] <- (partA + partB - partC)/2
       rm(partA, partB,partC)
     }
