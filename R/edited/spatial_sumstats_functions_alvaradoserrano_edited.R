@@ -126,8 +126,8 @@ stats.AFS = function(data, sstype, nsamples, pops.xy){
   Matrix = Matrix + t(Matrix)
   
   Cov.mat = Matrix - Matrix
-  Cov.mat2 = Matrix - Matrix
-  Cov.mat3 = Matrix - Matrix
+  #Cov.mat2 = Matrix - Matrix
+  #Cov.mat3 = Matrix - Matrix
 
   for (c in 1:ncol(Matrix)){
     for (r in 1:nrow(Matrix)){
@@ -143,20 +143,20 @@ stats.AFS = function(data, sstype, nsamples, pops.xy){
       #!# Still not sure about this equation though, no square on the distances??
       #Formula 13 from Smouse & Peakall 1999?
       #Cov.mat2 is a version that follows the Smouse & Peakall 1999 paper more closely
-      partA <- -Matrix[r,c]
-      partB <- (sum(Matrix[,c]) + sum(Matrix[r,]))/nrow(Matrix)
-      partC <- sum(Matrix)/nrow(Matrix)^2
-      Cov.mat2[r,c] <- (partA + partB - partC)/2
-      rm(partA, partB,partC)
+      #partA <- -Matrix[r,c]
+      #partB <- (sum(Matrix[,c]) + sum(Matrix[r,]))/nrow(Matrix)
+      #partC <- sum(Matrix)/nrow(Matrix)^2
+      #Cov.mat2[r,c] <- (partA + partB - partC)/2
+      #rm(partA, partB,partC)
 
       #!# Change here, 
       #Cov.mat3 is a version that uses equation 3 in Appendix I, but keeps the divided by 2 part from Peakall & Smouse
       #I don't think the divided by 2 part matters for the calculation of the r coefficients... they come out the same?
-      partA <- -(Matrix[r,c]^2)
-      partB <- (sum(Matrix[,c]^2) + sum(Matrix[r,]^2))/nrow(Matrix)
-      partC <- sum(Matrix^2)/nrow(Matrix)^2
-      Cov.mat3[r,c] <- (partA + partB - partC)/2
-      rm(partA, partB,partC)
+      #partA <- -(Matrix[r,c]^2)
+      #partB <- (sum(Matrix[,c]^2) + sum(Matrix[r,]^2))/nrow(Matrix)
+      #partC <- sum(Matrix^2)/nrow(Matrix)^2
+      #Cov.mat3[r,c] <- (partA + partB - partC)/2
+      #rm(partA, partB,partC)
     }
   }
   
@@ -166,6 +166,7 @@ stats.AFS = function(data, sstype, nsamples, pops.xy){
   #geo.matrix = as.matrix(dist(pops.xy[,2:3], diag= T, upper = T))   #!# This would be equivalent, somewhat easier to read
 
   geo.breaks = unique(as.integer(as.numeric(attributes(table(geo.matrix))$dimnames$geo.matrix)[-1]))
+  #unique(as.integer(sort(geo.matrix)))[-1] #AES: this line does the same thing as the line above
   r.coeffs = rep(0,length(geo.breaks))
   names(r.coeffs) = geo.breaks
   for (z in 1:length(geo.breaks)){
@@ -177,9 +178,9 @@ stats.AFS = function(data, sstype, nsamples, pops.xy){
           X.matrix[r,c] = 1
         }}}
     diag(X.matrix) = rowSums(X.matrix)
-    #!# Pointing at your new cov.mat - JDR
-    #X_C.matrix = X.matrix * Cov.mat
-    X_C.matrix = X.matrix * Cov.mat3    #I think version 3 is the correct one??  Hard to say...
+    #!# Pointing at your new cov.mat - JDR, nope back to the old one
+    X_C.matrix = X.matrix * Cov.mat
+    #X_C.matrix = X.matrix * Cov.mat3    #I think version 3 is the correct one??  Hard to say...
     #using formula (13) from Smouse and Peakall 2009
     r.coeffs[z] = (sum(X_C.matrix) - sum(diag(X_C.matrix))) / sum(diag(X_C.matrix))
   }
@@ -346,7 +347,7 @@ moran_SSS = function(NSS,xy){
   #NSS: vector of non-spatial summary stats used as input
   #xy: matrix of coordinates of sampled populations
   
-  suppressMessages(require(ape)); suppressMessages(require(gdata))
+  #suppressMessages(require(ape)); suppressMessages(require(gdata))
   
   xy.dist.inv = as.matrix(1/dist(xy))
   moran.I.TC = tryCatch.W.E(Moran.I(NSS,xy.dist.inv))
@@ -476,7 +477,7 @@ mantel_SSS = function(NSS,xy){
   #NSS: vector of non-spatial summary stats used as input
   #xy: matrix of coordinates of sampled populations
   
-  suppressMessages(require(vegan))
+  #suppressMessages(require(vegan))
   
   Mantel.TC = tryCatch.W.E(mantel.correlog(NSS,XY=xy))
   Mantel = Mantel.TC$value
@@ -490,7 +491,8 @@ mantel_SSS = function(NSS,xy){
     MantCor.x = mean(Mantel$mantel.res[,'Mantel.cor'], na.rm=T)
     MantCor.sd = sd(Mantel$mantel.res[,'Mantel.cor'], na.rm=T)
     MantCor.max = max(Mantel$mantel.res[,'Mantel.cor'], na.rm=T)
-    MantCor.ml = as.numeric(which(Mantel$mantel.res[,'Mantel.cor']==max(Mantel$mantel.res[,'Mantel.cor'],na.rm=T))[1])
+    #MantCor.ml = as.numeric(which(Mantel$mantel.res[,'Mantel.cor']==max(Mantel$mantel.res[,'Mantel.cor'],na.rm=T))[1])
+    MantCor.ml = Mantel$mantel.res[as.numeric(which(Mantel$mantel.res[,'Mantel.cor']==max(Mantel$mantel.res[,'Mantel.cor'],na.rm=T))[1]),'class.index']
   }
   mant.stats = list('Man.AvgCor'=MantCor.x, 'Man.SdCor'=MantCor.sd, 'Man.MaxCor'=MantCor.max, 'Man.MaxLag'=MantCor.ml)
   return(mant.stats)
