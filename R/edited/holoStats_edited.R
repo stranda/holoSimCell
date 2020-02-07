@@ -294,16 +294,17 @@ holoStats = function(out, popDF, extent, cores=1) {
   
   #Moran's I estimate:
   #getting the distance and fst matrices into moran format
-  euc_moran <- as.matrix(1/dist(pops.xy[,2:3]))
+  #euc_moran <- as.matrix(1/dist(pops.xy[,2:3]))
   #!# Slight change here, adding names to euc_moran for bookkeeping
-  attr(euc_moran, "dimnames") <- list(pops.xy$pop, pops.xy$pop)
-  moran <- Moran.I(x = localSNP,weight = euc_moran)
-  moran <- t(moran)
-  moran.names <- paste0("Moran.",colnames(moran))
-  moran <- unlist(c(moran))
-  names(moran) <- moran.names
+  #attr(euc_moran, "dimnames") <- list(pops.xy$pop, pops.xy$pop)
+  #moran <- Moran.I(x = localSNP,weight = euc_moran)
+  #moran <- t(moran)
+  #moran.names <- paste0("Moran.",colnames(moran))
+  #moran <- unlist(c(moran))
+  #names(moran) <- moran.names
   #message("Moran's I done")
-
+  moran <- moran_SSS(NSS = localSNP, xy = pops.xy[,c(2:3)])
+		     
   #calculating boundaries for monmonier's algorithm
   pops_xy1 <- pops.xy[,2:3]
 #!# Fix here, these column names need to be capitalized for the monmonier fxn!!
