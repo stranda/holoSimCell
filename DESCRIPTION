@@ -30,7 +30,8 @@ Depends: cubature,
 	 sf,
 	 network,
 	 plyr,
-	 shiny
+	 shiny,
+	 tripack
 Remotes: adamlilith/omnibus,
 	 adamlilith/statisfactory,
 	 adamlilith/enmSdm

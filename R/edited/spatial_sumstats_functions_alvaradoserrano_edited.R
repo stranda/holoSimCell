@@ -205,7 +205,7 @@ stats.AFS = function(data, sstype, nsamples, pops.xy){
 
 
 #########################################################################################################################
-sPCA.dist = function(data, pops.xy, nsamples, cpos=2, cneg=2, plot=T){
+sPCA.dist = function(data, pops.xy, nsamples, cpos=2, cneg=0, plot=T){
   
   #function to calculate the eculidean distance in sPCA (Jombart et al. 2008) space between individual SNP sequences
   # data: table of SNP sequences generated with my python script called XXX
@@ -251,22 +251,22 @@ sPCA.dist = function(data, pops.xy, nsamples, cpos=2, cneg=2, plot=T){
   #  }
   #}
 
-  mySpca.prelim = spca(obj = DATA, xy = XY[,-1], type = 7, a=2, dmin=0.1, scannf = FALSE, plot.nb = FALSE)
-  mySpca.prelim
+ # mySpca.prelim = spca(obj = DATA, xy = XY[,-1], type = 7, a=2, dmin=0.1, scannf = FALSE, plot.nb = FALSE)
+ # mySpca.prelim
   #barplot(mySpca.prelim$eig, main = "Eigenvalues of sPCA")
   
   #testing significance of global and local components
-  myGtest <- global.rtest(DATA$tab, mySpca.prelim$lw, nperm = 99)
-  if (myGtest$pvalue > 0.05){
-    cpos = 2        #NOTE here that even if global structures are not significant, at least the first two components are kept!!!
-  }
+ # myGtest <- global.rtest(DATA$tab, mySpca.prelim$lw, nperm = 99)
+ # if (myGtest$pvalue > 0.05){
+ #   cpos = 2        #NOTE here that even if global structures are not significant, at least the first two components are kept!!!
+ # }
   #cat(paste('\nGlobal test p-value:', myGtest$pvalue, ' --> ', cpos, 'global components retained\n'))
   #plot(myGtest)
   
-  myLtest <- local.rtest(DATA$tab, mySpca.prelim$lw, nperm = 99)
-  if (myLtest$pvalue > 0.05){
-    cneg = 0
-  }
+ # myLtest <- local.rtest(DATA$tab, mySpca.prelim$lw, nperm = 99)
+ # if (myLtest$pvalue > 0.05){
+ #   cneg = 0
+ # }
   #cat(paste('Local test p-value:', myLtest$pvalue, ' --> ', cneg, 'local components retained\n'))
   #plot(myLtest)
   
@@ -332,8 +332,9 @@ sPCA.dist = function(data, pops.xy, nsamples, cpos=2, cneg=2, plot=T){
     spca.Bet.dsd[k] = sd(spca.Bet.dist)
     names(spca.Bet.dsd)[k] = paste('SPCA.Dsd',comp[1,k],comp[2,k],sep='_')
   }
-  spca.stats = c(spca.Wit.mean, spca.Wit.dsd, spca.Bet.mean, spca.Bet.dsd, myGtest$pvalue, myLtest$pvalue)
-  names(spca.stats)[(length(spca.stats)-1):length(spca.stats)] = c('Gtest.pv','Ltest.pv')
+# spca.stats = c(spca.Wit.mean, spca.Wit.dsd, spca.Bet.mean, spca.Bet.dsd, myGtest$pvalue, myLtest$pvalue)
+  spca.stats = c(spca.Wit.mean, spca.Wit.dsd, spca.Bet.mean, spca.Bet.dsd)
+ # names(spca.stats)[(length(spca.stats)-1):length(spca.stats)] = c('Gtest.pv','Ltest.pv')
   return(spca.stats)
 }
 #########################################################################################################################
@@ -373,7 +374,7 @@ semivar_SSS = function(NSS, xy, pdf='F'){
   #xy: matrix of coordinates of sampled populations
   #pdf: whether to generate or not a pdf
   
-  suppressMessages(require(geoR))
+  #suppressMessages(require(geoR))
   do.pdf = as.logical(pdf)
   
   xy.dist = dist(xy)
@@ -414,7 +415,7 @@ monmonier_SSS = function(NSS, xy, boundLength, pdf='F'){
   #boundLength: vector of bins' upper limits for semivariogram
   #pdf: whether to generate or not a pdf   
   
-  suppressMessages(require(adegenet)); suppressMessages(require(tripack))
+  #suppressMessages(require(adegenet)); suppressMessages(require(tripack))
   do.pdf = as.logical(pdf)
   
   #this step introduces minor displacements to sample coordinates which are required when populations are lined-up in 1-dimension because there is no triangulation possible in that case. The minor distortion do not significantly change the neighbor calculation

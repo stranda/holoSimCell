@@ -7,7 +7,15 @@ plothist <- function(ph, maxtime=NULL)
 {
     ch=ph$coalhist
     pops=ph$pophist
-
+    pops=data.frame(do.call(rbind,lapply(unique(pops$pop),function(p)  #only keep the most recent col event
+    {
+        if (length(which(pops==p))>1)
+        {
+            tmp <- pops[pops$pop==p,]
+            tmp <- tmp[order(-tmp$arrive),][1,]
+        } else pops[pops$pop==p,]
+    })))
+    
     ch=merge(ch,pops,by.x="src",by.y="pop")[,c(-6,-7)]
     ch=ch[with(ch,order(-time,src,snk)),]
     ch=rbind(data.frame(src=pops$pop[(!is.na(pops$arrive))&(pops$arrive==0)],
