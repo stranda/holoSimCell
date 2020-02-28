@@ -244,6 +244,7 @@ gssa_raggedness <- function(out=NULL,dist_mat=NULL){
 #psi function from John - May 13, 2019 *JDR*
 #!# Changing this to "frequency" - not proportion
 #!# Updates - back to frequency in the proportion sense of the word.  I think I misread the paper! - JDR 8/20/19
+#!# Updates - back to frequency as count, some changes to psi[pair] lines after consultation with AES & SMH - JDR 2/28/20
 psiCalc = function(data, samplen=20) {
   combos <- combn(colnames(data),2)
   
@@ -261,10 +262,12 @@ psiCalc = function(data, samplen=20) {
       if(length(varloci) == 1) {
         #!# I think I had these wrong... check eqn 1a from Peter & Slatkin 2013
         #psi[pair] = (1/samplen)*((samplen*mean(tmp_locMAF[1]))-(samplen*mean(tmp_locMAF[2])))
-        psi[pair] = (1/samplen)*(mean(tmp_locMAF[1])-mean(tmp_locMAF[2]))
+        #psi[pair] = (1/samplen)*(mean(tmp_locMAF[1])-mean(tmp_locMAF[2]))
+        psi[pair] = tmp_locMAF[1]-tmp_locMAF[2]
       } else {
         #psi[pair] = (1/samplen)*((samplen*mean(tmp_locMAF[,1]))-(samplen*mean(tmp_locMAF[,2])))
-        psi[pair] = (1/samplen)*(mean(tmp_locMAF[,1])-mean(tmp_locMAF[,2]))
+        #psi[pair] = (1/samplen)*(mean(tmp_locMAF[,1])-mean(tmp_locMAF[,2]))
+        psi[pair] = mean(tmp_locMAF[,1])-mean(tmp_locMAF[,2])
       }
     } else {
       psi[pair] = NA
@@ -327,7 +330,9 @@ graph_theory <- function(data_frame,pops){
   colnames(gt_sum_pop) <- "pop"
   #not variable in test matrix
   #calculating betweenness of graph nodes
-  gt_sum_pop$between_igraph <- betweenness.estimate(graph,cutoff = 0)
+  #!# Change cutoff to -1, cutoff = 0 wasn't working as it suggests it should in documentation
+  #gt_sum_pop$between_igraph <- betweenness.estimate(graph,cutoff = 0)
+  gt_sum_pop$between_igraph <- betweenness.estimate(graph,cutoff = -1)
   #variable in test matrix
   #calculating betweenness and closeness of data frame
   gt_sum_pop$close_sna <- closeness(as.matrix(graph))
@@ -337,7 +342,9 @@ graph_theory <- function(data_frame,pops){
   #the eigenvector centrality of each population
   gt_sum_pop$evcent_sna <- evcent(as.matrix(graph))$vector
   #calculating closeness of graph nodes
-  gt_sum_pop$close_igraph <- closeness.estimate(graph,cutoff = 0)
+  #!# Change cutoff to -1, cutoff = 0 wasn't working as it suggests it should in documentation
+  #gt_sum_pop$close_igraph <- closeness.estimate(graph,cutoff = 0)
+  gt_sum_pop$close_igraph <- closeness.estimate(graph,cutoff = -1)
   
   #adding in edge statistics
   #calculating edge betweenness for the graph edges (pairwise)
