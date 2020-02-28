@@ -275,7 +275,7 @@ holoStats = function(out, popDF, extent, cores=1) {
 
   #Calculating spatial PCA from the Alvarado-Serrano script + our plotting technique
   #changed the plot from the Alvarado-Serrano code, but it needs to be wrapped in the function to work
-  sPCA_sum_stats <- sPCA.dist(data, pops.xy, nsamples, cpos=2, cneg=2, plot=F)
+  sPCA_sum_stats <- sPCA.dist(data, pops.xy, nsamples, cpos=2, cneg=0, plot=F)
   #message("SPCA done")
 
   #Bray-Curtis Distance
