@@ -16,7 +16,7 @@ plothist <- function(ph, maxtime=NULL)
         } else pops[pops$pop==p,]
     })))
     
-    ch=merge(ch,pops,by.x="src",by.y="pop")[,c(-6,-7)]
+    ch=merge(ch,pops,by.x="src",by.y="pop")[,c("src","time","snk","col","row")]
     ch=ch[with(ch,order(-time,src,snk)),]
     ch=rbind(data.frame(src=pops$pop[(!is.na(pops$arrive))&(pops$arrive==0)],
                         time=pops$arrive[(!is.na(pops$arrive))&(pops$arrive==0)],
@@ -33,11 +33,11 @@ plothist <- function(ph, maxtime=NULL)
            widths=c(0.22,0.26,0.26,0.26)) #plot 3 as null
 
     
-    rows <- min(pops$row):max(pops$row)
-    rw <- max(rows)
+    rows <- floor(min(pops$row)):ceiling(max(pops$row))
+    rw <- ceiling(max(rows))
     
-    cols <- min(pops$col):max(pops$col)
-    cl <- max(cols)
+    cols <- floor(min(pops$col)):ceiling(max(pops$col))
+    cl <- ceiling(max(cols))
     
     ch$coldist=NA
 
@@ -55,11 +55,9 @@ plothist <- function(ph, maxtime=NULL)
     if ((!is.null(ph$Nvecs))&(min(dim(ph$Nvecs))>0))
     {
         harmmean <- function(x){1/mean(1/x)}
-        sz <- apply(ph$Nvecs+1,1,harmmean)-1
+        sz <- apply((ph$Nvecs+1)[pops$pop,],1,harmmean)-1
         pops$sz <- sz
     } else {sz <- log(dim(pops)[1])/6}
-
-    points(row~col,pops,pch=16,cex=log(sz+1))
 
     for (i in 1:dim(ch)[1])
     {
@@ -83,6 +81,9 @@ plothist <- function(ph, maxtime=NULL)
                                         #           print(ch$coldist[i])
             }
     }
+    
+    points(row~col,pops,pch=16,cex=log(sz+1))
+
     mxt <- ifelse(is.null(maxtime),max(ch$time,na.rm=T),maxtime)
 steps=5
     lgd <- round(seq(1,mxt,length.out=steps))
@@ -102,9 +103,10 @@ par(mai=mai)
     hist(ch$coldist,xlab="Colonization distance",main="Realized colonization distances")
     hist(ch$time,xlab="Colonization time",main="Realized colonization times")
 
-
-    cent <- bioticVelocity(ph,metrics="centroid")$centroidVelocity
-    ncent <- bioticVelocity(ph,metrics="nCentroid")$nCentroidVelocity
+    recentph <- ph
+    recentph$pophist <- pops 
+    cent <- bioticVelocity(recentph,metrics="centroid")$centroidVelocity
+    ncent <- bioticVelocity(recentph,metrics="nCentroid")$nCentroidVelocity
     both <- c(cent,ncent)
     both <- both[!is.na(both)|is.finite(both)]
 

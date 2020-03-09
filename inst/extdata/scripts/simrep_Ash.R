@@ -74,7 +74,7 @@ for(repl in 1:nreps) {
         landscape <- ashpollen
     } 
         
-    ph = getpophist.cells(hab_suit=landscape,samptime=1,refs=parms$refs,refsz=parms$ref_Ne,
+    ph = getpophist2.cells(hab_suit=landscape,samptime=1,refs=parms$refs,refsz=parms$ref_Ne,
                       mix=parms$mix,
                       shortscale=parms$shortscale,shortshape=parms$shortshape,
                       longmean=parms$longmean,

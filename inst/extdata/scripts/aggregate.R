@@ -16,55 +16,40 @@ pophist.aggregate <- function(ph, gmap=NULL)
     {
         gh = ph$coalhist
     }    else   { #do the aggregation
-        gpophist = merge(ph$pophist,gmap[,c("pop","gpop")])
-        gh=do.call(rbind,lapply(unique(sort(ph$coalhist$time)),function(tm)
-        {
-            ch=ph$coalhist[ph$coalhist$time==tm,]           
-            gch=data.frame(time=NA,src=NA,snk=NA,mv_sz=NA,gp_sz=NA)[-1,]
-            for (i in 1:nrow(ch))
-            {
-                gsnk=gmap$gpop[gmap$pop==ch$snk[i]] #genetic sinks at this time (reverse time)
-                gsrc=gmap$gpop[gmap$pop==ch$src[i]] #genetics sources at this time  (reverse time)
-                if (gsnk!=gsrc) ##if events are within same gpop do nothing, otherwise do this
-                {
-                    mv_sz = ph$Nvecs[ch$src[i],ch$time[i]+1] #i+1 cause value is zero at time i
-                    gp_sz = sum(ph$Nvecs[gmap$pop[gmap$gpop==gsrc],ch$time[i]])+
-                        ph$Nvecs[ch$src[i],ch$time[i]+1]-
-                        ph$Nvecs[ch$src[i],ch$time[i]]
 
-                    prop = mv_sz/gp_sz
-                    gch <- rbind(gch,cbind(time=ch$time[i],src=gsrc,snk=gsnk,mv_sz=mv_sz,gp_sz=gp_sz))
-                    
-                }
-                
-            }
+        refs <- ph$coalhist[ph$coalhist$time==0,]
+        refs$snk <- NA
+        refs$prop=1.0
+        
+        gh <- merge(ph$coalhist,gmap,by.x="src",by.y="pop",all=T)[,1:4]
+        names(gh)[4] <- "gsrc"
+        gh <- merge(gh,gmap,by.x="snk",by.y="pop")[,1:5]
+        names(gh)[5] <- "gsnk"
+        gh <- gh[order(gh$time,gh$snk,gh$src),]
+        gh$srcsz <- apply(gh[,c("src","time")],1,function(x){ph$Nvec[x[1],paste0("gen",x[2])]})
 
-            if (nrow(gch)>0) {
-                normval=with(gch,aggregate(cbind(mv_sz=mv_sz,gp_sz=gp_sz),list(time=time,src=src,snk=snk),sum))
-                normval$time <- as.numeric(as.character(normval$time))
-                normval$src <- as.numeric(as.character(normval$src))
-                normval$snk <- as.numeric(as.character(normval$snk))
-                } else normval <- NULL
-            normval$prop=normval$mv_sz/normval$gp_sz
-            normval$prop[is.na(normval$prop)] <- 1.0  #if the population immediately extincts prop is a NaN (0/0). this fixes
-            normval
-        }))
-        gh = gh[order(-gh$time,gh$snk),]
-        rownames(gh) <- 1:nrow(gh)
+        agg <- with(gh,aggregate(cbind(mvsrcsz=srcsz),list(time=time,gsnk=gsnk,gsrc=gsrc),sum))
+        
+        nvt <- aggregate(cbind(ph$Nvecs),list(gpop=gmap$gpop),sum)
+        rownames(nvt) <- as.character(nvt$gpop)
+        nvt <- nvt[,-1]
+        agg$gsrcsz <- apply(agg[,c("gsrc","time")],1,function(x){nvt[x[1],paste0("gen",x[2])]})
+        agg$prop <- round(agg$mvsrcsz/agg$gsrcsz,3)
+        gh <- agg[agg$gsnk!=agg$gsrc,c("time","gsrc","gsnk","prop")]
+        names(gh) <- c("time","src","snk","prop")
+        gh <- rbind(refs,gh[order(gh$time,gh$snk,gh$src),])
     }
-    ph$coalhist <- gh[,c(1,2,3,6)]
+    ph$coalhist <- gh
 
     #now the pophist object
     poph <- gmap[,-1]
     names(poph)[1] <- "pop"
     poph <- with(poph,aggregate(cbind(row=row,col=col),list(pop=pop),mean))
-#    poph <- merge(poph,l$coalhist,by.y="src",by.x="pop",all=T)[,1:5]
-#    names(poph) <- c("pop","row","col","arrive","source")
     pophist <- merge(ph$pophist,gmap)
     gpophist <- do.call(rbind,lapply(unique(pophist$gpop),function(gp)
     {
         p <- pophist[pophist$gpop==gp,]
-        print(p)
+#        print(p)
         if (nrow(p)>0)
         {
             ret <- NULL  #data.frame(pop=NA,arrive=NA,source=NA)[-1,]
@@ -72,12 +57,12 @@ pophist.aggregate <- function(ph, gmap=NULL)
                 for (s in unique(p$source))
                 {
                     if (is.na(s)) src <- NA else src <- gmap[gmap$pop==s,"gpop"]
-                    print(paste("gp",gp,"a",a,"s",s,"src",src))
+#                    print(paste("gp",gp,"a",a,"s",s,"src",src))
 
                     if (!is.na(src)[1])
                         if (src!=gp)
                         {
-                            print("adding line")
+#                            print("adding line")
                             ret <- rbind(ret,
                                          data.frame(pop=gp,arrive=a,source=src))
                         }
@@ -86,8 +71,8 @@ pophist.aggregate <- function(ph, gmap=NULL)
         } else {NULL}
         
     }))
-    
-    
+    rc <- with(gmap,aggregate(cbind(row,col),list(pop=gpop),mean))
+    gpophist <- merge(gpophist,rc)[,c("pop","col","row","arrive","source")]
 ###now redo Nvecs
     nv <- aggregate(ph$Nvecs,list(gpop=gmap$gpop),sum)
     rownames(nv) <- as.character(nv$gpop)
@@ -105,7 +90,7 @@ pophist.aggregate <- function(ph, gmap=NULL)
                              nmean=ph$struct["longmean"],nvar=ph$struct["longmean"]^2)
     ph$aggregate_tmat <- tmat
     ph$gmap <- gmap
-
+    ph$pophist <- gpophist
     
     ph
 }
@@ -142,5 +127,14 @@ make.gmap <- function(pophist,xnum=2,ynum=2)
         tmp
     }))
     
-    gpops[order(gpops$pop),c("pop","gpop","col","row")]
+    unique(gpops[order(gpops$pop),c("pop","gpop","col","row")])
 }
+
+
+disaggregateLandscape <- function(hs, factor=c(1,2,4,6,8))
+{
+    old <- hs
+    
+    
+}
+

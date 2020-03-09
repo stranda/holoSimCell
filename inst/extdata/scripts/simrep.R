@@ -48,8 +48,6 @@ poptbl <- table(popmap[gsub("fp","",names(imputed.pruned)),2])
 
 samppts <- pts[pts$abbrev %in% names(poptbl),]
 
-
-
 for(repl in 1:nreps) {
 
     #Draw parms
