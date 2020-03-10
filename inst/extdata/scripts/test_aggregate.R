@@ -47,7 +47,7 @@ sec=as.numeric(Sys.time())-1500000000
 lp= as.numeric(as.character(nchar(paste(.libPaths(), collapse = " "))))
 slp <- as.integer(floor(sec*lp))
 
-set.seed(as.integer(slp))
+set.seed(as.integer(sec))
 
 ph = getpophist2.cells(hab_suit=landscape,
                        refs=(5),
