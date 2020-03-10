@@ -59,13 +59,13 @@ ph = getpophist2.cells(hab_suit=landscape,
                        sz=150) #size of a cell (same units as longmean and shortscale)
 
 gmap=make.gmap(ph$pophist,
-               xnum=2,
-               ynum=2)
+               xnum=2, #number of cells to aggregate in x-direction
+               ynum=2) #number of aggregate in the y-direction
 
 ph2 <- pophist.aggregate(ph,gmap=gmap)
 
 
-pdf("subset_example.pdf")
+pdf("aggregate_example.pdf")
 plothist(ph)
 plothist(ph2)
 dev.off()
