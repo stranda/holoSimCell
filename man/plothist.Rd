@@ -4,7 +4,7 @@
 \alias{plothist}
 \title{plot the population history}
 \usage{
-plothist(ph)
+plothist(ph, maxtime = NULL)
 }
 \arguments{
 \item{ph}{population history object (direct output from gepophist.cells)}

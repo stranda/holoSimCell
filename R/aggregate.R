@@ -106,7 +106,8 @@ pophist.aggregate <- function(ph, gmap=NULL)
 #'
 #' @return a gmap object used for pophist.aggregate
 #' @details If the size of the landscape in pophist is not evenly divisible by xnum and ynum, "remainder" cells on the top and righthand sides of the landscape will be included in genetic clusters.  As a result the numbers of cells per cluster will vary
-#' 
+#'
+#' @export
 make.gmap <- function(pophist,xnum=2,ynum=2)
 {
  ##   remain.right = max(pophist$col) %% xnum
@@ -130,11 +131,4 @@ make.gmap <- function(pophist,xnum=2,ynum=2)
     unique(gpops[order(gpops$pop),c("pop","gpop","col","row")])
 }
 
-
-disaggregateLandscape <- function(hs, factor=c(1,2,4,6,8))
-{
-    old <- hs
-    
-    
-}
 

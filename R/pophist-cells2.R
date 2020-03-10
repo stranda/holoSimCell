@@ -149,7 +149,8 @@ getpophist.cells <- function(h=225, #humber of habitats (populations)
 ###this is supposed to be the among-population migration matrix
 ###should represent the prob of movement from the center of pop i to the center of pop j
     tmat <- integratedMigMat(landx=xdim,landy=ydim,xnum=5,ynum=5,ysz=sz,xsz=sz,
-                             sshp=shortshape,ssc=shortscale,mix=mix,nmean=longmean,nvar=longmean^2)
+                             sshp=shortshape,ssc=shortscale,mix=mix,
+                             nmean=longmean,nvar=longmean^2)
         
     #pops$arrive <- NA  #!# both of these are now done in the definition of pops
     #pops$source <- NA
@@ -394,10 +395,40 @@ getpophist2.cells <- function(h=225, #humber of habitats (populations)
         extFUN=NULL #!# Function passed to extirpate() to implement local extinction due to demographic stochasticity - 2 arguments
     }
 
+    if (FALSE)
+    {
+        h=225 #humber of habitats (populations)
+        xdim=15 #x -extent
+        ydim=15 #y-extent
+        maxtime=1000 
+        distance.fun=distancePDF   # unlike previous versions needs the dispersal
+        shortscale=0.35
+        longmean=3 # parameters along with landscape
+        shortshape=1
+        mix=0.01        #weibull shape for short distance, mix
+        lambda=1.01  #underlying population growth rate
+        deltLambda=rep(0,h) #adjustment to pop growth per population
+        CVn=NULL #!# coefficient of variation in population size (demographic stochasticity) 
+        pois.var = FALSE #!# if TRUE, population size each generation is drawn from a Poisson
+        extFUN=NULL #!# Function passed to extirpate() to implement local extinction due to demographic stochasticity - 2 arguments
+#        hab_suit = NULL, #object returned from def_grid_pred
+        K=10000 #underlying carrying capacity per pop
+        deltK = rep(1,h) #!# per population adjustment to K
+        refs=c(2) #population number of the refuges
+        refsz=c(1000)#the size of each refuge
+        popDispInfl=function(x){return (x)} #function that maps pop size to col ability
+        sz=1  #size of each cell
+        enmstep=NULL #vector of the number of time clicks for each habitat
+        samptime=0 #if zero runs through.  If >zero reports every samptime
+                             
+    }
+    
+
 ############DEPRECATING SAMPTIME
 ############# Setting Samptime to 1 here for all runs.  This means that census happens every
 #####          time click and we have a full record of history
 ####
+
     samptime=1
     
     if (!is.null(hab_suit))
@@ -507,7 +538,7 @@ getpophist2.cells <- function(h=225, #humber of habitats (populations)
 
     for (gen in 1:maxtime)
     {
-#        print(paste("gen:",gen))
+
 
         
         src <- getsrcC(tmat,popDispInfl(Nvec))
@@ -544,6 +575,15 @@ getpophist2.cells <- function(h=225, #humber of habitats (populations)
             Nvec <- growpops(Nvec, lambda = lambda, deltLambda = deltLambda, K=K, deltK=deltK, CVn=CVn, pois.var = pois.var)
         }
 
+        Nvec[!is.finite(Nvec)] <- 0 #HACK alert.  Need to see what is happening in growpops to create Inf
+
+        if (sum(!is.finite(Nvec))>0)
+        
+        {
+            print(paste("gen:",gen))
+            print(dk)
+            print(Nvec)
+        }
 
 ####
 #### Extinctions:  There are two sources of extinction possible right now.  Demographic stochasticity and poor habitat suitability.
@@ -591,11 +631,14 @@ getpophist2.cells <- function(h=225, #humber of habitats (populations)
             p2 <- cbind(p1,N=Nvec[p1$pop])#[Nvec[disp$snk]>0,]
             colhist[[gen]] <- p2[!is.na(p2$arrive),]
 
-            for (i in 1:nrow(disp))
-                if (Nvec[disp$snk[i]]>0)
+            if (nrow(disp)>0)
+                for (i in 1:nrow(disp))
                 {
-                    popslst[[disp$snk[i]]]$arrive <- rbind(popslst[[disp$snk[i]]]$arrive,
-                                                           data.frame(time=gen,source=disp$src[i]))
+                    if (Nvec[disp$snk[i]]>0)
+                    {
+                        popslst[[disp$snk[i]]]$arrive <- rbind(popslst[[disp$snk[i]]]$arrive,
+                                                               data.frame(time=gen,source=disp$src[i]))
+                    }
                 }
 
         } else    colhist[[gen]] <- NULL
