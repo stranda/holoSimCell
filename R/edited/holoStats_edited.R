@@ -335,12 +335,16 @@ holoStats = function(out, popDF, extent, cores=1) {
   LD_pop <- NULL
   i <- 1
 
+  #Subsampling to the smaller of 500 or the number of loci in the dataset for faster LD calculation
+  SNPsamp <- sample(c(1:(ncol(data)-2)), min(500, (ncol(data)-2)), replace = FALSE)
+	  
   #calculate mean LD for each population
   for(i in 1:npops){
     #!# Change here: names aren't 1:npops
     #loci_pop <- subset(data,data$st == i)
     loci_pop <- subset(data, data$st == pops.xy$pop[i])
     snps <- loci_pop[,-c(1,2)]
+    snps <- snps[,SNPsamp]
     pair_LD <- LD.Measures(snps,data = "H")
     mean_LD_pop <- mean(pair_LD$r2)
     ifelse(i==1,
