@@ -224,7 +224,7 @@ holoStats = function(out, popDF, extent, cores=1) {
   
 	
   #Turning off spatial stats for now... some issues (JDR 7/26/19)
-  if(FALSE) {
+  #if(FALSE) {
   ##Spatial Statistics: written by Ellie Weise
   ##incorporated Dec 19, 2018
   #getting data into a usable format for the stats to calculate
@@ -375,47 +375,51 @@ holoStats = function(out, popDF, extent, cores=1) {
   #message("Directionality Index done")
 
   #calculating graph theory statistics
-  gt_sum <- graph_theory(data_frame = FstMat.loc, pops = pops.xy)
+  #gt_sum <- graph_theory(data_frame = FstMat.loc, pops = pops.xy)
+  #Updating to use new version of graph_theory (popgraph instead of ipgraph + sna) - JDR 8/20/2020
+  graphstats <- graph_theory(data = out@data, stats = c("cGD", "betweenness", "closeness"), plot = FALSE)
   #message("Graph done")
-
-  #naming stats to be put into the big stats list
-  pop_num <- gt_sum$node_stats[,1]
-  stats <- t(gt_sum$node_stats[,-1])
-  colnames(stats) <- pop_num
-  statnames <- rownames(stats)
-  node_stats <- unmatrix(stats)
   
-  stats <- gt_sum$edge_stats
-  stats1 <- data.frame(edge_between_igraph = stats$edge_between_igraph)
+  #Below chunk is not needed with new graph_theory() function - JDR 8/20/2020
+  #naming stats to be put into the big stats list
+  #pop_num <- gt_sum$node_stats[,1]
+  #stats <- t(gt_sum$node_stats[,-1])
+  #colnames(stats) <- pop_num
+  #statnames <- rownames(stats)
+  #node_stats <- unmatrix(stats)
+  
+  #stats <- gt_sum$edge_stats
+  #stats1 <- data.frame(edge_between_igraph = stats$edge_between_igraph)
   #rownames(stats1) <- paste0("node",stats$node1,"_",stats$node2)
   #edgenames = c()
   #for(pid in 1:length(popDF$id)) {
   #  edgenames = c(edgenames, paste0(popDF$id[pid],".", popDF$id[-pid]))
   #}
   
-  tmpedge <- data.frame(node1 = rep(NA, length(stats$node1)), node2 = rep(NA, length(stats$node2)))	
-  for(x in 1:length(popDF$id)) {
-	  tmpedge$node1[stats$node1 == x] <- levels(popDF$id)[x]
-  	tmpedge$node2[stats$node2 == x] <- levels(popDF$id)[x]
-  }
-  edgenames <- paste0(tmpedge$node1,".",tmpedge$node2)
+  #tmpedge <- data.frame(node1 = rep(NA, length(stats$node1)), node2 = rep(NA, length(stats$node2)))	
+  #for(x in 1:length(popDF$id)) {
+  #	  tmpedge$node1[stats$node1 == x] <- levels(popDF$id)[x]
+  #	tmpedge$node2[stats$node2 == x] <- levels(popDF$id)[x]
+  #}
+  #edgenames <- paste0(tmpedge$node1,".",tmpedge$node2)
   
-  rownames(stats1) <- edgenames
+  #rownames(stats1) <- edgenames
   #!# Naming issue here: Using P1-P25 instead of grid cell ID
-  edge_stats <- unmatrix(t(stats1))
-  }
+  #edge_stats <- unmatrix(t(stats1))
+  
   ################################################################
   
   stats = c(SNPs, localSNP, privateSNP, total_priv, pairFst.loc, pairnei,
             ibdfst.slope=ibdfst.slope,ibdfst.int=ibdfst.int,bsfst.break=bsfst[1],bsfst.ll=bsfst[2],
             ibdedist.slope=ibdedist.slope,ibdedist.int=ibdedist.int,bsedist.break=bsedist[1],bsedist.ll=bsedist[2],
             ibdnei.slope=ibdnei.slope,ibdnei.int=ibdnei.int,bsnei.break=bsnei[1],bsnei.ll=bsnei[2],
-            
             he.lat.stats, he.long.stats,
             pc1.lat.stats, pc1.long.stats,
             pc2.lat.stats, pc2.long.stats,
             pc3.lat.stats, pc3.long.stats,
-            NSS_as,SSS_as,gssa_HRi,gssa_mean,gssa_var,sPCA_sum_stats,pairbc.loc,moran,monmonier,semivar[1,],ld_stats[1,],psi,node_stats,edge_stats)
+            NSS_as,SSS_as,gssa_HRi,gssa_mean,gssa_var,
+	    sPCA_sum_stats,pairbc.loc,moran,monmonier,
+	    semivar[1,],ld_stats[1,],psi,graphstats)
   
   stats1 = matrix(data=stats, nrow = 1)
   colnames(stats1) = names(stats)
