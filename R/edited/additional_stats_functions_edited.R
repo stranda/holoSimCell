@@ -306,8 +306,71 @@ psiCalc_OLD = function(data, samplen=20) {
   psi
 }
 
+#New version of graph_theory() uses popgraph instead of igraph + sna - JDR 8/20/2020
+graph_theory <- function(data = data, stats = c("cGD", "betweenness", "closeness"), plot = FALSE) {
+	
+	indat <- apply(data[,-c(1,2)], 2, as.numeric)
+	indat2 <- matrix(data = NA, nrow = nrow(indat)/2, ncol = ncol(indat))
+	allele1row <- seq(1,nrow(indat),2)
+	for(r in 1:nrow(indat2)){
+		indat2[r,] <- indat[allele1row[r],]+indat[(allele1row[r]+1),]
+	}
+	pops <- data$strata[allele1row]
+	lat <- rep(NA, nrow(indat2))
+	long <- rep(NA, nrow(indat2))
+	colnames(indat2) <- paste0("loc",c(1:ncol(indat2)))
+	writeme <- data.frame(Population = pops, Latitude = lat, Longitude = long, indat2)
+	if (FALSE) #if true write to disk
+	{
+	  tmpfilename <- paste0("tmpsnp-",round(runif(1),5),".csv")
+	  write.csv(writeme, tmpfilename, quote = FALSE, row.names = FALSE)
+	  indat3 <- read_population(tmpfilename, type = "snp", locus.columns = c(4:1003))
+	  file.remove(tmpfilename)
+	} else {# use text connection
+	  vec=  c(paste0(paste(names(writeme),collapse=","),"\n"),sapply(1:nrow(writeme),function(l){paste0(paste(writeme[l,],collapse=", "),"\n")}))
+	  indat3 <- read_population(textConnection(vec), type = "snp", locus.columns = c(4:1003))
+	}
+	
+
+	indat4 <- to_mv(indat3)
+	pops <- indat3$Population
+	
+
+	myg <- popgraph(x = indat4, groups = pops)
+		
+	if(plot == TRUE) {
+		plot(myg)
+	}
+
+	out <- c()
+	if("cGD" %in% stats) {
+		cGD <- to_matrix(myg, mode = "shortest path")
+		combo_names <- combn(rownames(cGD),2)
+		combo_names <- apply(combo_names, 2, FUN = function(x){paste0("cGD-",x[1],".",x[2])})
+		cGD_out <- cGD[lower.tri(cGD) == TRUE]
+		cGD_out <- as.vector(cGD_out)
+		names(cGD_out) <- combo_names
+		out <- append(out, cGD_out)
+	}
+
+	if("betweenness" %in% stats) {
+		bwness <- betweenness(myg)
+		names(bwness) <- paste0("bwness-", names(bwness))
+		out <- append(out, bwness)
+	}	
+
+	if("closeness" %in% stats) {
+		cness <- closeness(myg)
+		names(cness) <- paste0("cness-", names(cness))
+		out <- append(out, cness)
+	} 
+
+	out
+}
+
+#OLDER VERSION, uses igraph and sna, replaced with above
 #calculating graph theory summary
-graph_theory <- function(data_frame,pops){
+graph_theory_OLD <- function(data_frame,pops){
   #require(igraph)
   #require(sna)
   #making sure there's no negative in the data frame - if there are, turn to zero
