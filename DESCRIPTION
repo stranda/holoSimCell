@@ -31,10 +31,10 @@ Depends: cubature,
 	 plyr,
 	 shiny,
 	 tripack
-Remotes: adamlilith/omnibus,
+Remotes: EricArcher/strataG@v2.0.2,
+	 adamlilith/omnibus,
 	 adamlilith/statisfactory,
-	 adamlilith/enmSdm,
-	 EricArcher/strataG@v2.0.2
+	 adamlilith/enmSdm
 Suggests: testthat
 LinkingTo: Rcpp
 RoxygenNote: 6.1.1
