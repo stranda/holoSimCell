@@ -35,7 +35,9 @@ Depends: cubature,
 Remotes: EricArcher/strataG@v2.0.2,
 	 adamlilith/omnibus,
 	 adamlilith/statisfactory,
-	 adamlilith/enmSdm
+	 adamlilith/enmSdm,
+	 dyerlab/popgraph,
+	 dyerlab/gstudio
 Suggests: testthat
 LinkingTo: Rcpp
 RoxygenNote: 6.1.1
