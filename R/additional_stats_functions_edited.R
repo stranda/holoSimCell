@@ -342,7 +342,7 @@ graph_theory <- function(data = data, stats = c("cGD", "betweenness", "closeness
 		plot(myg)
 	}
 
-	out <- c()
+	tmpout <- c()
 	if("cGD" %in% stats) {
 		cGD <- to_matrix(myg, mode = "shortest path")
 		combo_names <- combn(rownames(cGD),2)
@@ -350,22 +350,22 @@ graph_theory <- function(data = data, stats = c("cGD", "betweenness", "closeness
 		cGD_out <- cGD[lower.tri(cGD) == TRUE]
 		cGD_out <- as.vector(cGD_out)
 		names(cGD_out) <- combo_names
-		out <- append(out, cGD_out)
+		tmpout <- append(tmpout, cGD_out)
 	}
 
 	if("betweenness" %in% stats) {
 		bwness <- betweenness(myg)
 		names(bwness) <- paste0("bwness-", names(bwness))
-		out <- append(out, bwness)
+		tmpout <- append(tmpout, bwness)
 	}	
 
 	if("closeness" %in% stats) {
 		cness <- closeness(myg)
 		names(cness) <- paste0("cness-", names(cness))
-		out <- append(out, cness)
+		tmpout <- append(tmpout, cness)
 	} 
 
-	out
+	tmpout
 }
 
 #OLDER VERSION, uses igraph and sna, replaced with above

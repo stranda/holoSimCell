@@ -25,7 +25,7 @@ if(length(args) == 0){
 #outdir <- "/mnt/research/TIMBER/Ash/OUT" 
 
 
-outdir <- "~/GoogleDrive/src/holoSimCell/inst/extdata/scripts/holostats"
+outdir <- "~/Desktop"
 simdir <- outdir
 
 library(holoSimCell)
@@ -112,7 +112,7 @@ for(repl in 1:nreps) {
     SNPnum <- data.frame(nvar = 0)
     MAF_filt <- 0.01
     while(SNPnum$nvar < loc_parms$nloci) {
-        message(paste("Coalescent simulation with",loc_parms2$nloci,"loci"))
+        message(paste(Sys.time(), "- Coalescent simulation with",loc_parms2$nloci,"loci"))
         tmp <- runFSC_step(ph = ph, 
                         l = landscape,
                         sample_n = poptbl[1],
@@ -152,6 +152,8 @@ for(repl in 1:nreps) {
       
     }
 
+    message(paste(Sys.time(), "- Coalescent simulation complete"))
+    
     if(SNPnum$nvar > loc_parms$nloci) {
         variableloci <- which(SNPnum$nall == 2)
         keeploci <- sample(variableloci,loc_parms$nloci,replace = FALSE)

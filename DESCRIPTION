@@ -31,6 +31,7 @@ Depends: cubature,
 	 shiny,
 	 tripack,
 	 popgraph,
+	 igraph,
 	 gstudio
 Remotes: EricArcher/strataG@v2.0.2,
 	 adamlilith/omnibus,
