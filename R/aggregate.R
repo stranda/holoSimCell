@@ -79,7 +79,8 @@ pophist.aggregate <- function(ph, gmap=NULL)
     nv <- nv[,-1]
     ph$Nvecs <- nv
 ###now redo hab_suit (through taking means)
-    ph$aggregate_hab_suit <- t(aggregate(t(ph$hab_suit$hab_suit),list(gpop=gmap$gpop),mean))
+    ph$old_hab_suit <- ph$hab_suit
+    ph$hab_suit <- t(aggregate(t(ph$hab_suit$hab_suit),list(gpop=gmap$gpop),mean))
 ###now redo tmat
     ysz <- ph$struct["sz"]*length(unique(ph$pophist[ph$pophist$pop %in% gmap[gmap$gpop==1,"pop"],"row"]))
     xsz <- ph$struct["sz"]*length(unique(ph$pophist[ph$pophist$pop %in% gmap[gmap$gpop==1,"pop"],"col"]))
@@ -88,7 +89,8 @@ pophist.aggregate <- function(ph, gmap=NULL)
                              xnum=5,ynum=5,ysz=ysz,xsz=xsz,
                              sshp=ph$struct["shortshape"],ssc=ph$struct["shortscale"],mix=ph$struct["mix"],
                              nmean=ph$struct["longmean"],nvar=ph$struct["longmean"]^2)
-    ph$aggregate_tmat <- tmat
+    ph$old_tmat <- ph$tmat
+    ph$tmat <- tmat
     ph$gmap <- gmap
     ph$pophist <- gpophist
     
