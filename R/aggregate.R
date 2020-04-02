@@ -82,13 +82,17 @@ pophist.aggregate <- function(ph, gmap=NULL)
     ph$old_hab_suit <- ph$hab_suit
     ph$hab_suit <- t(aggregate(t(ph$hab_suit$hab_suit),list(gpop=gmap$gpop),mean))
 ###now redo tmat
-    ysz <- ph$struct["sz"]*length(unique(ph$pophist[ph$pophist$pop %in% gmap[gmap$gpop==1,"pop"],"row"]))
-    xsz <- ph$struct["sz"]*length(unique(ph$pophist[ph$pophist$pop %in% gmap[gmap$gpop==1,"pop"],"col"]))
- 
-    tmat <- integratedMigMat(landx=ceiling(max(gmap$col)/xsz),landy=ceiling(max(gmap$row)/ysz),
+    ynum <- length(unique(ph$pophist[ph$pophist$pop %in% gmap[gmap$gpop==1,"pop"],"row"]))
+    xnum <- length(unique(ph$pophist[ph$pophist$pop %in% gmap[gmap$gpop==1,"pop"],"col"]))
+    ysz <- ph$struct["sz"]*ynum
+    xsz <- ph$struct["sz"]*xnum
+    landx=ceiling(max(gmap$col)/xnum)
+    landy=ceiling(max(gmap$row)/ynum)
+    tmat <- integratedMigMat(landx=landx,landy=landy,
                              xnum=5,ynum=5,ysz=ysz,xsz=xsz,
                              sshp=ph$struct["shortshape"],ssc=ph$struct["shortscale"],mix=ph$struct["mix"],
                              nmean=ph$struct["longmean"],nvar=ph$struct["longmean"]^2)
+    print(dim(tmat))
     ph$old_tmat <- ph$tmat
     ph$tmat <- tmat
     ph$gmap <- gmap
