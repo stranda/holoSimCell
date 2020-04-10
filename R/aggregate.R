@@ -38,9 +38,23 @@ pophist.aggregate <- function(ph, gmap=NULL)
         gh <- agg[agg$gsnk!=agg$gsrc,c("time","gsrc","gsnk","prop")]
         names(gh) <- c("time","src","snk","prop")
         gh <- rbind(refs,gh[order(gh$time,gh$snk,gh$src),])
+        if (!testCoal(gh))
+        {
+            gh <- gh[order(gh$src,gh$time,gh$snk),]
+            gh <- do.call(rbind,lapply(unique(gh$src),function(src)
+            {
+                tmp=gh[gh$src==src,]  #return the first row of the src, time sorted
+                if (min(tmp$time)>0)
+                {
+                    mt = which(tmp$time==min(tmp$time))
+                    tmp[mt,"prop"] <- 0
+                    tmp[sample(mt,1),"prop"] <- 1 #here is the random assignment of full coalescence
+                }
+                tmp
+            }))
+        }
     }
     ph$coalhist <- gh
-
     #now the pophist object
     poph <- gmap[,-1]
     names(poph)[1] <- "pop"
