@@ -33,7 +33,7 @@ Depends: cubature,
 	 popgraph,
 	 igraph,
 	 gstudio
-Remotes: EricArcher/strataG@v2.0.2,
+Remotes: EricArcher/strataG,
 	 adamlilith/omnibus,
 	 adamlilith/statisfactory,
 	 adamlilith/enmSdm,

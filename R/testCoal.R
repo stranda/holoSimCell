@@ -13,17 +13,18 @@ testCoal <- function(ch)
     ok <- TRUE
 
     ### test for the multiple coalesce problem
-    cho <- ch[order(ch$src,ch$time,ch$snk),]
-    coalProps <- sapply(unique(cho$src),function(src)
+    #cho <- ch[order(ch$src,ch$time,ch$snk),]
+    coalProps <- sapply(unique(ch$src),function(src)
     {
-        tmp <- cho[cho$src==src,]
+        tmp <- ch[ch$src==src,]
         if (min(tmp$time)>0)
         {
             mt <- which(tmp$time==min(tmp$time))
             if (length(mt)>1)
             {
                 prp <- sum(tmp[mt,"prop"])
-                if ((min(tmp[mt,"prop"])==0)&(max(tmp[mt,"prop"])==1)&(prp==1))
+                #if ((min(tmp[mt,"prop"])==0)&(max(tmp[mt,"prop"])==1)&(prp==1))
+                if (tmp[mt[1],"prop"] == 1)
                     1 else 0
             } else tmp$prop[mt]
         }
