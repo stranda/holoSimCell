@@ -47,8 +47,9 @@ pophist.aggregate <- function(ph, gmap=NULL)
                 if (min(tmp$time)>0)
                 {
                     mt = which(tmp$time==min(tmp$time))
-                    tmp[mt,"prop"] <- 0
-                    tmp[sample(mt,1),"prop"] <- 1 #here is the random assignment of full coalescence
+                    #tmp[mt,"prop"] <- 0
+                    #tmp[sample(mt,1),"prop"] <- 1 #here is the random assignment of full coalescence
+                    tmp[mt,"prop"] <- tmp[mt,"prop"]/cumsum(tmp[mt,"prop"])
                 }
                 tmp
             }))
