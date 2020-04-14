@@ -7,7 +7,7 @@
 runFSC_step_agg2(ph = ph, l = landscape, sample_n = NULL,
   preLGMparms = NULL, label = "test", delete_files = TRUE,
   num_cores = 1, exec = "fsc25", loc_parms = NULL, found_Ne = NULL,
-  gmap = NULL)
+  gmap = NULL, MAF = NULL)
 }
 \description{
 takes a population history and creates sequences based on the coalscent

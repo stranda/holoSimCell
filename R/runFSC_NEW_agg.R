@@ -14,7 +14,8 @@ runFSC_step_agg2 = function(
   exec = "fsc25",			#Executable for FSC (needs to be in $PATH variable)
   loc_parms = NULL,		#Vector of locus parameters
   found_Ne = NULL,			#Founding population size, required for STEP change model		
-  gmap = NULL         #gmap relating spatially aggregated cells for coalescent sim to fine-grained cells from forward sim
+  gmap = NULL,         #gmap relating spatially aggregated cells for coalescent sim to fine-grained cells from forward sim
+  MAF = NULL           #MAF - minor allele frequency filter... loci with minor allele frequencies below this value are excluded from output
 ) {
   
   ############################################################	
@@ -233,16 +234,30 @@ runFSC_step_agg2 = function(
 
   #Modified function from Eric Archer's strataG fscTutorial() markdown
   #Adding pair.per.loc, simulating diploid data, need to retain 2 columns for each locus
-  sampleOnePerLocus <- function(mat) {
+  sampleOnePerLocus <- function(mat, MAF = NULL) {
     # Extract the SNP names from the matrix column names
     snp.name <- colnames(mat[, -(1:2)])
     snpcol1 <- snp.name[grep(pattern = ".1", snp.name, fixed = TRUE)]
     # Extract the chromosome name (starts with "C" and is followed by numbers) 
     #   from the SNP names
     chrom.names <- regmatches(snpcol1, regexpr("^C[[:digit:]]+", snpcol1))
+    
+    if(!is.null(MAF)) {
+       minorfreq <- c()
+       for(col in 1:length(snpcol1)) {
+         tmp_locuscalls <- c(mat[,snpcol1[col]],mat[,paste0(strsplit(snpcol1[col], split = ".1", fixed = TRUE), ".2")])
+         tmp_locustab <- table(tmp_locuscalls)
+         minorfreq[col] <- min(tmp_locustab/sum(tmp_locustab))
+         rm(tmp_locuscalls, tmp_locustab)
+       }
+       filtered <- snpcol1[minorfreq >= MAF & minorfreq <= 0.5]
+       filt.chrom.names <- regmatches(filtered, regexpr("^C[[:digit:]]+", filtered))
+       one.per.loc <- tapply(filtered, filt.chrom.names, sample, size = 1)
+    } else {
+      one.per.loc <- tapply(snpcol1, chrom.names, sample, size = 1)  
+    }
     # Choose one SNP per chromosome
-    one.per.loc <- tapply(snpcol1, chrom.names, sample, size = 1)
-    par.per.loc <- c()
+    
     for(l in 1:length(one.per.loc)) {
       if(l == 1) {
         pair.per.loc <- c(one.per.loc[l], paste0(strsplit(one.per.loc[l], split = ".1", fixed = TRUE), ".2"))
@@ -254,7 +269,7 @@ runFSC_step_agg2 = function(
     mat[, c("id", "deme", pair.per.loc)]
   }
 
-  fscout <- sampleOnePerLocus(out)
+  fscout <- sampleOnePerLocus(mat = out, MAF = MAF)
   
   #Need to get the names working as we want them to work...
   popid_inds <- sapply(strsplit(out$id, split = "_"), FUN = function(x) as.numeric(x[1]))

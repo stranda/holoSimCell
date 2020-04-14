@@ -77,7 +77,7 @@ outdir <- "~/Desktop"
 simdir <- outdir
 parms <- drawParms(control = system.file("extdata/csv","priors.csv",package="holoSimCell"))
 parms$seq_length <- 80
-parms$mu <- 1e-8  
+parms$mu <- 1e-7 
 loc_parms <- data.frame(marker = "snp",
                         nloci = parms$nloci,           
                         seq_length = parms$seq_length,
@@ -85,7 +85,7 @@ loc_parms <- data.frame(marker = "snp",
 
 
 loc_parms2 <- loc_parms     #Will use this object for simulations, increase # of loci until we get loc_parms$nloci SNPs
-loc_parms2$nloci <- round(loc_parms2$nloci*1.25) 	#!!# #Simulate more loci than needed to account for monomorphic sites
+loc_parms2$nloci <- round(loc_parms2$nloci*5) 	#!!# #Simulate more loci than needed to account for monomorphic sites
 
 preLGMparms <- data.frame(preLGM_t = parms$preLGM_t/parms$G,		#Time / GenTime
                           preLGM_Ne = parms$preLGM_Ne,
@@ -123,21 +123,27 @@ out <- runFSC_step_agg2(ph = ph2,				#A new pophist object - (pophist, Nvecs, tm
                         exec = "fsc26",			#Executable for FSC (needs to be in a folder in the system $PATH)
                         loc_parms = loc_parms2,		#Vector of locus parameters
                         found_Ne = parms$found_Ne,			#Founding population size, required for STEP change model		
-                        gmap = gmap)
+                        gmap = gmap,              #Mapping the original population onto aggregated grid
+                        MAF = 0.01                #Minor allele frequency threshold, loci with minor allele frequencies below this value are excluded from sim
+                        )
 
-#Some loci are below our MAF threshold, fix this inside runFSC_step_agg2
-snp.name <- colnames(out[, -(1:2)])
-chrom.names <- regmatches(snp.name, regexpr("^C[[:digit:]]+", snp.name))
-allele_per_loc <- c()
-maf_per_loc <- c()
-for(x in 1:length(chrom.names)) {
-  tmpalltab <- table(c(out[,grep(chrom.names[x], colnames(out))[1]], out[,grep(chrom.names[x], colnames(out))[2]]))
-  allele_per_loc[x] <- dim(tmpalltab)
-  maf_per_loc[x] <- min(tmpalltab)/sum(tmpalltab)
-  rm(tmpalltab)
+#Testing whether the MAF filter works...
+if(FALSE) {
+  snp.name <- colnames(out[, -(1:2)])
+  chrom.names <- regmatches(snp.name, regexpr("^C[[:digit:]]+", snp.name))
+  allele_per_loc <- c()
+  maf_per_loc <- c()
+  for(x in 1:length(chrom.names)) {
+   tmpalltab <- table(c(out[,grep(chrom.names[x], colnames(out))[1]], out[,grep(chrom.names[x], colnames(out))[2]]))
+   allele_per_loc[x] <- dim(tmpalltab)
+   maf_per_loc[x] <- min(tmpalltab)/sum(tmpalltab)
+   rm(tmpalltab)
+  }
+  sum(allele_per_loc == 2)/2  #Number of loci with 2 alleles
+  sum(maf_per_loc >= 0.01)/2  #Number of loci with MAF > 0.01
 }
-sum(allele_per_loc == 2)
-sum(maf_per_loc >= 0.01)
+
+popDF <- makePopdf(landscape,"cell")
 
 #var_loc_cols <- which(allele_per_loc == 2) + 2
 #FINALout <- out[,c(1,2,sample(var_loc_cols,parms$nloci,replace = FALSE))]
@@ -146,9 +152,10 @@ sum(maf_per_loc >= 0.01)
 
 ####### REMAINING TO DO...
 #1
-#Still need to devise a minor allele frequency filter, but that shouldn't be too hard...
-#Ideally that would go inside runFSC_step_agg2(), before the SampleOnePerLocus() call
-
-#2
 #Need to test holoStats() with the new output format from strataG
 #Some things will definitely need to change (popDF$row & popDF$col, for example)
+
+#2
+#Need a while loop to repeat simulation until we have enough polymorphic markers
+#scale the number of loci being simulated based on polymorphism rates in first simulation
+#ideally, never run more than 2 fastsimcoal simulations - although these are MUCH faster now...
