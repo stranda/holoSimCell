@@ -31,7 +31,9 @@ def_grid_pred= function(pred=NULL, samppts = NULL,
                         corners = matrix(c( -1702657, 3970378,
                                            -1702657, -100000,
                                            2908121, -100000,
-                                           2908212,3970378),ncol=2,byrow=T))
+                                           2908212,3970378),
+                                         ncol=2,byrow=T),
+                        base.ext=c("row","col")[1])
 {
 
     if (is.null(pred))
@@ -42,7 +44,7 @@ def_grid_pred= function(pred=NULL, samppts = NULL,
     if (!is.null(samppts))
     {
         samps <- st_as_sf(samppts,coords=c("long","lat"),crs=range.epsg)
-        samps <- st_transform(samps,sim.epsg)
+        samps <- st_transform(samps,crs=raster.proj,type="proj")
     }
     
     sumextent <- apply(pred,c(1,2),sum,na.rm=T)
@@ -62,7 +64,7 @@ def_grid_pred= function(pred=NULL, samppts = NULL,
     
 ###using the raster as the base, need to spend more time on logic above to use all sources. or downsample
     
-    if (!is.null(init.ext)) ### there is a size to resample to.  Will do for every 3rd dim layer
+    if (!is.null(init.ext)) ### there is a size to resample to.  Will do for every 3rd dim layer (time point)
     {
 
         ##try to get new cells square
@@ -73,14 +75,16 @@ def_grid_pred= function(pred=NULL, samppts = NULL,
         cy=init.ext[2]
         dx=er["x"]/cx
         dy=er["y"]/cy
-        if (asp>1)
+
+        if (base.ext=="row")
         {
-            cx=round(er["x"]/dy)
-        } else
-            if (asp<1)
-            {
-                cy=round(er["y"]/dx)
-            }
+            cx = round(cy/asp)
+        } else if (base.ext=="col")
+        {
+            cy = round(cx*asp)
+        } else {stop ("base.ext needs to be 'row' or 'col'")}
+                    
+        
         out.ext <- c(cx,cy)
 
         newr <- raster(ncol=out.ext[1],nrow=out.ext[2],crs=raster.proj,
