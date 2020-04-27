@@ -25,7 +25,7 @@
 def_grid_pred= function(pred=NULL, samppts = NULL,
                         init.ext = NULL,
                         raster.proj='+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs',
-                        keep.thresh = 0.1,
+                        keep.thresh = 0.05,
                         sim.epsg=5070,
                         range.epsg=4326,
                         corners = matrix(c( -1702657, 3970378,
@@ -196,5 +196,5 @@ coords2cell <- function(r,c,ncol)
 #' @export
 aspRaster <- function(r)
 {
- res(r)[2]/res(r)[1]
+ dim(r)[2]/dim(r)[1]
 }

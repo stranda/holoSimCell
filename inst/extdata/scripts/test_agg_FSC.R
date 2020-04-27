@@ -35,7 +35,17 @@ samppts <- pts[pts$abbrev %in% names(poptbl),]
 ## ashland is a stored R object as well
 if (!exists("ashland"))
 {
-    ashland <- def_grid_pred(pred=ashpred[,,701:1],samppts=samppts,init.ext=c(40,36),keep.thresh=0.05)
+###    ashland <- def_grid_pred(pred=ashpred[,,701:1],samppts=samppts,init.ext=c(40,36),keep.thresh=0.05)
+    corners = matrix(c(-1702657,  1600000,
+                       -1702657,  -1100000,
+                       2908121,   -1100000,
+                       2908212,  1600000),ncol=2,byrow=T)
+    colnames(corners) <- c("x","y")
+    rownames(corners) <- c("ul","ll","lr","ur")
+
+    ashland <- def_grid_pred(pred=ashpred[,,701:1],samppts=samppts,init.ext=c(40,36),keep.thresh=0.05,
+                            corners = corners
+                             )
 }
 
 landscape <- ashland
