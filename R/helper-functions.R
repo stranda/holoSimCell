@@ -4,14 +4,40 @@
 
 mafreq <- function(out)
 {
-    locs <- names(out@data)[-1:-2]
+    #locs <- names(out@data)[-1:-2]
+    locs <- regmatches(colnames(out)[-c(1:2)], regexpr("^C[[:digit:]]+", colnames(out)[-c(1:2)]))
+    locs <- unique(locs)
     sapply(locs,function(l)
     {
-        tbl=table(out@data[[l]])
+        #tbl=table(out@data[[l]])
+        tbl <- table(c(out[,grep(l,colnames(out))[1]], out[,grep(l,colnames(out))[2]]))
         res= (sort(tbl)/sum(tbl))[1]
         res
     })
 }
+
+loc.mafreq <- function(split_out = NULL, minor = NULL) {
+  outm <- matrix(data = NA,
+                 nrow = length(grep("^C[[:digit:]]+",names(split_out[[1]])))/2,
+                 ncol = length(split_out))
+  rownames(outm) <- unique(gsub(".1$|.2$","",names(split_out[[1]])[grep("^C[[:digit:]]+",names(split_out[[1]]))]))
+  colnames(outm) <- names(split_out)
+  
+  for(pop in names(split_out)) {
+    
+    geno <- split_out[[pop]][,-c(1,2)]
+    #seq(1,ncol(geno)/2,by=1)
+    geno <- apply(geno,2,as.character)
+    geno <- apply(geno,2,as.numeric)
+    
+    for(mloc in gsub(".1$|.0$","",names(minor))) { #cruise through the minor alleles
+      outm[grep(mloc,rownames(outm)),colnames(outm)==pop] <-
+        length(which(geno[,grep(mloc,colnames(geno))] == minor[grep(mloc,names(minor))]))/(nrow(geno)*2)
+    }
+  }
+  outm
+}
+
 
 pwise.fst.glob <- function(locMAF,allMAF,locN)  #uses the Nei formulation parameterized in adegenet docs
 {
@@ -190,4 +216,41 @@ pwise.nei <- function(locMAF,cores=1)
     colnames(dfmat) <- rownames(dfmat)
     d <- as.dist(t(dfmat))
     d
+}
+
+#Modified function from Eric Archer's strataG fscTutorial() markdown
+#Adding pair.per.loc, simulating diploid data, need to retain 2 columns for each locus
+sampleOnePerLocus <- function(mat, MAF = NULL) {
+  # Extract the SNP names from the matrix column names
+  snp.name <- colnames(mat[, -(1:2)])
+  snpcol1 <- snp.name[grep(pattern = ".1", snp.name, fixed = TRUE)]
+  # Extract the chromosome name (starts with "C" and is followed by numbers) 
+  #   from the SNP names
+  chrom.names <- regmatches(snpcol1, regexpr("^C[[:digit:]]+", snpcol1))
+  
+  if(!is.null(MAF)) {
+    minorfreq <- c()
+    for(col in 1:length(snpcol1)) {
+      tmp_locuscalls <- c(mat[,snpcol1[col]],mat[,paste0(strsplit(snpcol1[col], split = ".1", fixed = TRUE), ".2")])
+      tmp_locustab <- table(tmp_locuscalls)
+      minorfreq[col] <- min(tmp_locustab/sum(tmp_locustab))
+      rm(tmp_locuscalls, tmp_locustab)
+    }
+    filtered <- snpcol1[minorfreq >= MAF & minorfreq <= 0.5]
+    filt.chrom.names <- regmatches(filtered, regexpr("^C[[:digit:]]+", filtered))
+    one.per.loc <- tapply(filtered, filt.chrom.names, sample, size = 1)
+  } else {
+    one.per.loc <- tapply(snpcol1, chrom.names, sample, size = 1)  
+  }
+  # Choose one SNP per chromosome
+  
+  for(l in 1:length(one.per.loc)) {
+    if(l == 1) {
+      pair.per.loc <- c(one.per.loc[l], paste0(strsplit(one.per.loc[l], split = ".1", fixed = TRUE), ".2"))
+    } else {
+      pair.per.loc <- c(pair.per.loc, one.per.loc[l], paste0(strsplit(one.per.loc[l], split = ".1", fixed = TRUE), ".2"))
+    }
+  }
+  # Return matrix of 
+  mat[, c("id", "deme", pair.per.loc)]
 }

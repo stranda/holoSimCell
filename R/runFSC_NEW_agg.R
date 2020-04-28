@@ -109,6 +109,9 @@ runFSC_step_agg2 = function(
   
   ##!## Slight change here... map first to the gpop column of the gmap object, then to the FSC id (old, new) - JDR 4/1/2020
   sample_ids <- plyr::mapvalues(l$sampled, gmap$pop, gmap$gpop, warn_missing=FALSE)
+  if(sum(sample_ids %in% empty_gpops) > 0) {
+    stop("Some locations where genetic samples have been collected were not colonized during the forward simulation.  Try other parameter values and rerun getpophist!")
+  }
   sample_pops <- plyr::mapvalues(sample_ids, oldID, newID, warn_missing=FALSE)
   sample_size[sample_pops+1] <- sample_n
  
@@ -145,8 +148,9 @@ runFSC_step_agg2 = function(
   #}
   
   ###!### This stuff is new!!
+  num_markers_sim <- loc_parms$nloci*1.25
   if(loc_parms$marker == "snp") {
-    genetics <- fscSettingsGenetics(fscBlock_snp(sequence.length = loc_parms$seq_length, mut.rate = loc_parms$mu), num.chrom = loc_parms$nloci)  
+    genetics <- fscSettingsGenetics(fscBlock_snp(sequence.length = loc_parms$seq_length, mut.rate = loc_parms$mu), num.chrom = num_markers_sim)  
   } else {
     stop("runFSC_step is only built for SNP data (at the moment)")
   }
@@ -227,49 +231,35 @@ runFSC_step_agg2 = function(
   #fscout <- fastsimcoal(label = label, pop.info = pop_info, locus.params = locus_params, mig.rates = migmat, hist.ev = hist_ev, num.cores = num_cores, delete.files = delete_files, exec = exec)
 
   ###!### This is new!!
-  p <- fscWrite(demes = demes, genetics = genetics, events = events, migration = migration, label = label, use.wd = TRUE)
-  p <- fscRun(p, all.sites = FALSE, inf.sites = FALSE, no.arl.output = FALSE, dna.to.snp = TRUE, quiet = FALSE, num.cores = num_cores, exec = exec)
-  out <- fscReadArp(p)
+  varSNPs <- 0
+  while(varSNPs < loc_parms$nloci) {
+    p <- fscWrite(demes = demes, genetics = genetics, events = events, migration = migration, label = label, use.wd = TRUE)
+    p <- fscRun(p, all.sites = FALSE, inf.sites = FALSE, no.arl.output = FALSE, dna.to.snp = TRUE, quiet = FALSE, num.cores = num_cores, exec = exec)
+    out <- fscReadArp(p)
 
-
-  #Modified function from Eric Archer's strataG fscTutorial() markdown
-  #Adding pair.per.loc, simulating diploid data, need to retain 2 columns for each locus
-  sampleOnePerLocus <- function(mat, MAF = NULL) {
-    # Extract the SNP names from the matrix column names
-    snp.name <- colnames(mat[, -(1:2)])
-    snpcol1 <- snp.name[grep(pattern = ".1", snp.name, fixed = TRUE)]
-    # Extract the chromosome name (starts with "C" and is followed by numbers) 
-    #   from the SNP names
-    chrom.names <- regmatches(snpcol1, regexpr("^C[[:digit:]]+", snpcol1))
+    fscout <- sampleOnePerLocus(mat = out, MAF = MAF)
+    tmp_gtype <- df2gtypes(fscout, ploidy = 2)
+    varSNPs <- sum(numAlleles(tmp_gtype)$num.alleles == 2)
     
-    if(!is.null(MAF)) {
-       minorfreq <- c()
-       for(col in 1:length(snpcol1)) {
-         tmp_locuscalls <- c(mat[,snpcol1[col]],mat[,paste0(strsplit(snpcol1[col], split = ".1", fixed = TRUE), ".2")])
-         tmp_locustab <- table(tmp_locuscalls)
-         minorfreq[col] <- min(tmp_locustab/sum(tmp_locustab))
-         rm(tmp_locuscalls, tmp_locustab)
-       }
-       filtered <- snpcol1[minorfreq >= MAF & minorfreq <= 0.5]
-       filt.chrom.names <- regmatches(filtered, regexpr("^C[[:digit:]]+", filtered))
-       one.per.loc <- tapply(filtered, filt.chrom.names, sample, size = 1)
-    } else {
-      one.per.loc <- tapply(snpcol1, chrom.names, sample, size = 1)  
-    }
-    # Choose one SNP per chromosome
-    
-    for(l in 1:length(one.per.loc)) {
-      if(l == 1) {
-        pair.per.loc <- c(one.per.loc[l], paste0(strsplit(one.per.loc[l], split = ".1", fixed = TRUE), ".2"))
-      } else {
-        pair.per.loc <- c(pair.per.loc, one.per.loc[l], paste0(strsplit(one.per.loc[l], split = ".1", fixed = TRUE), ".2"))
+    if(varSNPs < loc_parms$nloci) {
+      scaleSNP <- 1.1*(loc_parms$nloci/varSNPs)
+      newSNPnum <- round(scaleSNP*attr(genetics, "num.chrom"),0)
+      print(paste("Coalescent simulation with", attr(genetics, "num.chrom"), "loci resulted in", varSNPs, "variable markers. Trying again with",newSNPnum, "loci!"))
+      attr(genetics, "num.chrom") <- newSNPnum
+      rm(scaleSNP, newSNPnum)
+    } else if(varSNPs > loc_parms$nloci) {
+      #SAMPLE loc_parms$nloci markers here!!!
+      #####
+      nalleles <- numAlleles(tmp_gtype)
+      varchromnames <-  nalleles$locus[nalleles$num.alleles == 2]
+      keep.loci <- sample(varchromnames, loc_parms$nloci, replace = FALSE)
+      keep.columns <- c(1,2)
+      for(locus in keep.loci) {
+        keep.columns <- c(keep.columns, grep(locus, colnames(fscout)))
       }
+      fscout <- fscout[,keep.columns]
     }
-    # Return matrix of 
-    mat[, c("id", "deme", pair.per.loc)]
   }
-
-  fscout <- sampleOnePerLocus(mat = out, MAF = MAF)
   
   #Need to get the names working as we want them to work...
   popid_inds <- sapply(strsplit(out$id, split = "_"), FUN = function(x) as.numeric(x[1]))
@@ -286,7 +276,8 @@ runFSC_step_agg2 = function(
   #FSCabbrev <- plyr::mapvalues(FSCgridid,l$sampdf$cell,l$sampdf$abbrev)
   #fscout@data$strata <- FSCabbrev
   #fscout@data$ids <- paste0(fscout@data$strata, "_", c(1:length(fscout@data[,1])))
-
+  fscout <- fscout[order(fscout$deme),]
+  
   fscout
   
   
