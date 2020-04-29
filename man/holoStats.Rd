@@ -4,7 +4,7 @@
 \alias{holoStats}
 \title{Calculate summary stats for holosim}
 \usage{
-holoStats(out, popDF, extent, cores = 1)
+holoStats(out, popDF, cores = 1)
 }
 \arguments{
 \item{out}{genetic data}

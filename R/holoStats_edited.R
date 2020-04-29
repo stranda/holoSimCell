@@ -7,17 +7,26 @@
 #' @export
 #' 
 #holostats function
-holoStats = function(out, popDF, extent, cores=1) {
-  pops.xy = popDF[,c("id","col","row")]
-  names(pops.xy)[1] <- "pop"
+#holoStats = function(out, popDF, extent, cores=1) {
+holoStats = function(out, popDF, cores=1) {
+  #pops.xy = popDF[,c("id","col","row")]
+  pops.xy = popDF[,c("pop","x","y")]
+  #names(pops.xy)[1] <- "pop"
+  names(pops.xy) <- c("pop", "col", "row")
 
   allMAF <- mafreq(out)
   totalHe <- 2*allMAF*(1-allMAF)
-  popid <- strataNames(out)
+  #popid <- strataNames(out)
+  popid <- unique(out$deme)
   
   SNPs <- sum(allMAF<1)
   names(SNPs) <- "tot_SNPs"
-  split_out <- strataSplit(out) #list of strataG objects for each pop
+  #split_out <- strataSplit(out) #list of strataG objects for each pop
+  split_out <- vector("list", length(unique(out$deme)))
+  for(p in 1:length(unique(out$deme))) {
+    split_out[[p]] <- out[out$deme == unique(out$deme)[p],]
+    names(split_out)[p] <- unique(split_out[[p]]$deme)
+  }
   ###    locMAF = sapply(split_out,function(o){mafreq(o)})
 #!#  locMAF <- do.call(cbind,mclapply(split_out,mc.cores=cores,function(o){mafreq(o)}))
 
@@ -25,26 +34,26 @@ holoStats = function(out, popDF, extent, cores=1) {
   #!# Exploit the names of allMAF to ID the global minor allele
   minor <- sapply(names(allMAF), FUN=function(x){strsplit(x, split = "[.]")[[1]][2]})
   #!# A new function for the locMAF -- this is a big change... does it work with all things that depend on locMAF??
-  loc.mafreq <- function(split_out = NULL, minor = NULL) {
-    out <- matrix(data = NA, nrow = length(grep("Locus",names(split_out[[1]]@data))), ncol = length(split_out))
-    rownames(out) <- names(split_out[[1]]@data)[grep("Locus",names(split_out[[1]]@data))]
-    colnames(out) <- names(split_out)
-
-    for(pop in 1:length(split_out)) {
-      
-      geno <- split_out[[pop]]@data[,-c(1,2)]
-      geno <- apply(geno,2,as.character)
-      geno <- apply(geno,2,as.numeric)
-
-      for(loc in 1:length(out[,1])) {
-        out[loc,pop] <- length(which(geno[,loc] == minor[loc]))/length(geno[,loc])
-      }
-
-      rm(geno)
-    }
-
-    out
-  }
+  #loc.mafreq <- function(split_out = NULL, minor = NULL) {
+  #  out <- matrix(data = NA, nrow = length(grep("Locus",names(split_out[[1]]@data))), ncol = length(split_out))
+  #  rownames(out) <- names(split_out[[1]]@data)[grep("Locus",names(split_out[[1]]@data))]
+  #  colnames(out) <- names(split_out)
+  #
+  #  for(pop in 1:length(split_out)) {
+  #    
+  #    geno <- split_out[[pop]]@data[,-c(1,2)]
+  #    geno <- apply(geno,2,as.character)
+  #    geno <- apply(geno,2,as.numeric)
+  #
+  #    for(loc in 1:length(out[,1])) {
+  #      out[loc,pop] <- length(which(geno[,loc] == minor[loc]))/length(geno[,loc])
+  #    }
+  #
+  #    rm(geno)
+  #  }
+  #
+  #  out
+  #}
 
   locMAF <- loc.mafreq(split_out, minor)
 
@@ -53,8 +62,10 @@ holoStats = function(out, popDF, extent, cores=1) {
   locHe <- colMeans(2*locMAF*(1-locMAF))
   varlocHe <- apply(2*locMAF*(1-locMAF),2,var)
   
-  locN <- sapply(split_out,function(o){length(o@data$ids)})
-#  names(locN) <- popid
+  #locN <- sapply(split_out,function(o){length(o@data$ids)})
+  locN <- sapply(split_out,function(o){nrow(o)})
+  
+  #  names(locN) <- popid
   #!# Change here for new locMAF
   #localSNP <- apply(locMAF,2,function(x){sum(x<1)})
   localSNP <- apply(locMAF,2,function(x){sum(x<1 & x>0)})
@@ -62,7 +73,9 @@ holoStats = function(out, popDF, extent, cores=1) {
 #  names(localSNP) <- paste0("S.", popid)
   names(localSNP) <- paste0("S.", names(localSNP))
   ##not sure we need this, does not seem to be variable and costs some time
-  privateSNP <- colSums(privateAlleles(out))
+  #privateSNP <- colSums(privateAlleles(out))
+  privateSNP <- colSums(privateAlleles(df2gtypes(out, ploidy = 2)))
+  privateSNP <- privateSNP[match(unique(out$deme), names(privateSNP))]
   #privateSNP = privateSNP[sample.order]
 #  names(privateSNP) <- paste0("pS.", popid)
   names(privateSNP) <- paste0("pS.", names(privateSNP))
@@ -127,12 +140,13 @@ holoStats = function(out, popDF, extent, cores=1) {
   #popcrd=data.frame(t(sapply(popDF$grid.cell,function(i) {which(pops1==i,arr.ind=T)})))
   #names(popcrd)=c("y","x")
   #popDF=cbind(popDF,popcrd)
-  popDF$y <- popDF$row
-  popDF$x <- popDF$col
+  #popDF$y <- popDF$row
+  #popDF$x <- popDF$col
 	
   ###     get pairwise geo distances
   pdist=as.matrix(dist(popDF[,c("x","y")]))
-  colnames(pdist) <- popDF$id
+  #colnames(pdist) <- popDF$id
+  colnames(pdist) <- popDF$pop
   rownames(pdist) <- colnames(pdist)
   diag(pdist) <- NA
   pdist[upper.tri(pdist)] <- NA
@@ -154,10 +168,12 @@ holoStats = function(out, popDF, extent, cores=1) {
   he_by_pop <- colMeans(2*locMAF*(1-locMAF))
   
 #  hedf <- data.frame(he=he_by_pop, id=unique(out@data$strata),stringsAsFactors=F)
-  hedf <- data.frame(he=he_by_pop, id=names(he_by_pop),stringsAsFactors=F)
+  #hedf <- data.frame(he=he_by_pop, id=names(he_by_pop),stringsAsFactors=F)
+  hedf <- data.frame(he=he_by_pop, pop=names(he_by_pop),stringsAsFactors=F)
 
   pr=prcomp(t(locMAF))
-  pcadf <- data.frame(id=rownames(predict(pr)),pc1=predict(pr)[,1],pc2=predict(pr)[,2],pc3=predict(pr)[,3])
+  #pcadf <- data.frame(id=rownames(predict(pr)),pc1=predict(pr)[,1],pc2=predict(pr)[,2],pc3=predict(pr)[,3])
+  pcadf <- data.frame(pop=rownames(predict(pr)),pc1=predict(pr)[,1],pc2=predict(pr)[,2],pc3=predict(pr)[,3])
   
   popDF <- merge(pcadf,merge(popDF,hedf))
   
@@ -228,7 +244,32 @@ holoStats = function(out, popDF, extent, cores=1) {
   ##Spatial Statistics: written by Ellie Weise
   ##incorporated Dec 19, 2018
   #getting data into a usable format for the stats to calculate
-  df <- out@data
+  #df <- out@data
+  #!# This is kind of long and messy.  Better way to do this?  Would like to keep the two allele copies for the same individual together in the data frame - JDR 4/27/2020
+  chrom.names <- unique(regmatches(colnames(out[,-c(1,2)]), regexpr("^C[[:digit:]]+", colnames(out[,-c(1,2)]))))
+  df <- matrix(data = NA, nrow = 2*nrow(out), ncol = length(chrom.names)+2)
+  df <- as.data.frame(df)
+  colnames(df) <- c("id","deme",chrom.names)
+  df$id <- c(out$id, out$id)
+  df$deme <- c(out$deme, out$deme)
+  for(loc in chrom.names) {
+    tmp.columns <- grep(loc, colnames(out))
+    if(length(tmp.columns) == 2) {
+      tmp <- c(out[,tmp.columns[1]], out[,tmp.columns[2]])
+      df[,loc] <- tmp
+      rm(tmp.columns, tmp)
+    } else {
+      stop(paste("too many columns for chromosome", loc, "subsample to one per locus?"))
+    }
+  }
+  myorder <- c()
+  for(pop in unique(out$deme)) {
+    tmp <- which(df$deme == pop)
+    tmp <- tmp[order(df$id[tmp])]
+    myorder <- c(myorder, tmp)
+    rm(tmp)
+  }
+  df <- df[myorder,]
   
   #function used to ensure that 0 represents the major allele and 1 is the minor allele in our data set
   #!#Moved to additional_stats_functions.R
@@ -260,7 +301,7 @@ holoStats = function(out, popDF, extent, cores=1) {
   #GSSA Calculation from Alvarado-Serrano paper
   #function in separate script
   geodist <- as.matrix(dist(data.frame(popDF$x, popDF$y)))
-  gssa <- gssa_raggedness(out = out, dist_mat = geodist)
+  gssa <- gssa_raggedness(data = data, dist_mat = geodist)
   gssa_HRi <- t(unname(gssa$HRi))     #Tweaks to naming, gssa output now has HRi, mean, & var - JDR 1/17/2020
   gssa_HRi <- as.vector(gssa_HRi)
   names(gssa_HRi) = paste0("HRi_",pops.xy$pop)
@@ -286,8 +327,8 @@ holoStats = function(out, popDF, extent, cores=1) {
   pairbc.loc = as.vector(bray_curtis)
   bcnames.loc = c()
   #This will be different...
-  for(pid in 1:(length(popDF$id)-1)) {
-    bcnames.loc = c(bcnames.loc, paste0("BrayCurt_",popDF$id[pid],".", popDF$id[(pid+1):length(popDF$id)]))
+  for(pid in 1:(length(popDF$pop)-1)) {
+    bcnames.loc = c(bcnames.loc, paste0("BrayCurt_",popDF$pop[pid],".", popDF$pop[(pid+1):length(popDF$pop)]))
   }
   #!# Naming issue here: popid.popid also used for Nei and Fst
   names(pairbc.loc) <- bcnames.loc
@@ -357,7 +398,8 @@ holoStats = function(out, popDF, extent, cores=1) {
   #apply the polyfit function to LD
   #!# Changed... risky to point back at the out object.  LD was made going through pops.xy, stick with that
   #LD_pop1 <- data.frame(id = unique(out@data$strata), ld = LD_pop$mean_LD_pop)
-  LD_pop1 <- data.frame(id = pops.xy$pop, ld = LD_pop$mean_LD_pop)
+  #LD_pop1 <- data.frame(id = pops.xy$pop, ld = LD_pop$mean_LD_pop)
+  LD_pop1 <- data.frame(pop = pops.xy$pop, ld = LD_pop$mean_LD_pop)
   popDF <- merge(popDF,LD_pop1)
   
   ld.lat.stats <- polyfit(popDF,"ld","y",ord=2)
@@ -377,7 +419,8 @@ holoStats = function(out, popDF, extent, cores=1) {
   #calculating graph theory statistics
   #gt_sum <- graph_theory(data_frame = FstMat.loc, pops = pops.xy)
   #Updating to use new version of graph_theory (popgraph instead of ipgraph + sna) - JDR 8/20/2020
-  graphstats <- graph_theory(data = out@data, stats = c("cGD", "betweenness", "closeness"), plot = FALSE)
+  #graphstats <- graph_theory(data = out@data, stats = c("cGD", "betweenness", "closeness"), plot = FALSE)
+  graphstats <- graph_theory(data = data, stats = c("cGD", "betweenness", "closeness"), plot = FALSE)
   #message("Graph done")
   
   #Below chunk is not needed with new graph_theory() function - JDR 8/20/2020

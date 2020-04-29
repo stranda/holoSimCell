@@ -41,12 +41,13 @@ data_reformat <- function(raw_data){
   #make strata into single number numeric
   #!# This is new, sorts raw_data by strata, as in split_out
   #!# This should help with consistency of the ordering of populations
-  raw_data <- raw_data[order(raw_data$strata),]
+  #raw_data <- raw_data[order(raw_data$strata),]  #!# No longer necessary - 4/27/2020, not working with gtypes object anymore
   #!#
   #CHANGE HERE -- REDOING HOW STRATA ARE NAMED -- JDR May 2019
   #st <- unlist(strsplit(raw_data$strata," "))
   #st <- as.numeric(st[seq(2,length(st),2)])
-  st <- raw_data$strata
+  #st <- raw_data$strata
+  st <- raw_data$deme
   #!#
 
   #make a repeat list of ones
@@ -136,18 +137,23 @@ old_gssa_raggedness <- function(out=NULL,dist_mat=NULL){
   }
   index
 }
-gssa_raggedness <- function(out=NULL,dist_mat=NULL){
+gssa_raggedness <- function(data=NULL,dist_mat=NULL){
   #require(strataG)
   #require(matrixStats)
   ##working with the gtypes object to get in into the correct format
-  split <- strataSplit(out)
-  
+  #split <- strataSplit(out)
+  split <- vector("list", length(unique(data$st)))
+  for(p in 1:length(unique(data$st))) {
+    split[[p]] <- data[data$st == unique(data$st)[p],]
+    names(split)[p] <- unique(split[[p]]$st)
+  }
   #First, need to ID the minor alleles for each locus
   maID <- function(x) {
     as.numeric(names(which(table(x) == min(table(x)))))[1]
   }
   
-  ma_vec <- apply(out@data[,-c(1,2)], 2, maID)
+  #ma_vec <- apply(out@data[,-c(1,2)], 2, maID)
+  ma_vec <- apply(data[,-c(1,2)], 2, maID)
   
   #Next make a table with npops columns and nloci rows that will give the frequencies of minor alleles in each population at each locus
   getMAFreq <- function(x=NULL, ma=NULL) {
@@ -156,7 +162,7 @@ gssa_raggedness <- function(out=NULL,dist_mat=NULL){
   
   ma_freq_mat = matrix(data = NA, nrow = length(ma_vec), ncol = length(split))
   for(pop in 1:length(split)) {
-    ma_freq_mat[,pop] = mapply(getMAFreq, split[[pop]]@data[,-c(1,2)], ma_vec)
+    ma_freq_mat[,pop] = mapply(getMAFreq, split[[pop]][,-c(1,2)], ma_vec)
   }
   
   #create an empty list of vectors to fill later
@@ -315,7 +321,8 @@ graph_theory <- function(data = data, stats = c("cGD", "betweenness", "closeness
 	for(r in 1:nrow(indat2)){
 		indat2[r,] <- indat[allele1row[r],]+indat[(allele1row[r]+1),]
 	}
-	pops <- data$strata[allele1row]
+	#pops <- data$strata[allele1row]
+	pops <- as.character(data$st[allele1row])
 	lat <- rep(NA, nrow(indat2))
 	long <- rep(NA, nrow(indat2))
 	colnames(indat2) <- paste0("loc",c(1:ncol(indat2)))
@@ -324,14 +331,14 @@ graph_theory <- function(data = data, stats = c("cGD", "betweenness", "closeness
 	{
 	  tmpfilename <- paste0("tmpsnp-",round(runif(1),5),".csv")
 	  write.csv(writeme, tmpfilename, quote = FALSE, row.names = FALSE)
-	  indat3 <- read_population(tmpfilename, type = "snp", locus.columns = c(4:1003))
+	  indat3 <- read_population(tmpfilename, type = "snp", locus.columns = c(4:ncol(writeme)))
 	  file.remove(tmpfilename)
 	} else {# use text connection
 	  vec=  c(paste0(paste(names(writeme),collapse=","),"\n"),sapply(1:nrow(writeme),function(l){paste0(paste(writeme[l,],collapse=", "),"\n")}))
-	  indat3 <- read_population(textConnection(vec), type = "snp", locus.columns = c(4:1003))
+	  indat3 <- read_population(textConnection(vec), type = "snp", locus.columns = c(4:ncol(writeme)))
 	}
 	
-
+  indat3$Population <- writeme$Population
 	indat4 <- to_mv(indat3)
 	pops <- indat3$Population
 	
