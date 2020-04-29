@@ -1,5 +1,5 @@
 library(holoSimCell)
-#devtools::load_all()
+devtools::load_all()
 ### imputed, popmap (individualID->pop mapping), pts (sample locations) and ashpred
 ### are now built into holoSimCell
 ### as built in dataframes (in data/ directory)
@@ -104,19 +104,15 @@ if(FALSE){
 
 
 
-outdir <- "."
+outdir <- "~/Desktop"
 simdir <- outdir
 parms <- drawParms(control = system.file("extdata/csv","priors.csv",package="holoSimCell"))
 parms$seq_length <- 80
-parms$mu <- 1e-8  
+parms$mu <- 1e-7 
 loc_parms <- data.frame(marker = "snp",
                         nloci = parms$nloci,           
                         seq_length = parms$seq_length,
                         mu = parms$mu)
-
-
-loc_parms2 <- loc_parms     #Will use this object for simulations, increase # of loci until we get loc_parms$nloci SNPs
-loc_parms2$nloci <- round(loc_parms2$nloci*1.25) 	#!!# #Simulate more loci than needed to account for monomorphic sites
 
 preLGMparms <- data.frame(preLGM_t = parms$preLGM_t/parms$G,		#Time / GenTime
                           preLGM_Ne = parms$preLGM_Ne,
@@ -127,7 +123,6 @@ parms_out <- as.data.frame(c(ph$struct[which(!names(ph$struct) %in% names(parms)
 #With smaller K, some populations have very very low N at the end of the simulation
 #In those cases, we need to inflate N a bit for the coalescent simulation
 ph2$Nvecs[ph2$Nvecs[,702] > 0 & ph2$Nvecs[,702] < 1,702] <- 1
-
 
 #Run the coalescent simulation
 setwd(simdir) 
@@ -152,34 +147,12 @@ out <- runFSC_step_agg2(ph = ph2,				#A new pophist object - (pophist, Nvecs, tm
                         delete_files = TRUE,	#Logical - clear out .par, .arp, and other FSC outputs?
                         num_cores = 1,			#Number of processors to use for FSC
                         exec = "fsc26",			#Executable for FSC (needs to be in a folder in the system $PATH)
-                        loc_parms = loc_parms2,		#Vector of locus parameters
+                        loc_parms = loc_parms,		#Vector of locus parameters
                         found_Ne = parms$found_Ne,			#Founding population size, required for STEP change model		
-                        gmap = gmap)
+                        gmap = gmap,              #Mapping the original population onto aggregated grid
+                        MAF = 0.01                #Minor allele frequency threshold, loci with minor allele frequencies below this value are excluded from sim
+)
 
-#Some loci are below our MAF threshold, fix this inside runFSC_step_agg2
-snp.name <- colnames(out[, -(1:2)])
-chrom.names <- regmatches(snp.name, regexpr("^C[[:digit:]]+", snp.name))
-allele_per_loc <- c()
-maf_per_loc <- c()
-for(x in 1:length(chrom.names)) {
-  tmpalltab <- table(c(out[,grep(chrom.names[x], colnames(out))[1]], out[,grep(chrom.names[x], colnames(out))[2]]))
-  allele_per_loc[x] <- dim(tmpalltab)
-  maf_per_loc[x] <- min(tmpalltab)/sum(tmpalltab)
-  rm(tmpalltab)
-}
-sum(allele_per_loc == 2)
-sum(maf_per_loc >= 0.01)
+popDF <- makePopdf(landscape,"cell")
 
-#var_loc_cols <- which(allele_per_loc == 2) + 2
-#FINALout <- out[,c(1,2,sample(var_loc_cols,parms$nloci,replace = FALSE))]
-#dim(FINALout)
-#sum(apply(FINALout[,-c(1,2)], 2, FUN=function(x) dim(table(x))) == 2)
-
-####### REMAINING TO DO...
-#1
-#Still need to devise a minor allele frequency filter, but that shouldn't be too hard...
-#Ideally that would go inside runFSC_step_agg2(), before the SampleOnePerLocus() call
-
-#2
-#Need to test holoStats() with the new output format from strataG
-#Some things will definitely need to change (popDF$row & popDF$col, for example)
+stats <- holoStats(out, popDF, cores = 1)

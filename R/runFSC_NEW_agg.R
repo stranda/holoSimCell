@@ -60,7 +60,7 @@ runFSC_step_agg2 = function(
   empty[l$empty] <- TRUE
   empty_gpops <- sort(unique(c(
     gmap$gpop[!gmap$gpop %in% gmap$gpop[empty == FALSE]],
-    which(rowSums(ph2$Nvecs) == 0),
+    which(rowSums(ph$Nvecs) == 0),
     gmap$gpop[!gmap$gpop %in% coalhist$src & !gmap$gpop %in% coalhist$snk])))
   
   if(length(empty_gpops) > 0) {
