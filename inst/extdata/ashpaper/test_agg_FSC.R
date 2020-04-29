@@ -47,7 +47,7 @@ if ((!exists("icenolakesland")))
     icenolakes <- as.array(1-rs) #really slow! thats one reason these layers get stored
     
     icenolakesland <- def_grid_pred(pred=icenolakes,samppts=samppts,
-                                    init.ext=c(dim(rs)[1],dim(rs)[2]),
+                                    init.ext=c(45,65),
                                     keep.thresh=0.05,corners=corners)
 }
 
@@ -65,7 +65,7 @@ if (!exists("icelakesland"))
     icelakes <- as.array(1-rs) #really slow! thats one reason these layers get stored
     
     icelakesland <- def_grid_pred(pred=icelakes,samppts=samppts,
-                                  init.ext=c(dim(rs)[1],dim(rs)[2]),
+                                  init.ext=c(40,59),
                                   keep.thresh=0.05,corners=corners)
 }
 
@@ -81,9 +81,9 @@ slp <- as.integer(floor(sec*lp))
 set.seed(as.integer(sec))
 
 ph = getpophist2.cells(hab_suit=landscape,
-                       refs=(980),
+                       refs=(540),
                        refsz=100,
-                       mix=0.00,  #note how small.
+                       mix=0.005,  #note how small.
                        shortscale=0.04,  # scale parameter of weibull with shape below
                        shortshape=1, #weibull shape
                        longmean=0.1,  # mean of normal with sd = longmean
@@ -104,7 +104,7 @@ if(FALSE){
 
 
 
-outdir <- "~/Desktop"
+outdir <- "."
 simdir <- outdir
 parms <- drawParms(control = system.file("extdata/csv","priors.csv",package="holoSimCell"))
 parms$seq_length <- 80
