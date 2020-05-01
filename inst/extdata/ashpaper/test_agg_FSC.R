@@ -128,7 +128,7 @@ outdir <- "~/Desktop"
 simdir <- outdir
 parms <- drawParms(control = system.file("extdata/csv","priors.csv",package="holoSimCell"))
 parms$seq_length <- 80
-parms$mu <- 1e-7 
+parms$mu <- 1e-8 
 loc_parms <- data.frame(marker = "snp",
                         nloci = parms$nloci,           
                         seq_length = parms$seq_length,

@@ -236,15 +236,17 @@ runFSC_step_agg2 = function(
     p <- fscWrite(demes = demes, genetics = genetics, events = events, migration = migration, label = label, use.wd = TRUE)
     p <- fscRun(p, all.sites = FALSE, inf.sites = FALSE, no.arl.output = FALSE, dna.to.snp = TRUE, quiet = FALSE, num.cores = num_cores, exec = exec)
     out <- fscReadArp(p)
-
+    message(paste("Coalescent simulation with",attr(genetics,"num.chrom"), "loci resulted in", (ncol(out)-2)/2, "polymorphic sites"), appendLF=TRUE)
+    
     fscout <- sampleOnePerLocus(mat = out, MAF = MAF)
     tmp_gtype <- df2gtypes(fscout, ploidy = 2)
     varSNPs <- sum(numAlleles(tmp_gtype)$num.alleles == 2)
+    message(paste("Subsampling to one SNP per locus...", varSNPs, "loci have at least one polymorphic sites with MAF >", MAF), appendLF=TRUE)
     
     if(varSNPs < loc_parms$nloci) {
       scaleSNP <- 1.1*(loc_parms$nloci/varSNPs)
       newSNPnum <- round(scaleSNP*attr(genetics, "num.chrom"),0)
-      print(paste("Coalescent simulation with", attr(genetics, "num.chrom"), "loci resulted in", varSNPs, "variable markers. Trying again with",newSNPnum, "loci!"))
+      print(paste("Coalescent simulation with", attr(genetics, "num.chrom"), "loci resulted in", varSNPs, "variable markers. Trying again with",newSNPnum, "loci!"), appendLF=TRUE)
       attr(genetics, "num.chrom") <- newSNPnum
       rm(scaleSNP, newSNPnum)
     } else if(varSNPs > loc_parms$nloci) {
@@ -278,6 +280,7 @@ runFSC_step_agg2 = function(
   #fscout@data$ids <- paste0(fscout@data$strata, "_", c(1:length(fscout@data[,1])))
   fscout <- fscout[order(fscout$deme),]
   
+  message(paste("Coalescent simulation complete -", (ncol(fscout)-2)/2, "SNPs generated"), appendLF=TRUE)
   fscout
   
   
