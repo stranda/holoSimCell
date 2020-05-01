@@ -246,7 +246,7 @@ runFSC_step_agg2 = function(
     if(varSNPs < loc_parms$nloci) {
       scaleSNP <- 1.1*(loc_parms$nloci/varSNPs)
       newSNPnum <- round(scaleSNP*attr(genetics, "num.chrom"),0)
-      print(paste("Coalescent simulation with", attr(genetics, "num.chrom"), "loci resulted in", varSNPs, "variable markers. Trying again with",newSNPnum, "loci!"), appendLF=TRUE)
+      message(paste("Coalescent simulation with", attr(genetics, "num.chrom"), "loci resulted in", varSNPs, "variable markers. Trying again with",newSNPnum, "loci!"), appendLF=TRUE)
       attr(genetics, "num.chrom") <- newSNPnum
       rm(scaleSNP, newSNPnum)
     } else if(varSNPs > loc_parms$nloci) {
