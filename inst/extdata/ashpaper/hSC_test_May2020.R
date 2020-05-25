@@ -1,8 +1,27 @@
-library(holoSimCell)
+#library(holoSimCell)
 devtools::load_all()
 ### imputed, popmap (individualID->pop mapping), pts (sample locations) and ashpred
 ### are now built into holoSimCell
 ### as built in dataframes (in data/ directory)
+
+
+args <- commandArgs(TRUE)
+i <- as.numeric(args[1])
+nreps <- as.numeric(args[2]) 
+who <- as.character(args[3])  
+label <- as.character(args[4])
+
+if(length(args) == 0){
+  i <- 1
+  nreps <- 20
+  who <- "JDR"
+  label <- "test"
+}
+
+#Set the filename, simulation, and output directories for the run
+fn <- paste0(label,"-",i,"_", who, ".csv")
+outdir <- "~/Desktop/hSC_testing/outdir"
+simdir <- "~/Desktop/hSC_testing/simdir"
 
 rownames(popmap) <- popmap[,1]
 table(popmap[gsub("fp","",names(imputed)),2])
@@ -81,99 +100,99 @@ if (!uniqueSampled(landscape))
 ###seed is based on time in seconds and the number of characters in the library path
 ###
 ###
-sec=as.numeric(Sys.time())-1500000000
-lp= as.numeric(as.character(nchar(paste(.libPaths(), collapse = " "))))
-slp <- as.integer(floor(sec*lp))
+repl <- 1
+while(repl <= nreps) {
+  sec=as.numeric(Sys.time())-1500000000
+  lp= as.numeric(as.character(nchar(paste(.libPaths(), collapse = " "))))
+  slp <- as.integer(floor(sec*lp))
 
-set.seed(as.integer(sec))
+  set.seed(as.integer(sec))
 
-ph = getpophist2.cells(hab_suit=landscape,
-                       refs=(540),
-                       refsz=100,
-                       mix=0.005,  #note how small.
-                       shortscale=0.04,  # scale parameter of weibull with shape below
-                       shortshape=1, #weibull shape
-                       longmean=0.15,  # mean of normal with sd = longmean
-                       sz=1) #size of a cell (same units as longmean and shortscale)
+  parms <- drawParms(control = system.file("extdata/csv","priors.csv",package="holoSimCell"))
 
-if (!testPophist(ph,landscape))
-{
-    print("here is where we could do something about non-colonized sample pops")
-}
+  #Forward simulation
+  ph = getpophist2.cells(hab_suit=landscape,
+                       refs=parms$refs,  #set at cell 540 right now 
+                       refsz=parms$found_Ne,
+                       mix=parms$mix,  #note how small.
+                       shortscale=parms$shortscale,  # scale parameter of weibull with shape below
+                       shortshape=parms$shortshape, #weibull shape
+                       longmean=parms$longmean,  # mean of normal with sd = longmean
+                       sz=parms$sz, #size of a cell (same units as longmean and shortscale)
+                       K = parms$Ne) #maximum population size in a grid cell, scaled with hab_suit from landscape object
 
-
-gmap=make.gmap(ph$pophist,
+  if (!testPophist(ph,landscape))
+  {
+      print("here is where we could do something about non-colonized sample pops")
+  }
+  
+  #Cell aggregation for coalescent
+  gmap=make.gmap(ph$pophist,
                xnum=2, #number of cells to aggregate in x-direction
                ynum=2) #number of aggregate in the y-direction
 
+  if (doesGmapCombine(gmap,landscape))
+  {
+      stop("Need to look at the resolutions because this gmap combines sampled populations")
+  }
 
-if (doesGmapCombine(gmap,landscape))
-{
-    stop("Need to look at the resolutions because this gmap combines sampled populations")
-}
+  ph2 <- pophist.aggregate(ph,gmap=gmap)
 
-
-ph2 <- pophist.aggregate(ph,gmap=gmap)
-
-if(FALSE){
-  pdf("aggregate_example.pdf")
-  plothist(ph)
-  plothist(ph2)
-  dev.off()
-}
-
-
-
-outdir <- "~/Desktop"
-simdir <- outdir
-parms <- drawParms(control = system.file("extdata/csv","priors.csv",package="holoSimCell"))
-parms$seq_length <- 80
-parms$mu <- 1e-8 
-
-loc_parms <- data.frame(marker = "snp",
+  #Parameters specific to coalescent model
+  loc_parms <- data.frame(marker = "snp",
                         nloci = parms$nloci,           
                         seq_length = parms$seq_length,
                         mu = parms$mu)
 
-preLGMparms <- data.frame(preLGM_t = parms$preLGM_t/parms$G,		#Time / GenTime
+  preLGMparms <- data.frame(preLGM_t = parms$preLGM_t/parms$G,		#Time / GenTime
                           preLGM_Ne = parms$preLGM_Ne,
                           ref_Ne = parms$ref_Ne)
 
-parms_out <- as.data.frame(c(ph$struct[which(!names(ph$struct) %in% names(parms))], parms))
+  parms_out <- as.data.frame(c(ph$struct[which(!names(ph$struct) %in% names(parms))], parms))
 
-#With smaller K, some populations have very very low N at the end of the simulation
-#In those cases, we need to inflate N a bit for the coalescent simulation
-ph2$Nvecs[ph2$Nvecs[,702] > 0 & ph2$Nvecs[,702] < 1,702] <- 1
+  #With smaller K, some populations have very very low N at the end of the simulation
+  #In those cases, we need to inflate N a bit for the coalescent simulation
+  ph2$Nvecs[ph2$Nvecs[,702] > 0 & ph2$Nvecs[,702] < 1,702] <- 1
 
-#Run the coalescent simulation
-setwd(simdir) 
-
-#For easy testing of runFSC_step_agg2() guts
-if(FALSE) {
-  phOLD <- ph
-  ph <- ph2
-  l <- landscape
-  num_cores <- 1
-  label <- "NewTest"
-  exec <- "fsc26"
-  sample_n <- 14
-  found_Ne <- 50
-}
-
-out <- runFSC_step_agg3(ph = ph2,				#A new pophist object - (pophist, Nvecs, tmat, struct, hab_suit, coalhist)
+  #Run the coalescent simulation
+  setwd(simdir) 
+  out <- runFSC_step_agg3(ph = ph2,				#A new pophist object - (pophist, Nvecs, tmat, struct, hab_suit, coalhist)
                         l = landscape, 			#A new landscape object - (details, occupied, empty, sampled, hab_suit, sumrast, samplocsrast, samplocs)
                         sample_n = 14,		#Number of sampled individuals per population
                         preLGMparms = preLGMparms,		#This has parms for the refuge, preLGM size and timing
-                        label = "test_agg",			#Label for FSC simulation files
+                        label = paste0(label,"-",repl),			#Label for FSC simulation files
                         delete_files = TRUE,	#Logical - clear out .par, .arp, and other FSC outputs?
                         num_cores = 1,			#Number of processors to use for FSC
                         exec = "fsc26",			#Executable for FSC (needs to be in a folder in the system $PATH)
                         loc_parms = loc_parms,		#Vector of locus parameters
                         found_Ne = parms$found_Ne,			#Founding population size, required for STEP change model		
                         gmap = gmap,              #Mapping the original population onto aggregated grid
-                        MAF = 0.01                #Minor allele frequency threshold, loci with minor allele frequencies below this value are excluded from sim
-)
+                        MAF = 0.01,                #Minor allele frequency threshold, loci with minor allele frequencies below this value are excluded from sim
+                        maxloc = 200000           #Maximum number of marker loci to attempt in a fastsimcoal simulation
+  )
 
-popDF <- makePopdf(landscape,"cell")
-
-stats <- holoStats(out, popDF, cores = 1)
+  #Calculate summary statistics
+  if(!is.null(out)) {
+    popDF <- makePopdf(landscape,"cell")
+    stats <- holoStats(out, popDF, cores = 1)
+  
+    #Calculate maximum biotic velocity achieved during simulation
+    BVmax <- max(bioticVelocity(ph, metrics = "centroid")$centroidVelocity)
+  
+    #Combine parameters and sumstats into one vector
+    all_out <- c(date = date(), node=i, rep=repl, parms_out, BVmax=BVmax, stats)
+  
+    #Write output
+    setwd(outdir)
+    if(!file.exists(fn)) {
+      write.table(all_out, fn, sep = ",", quote = FALSE, row.names = FALSE)
+    } else {
+      write.table(all_out, fn, quote = FALSE, row.names = FALSE, sep=",", append = TRUE, col.names = FALSE)
+    }
+  
+    rm(all_out)
+    
+    repl <- repl+1
+  }
+  
+}

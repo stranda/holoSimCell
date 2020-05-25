@@ -1,9 +1,17 @@
+#To Do List...
+#1. set population size to 1 at the present for all populations that have gone extinct but need to be kept in the simulation
+#2. set migration rates to 0 for all extinct populations
+#3. identify the time of extinction for all zero_pops
+#4. keep a "base_tmat" object that gets updated with populations that go extinct, but still has migration rates associated with zero pops
+#5. add historical events at the time of extinction that expand the population size
+#6. substitute row for base_tmat into the appropriate tmat at the time of extinction
+
 #' run fastsimcoal
 #'
 #' takes a population history and creates sequences based on the coalscent
 #'
 #' @export
-runFSC_step_agg2 = function(
+runFSC_step_agg3 = function(
   ph = ph,				#A new pophist object - (pophist, Nvecs, tmat, struct, hab_suit, coalhist)
   l = landscape, 			#A new landscape object - (details, occupied, empty, sampled, hab_suit, sumrast, samplocsrast, samplocs)
   sample_n = NULL,		#Number of sampled individuals per population
@@ -15,7 +23,8 @@ runFSC_step_agg2 = function(
   loc_parms = NULL,		#Vector of locus parameters
   found_Ne = NULL,			#Founding population size, required for STEP change model		
   gmap = NULL,         #gmap relating spatially aggregated cells for coalescent sim to fine-grained cells from forward sim
-  MAF = NULL           #MAF - minor allele frequency filter... loci with minor allele frequencies below this value are excluded from output
+  MAF = NULL,           #MAF - minor allele frequency filter... loci with minor allele frequencies below this value are excluded from output
+  maxloc = 200000       #max number of marker loci to attempt in fastsimcoal
 ) {
   
   ############################################################	
@@ -95,8 +104,18 @@ runFSC_step_agg2 = function(
   
   
   pop_size <- simhist[,length(simhist[1,])]
-  pop_size[pop_size == 0] <- 500			#!# What should we do here?  set to 1?  Set to K?  Set to max attained in this pop?  Can't be 0!!
-  
+  #pop_size[pop_size == 0] <- 500			#!# What should we do here?  set to 1?  Set to K?  Set to max attained in this pop?  Can't be 0!!
+  extinct_pops <- which(pop_size == 0)
+  pop_size[extinct_pops] <- 1
+  extinctIDs <- extinct_pops - 1
+  base_tmat <- migmat[[1]]
+  migmat[[1]][extinct_pops,] <- 0
+  migmat[[1]][,extinct_pops] <- 0
+  extinctions <- data.frame(pop = extinct_pops, id = extinctIDs, time = NA)
+  for(pop in extinctions$pop) {
+  	extinctions$time[extinctions$pop == pop] <- ngens - max(which(simhist[pop,] != 0))
+  }
+
   #Sample size
   sample_size <- rep(0,h)
   #Growth rate = 0
@@ -160,7 +179,8 @@ runFSC_step_agg2 = function(
   ##################################################
   usemigmat <- 0
   ev <- 1
-  
+  gonepops <- c()
+
   for(G in 0:ngens) {
     tmp_pops <- coalhist[which(coalhist$time == G),]
     #tmp_pops <- FSCpops[which(FSCpops$arrive == G),]
@@ -180,8 +200,22 @@ runFSC_step_agg2 = function(
           ev <- ev+1
         }
       }
-      
+  
+	    gonepops <- c(gonepops, tmp_leaving)    
       migmat[[usemigmat+2]] <- migmat[[usemigmat+1]]
+      if(G %in% extinctions$time) {
+  	  	for(pop in extinctions$pop[extinctions$time == G]) {
+  	  		subrow <- base_tmat[pop,]
+  	  		subcol <- base_tmat[,pop]
+  	  		subrow[gonepops] <- 0
+  	  		subcol[gonepops] <- 0
+  	  		migmat[[usemigmat+2]][pop,] <- subrow
+  	  		migmat[[usemigmat+2]][,pop] <- subcol
+  	  		allevents[ev,] <- c(G, extinctions$id[extinctions$pop == pop], extinctions$id[extinctions$pop == pop], 0, max(simhist[pop,])/pop_size[pop], 0, usemigmat+1)
+  	  		ev <- ev+1
+  	  		rm(subrow, subcol)
+  	  	}
+  	  }
       migmat[[usemigmat+2]][tmp_leaving,] <- 0
       migmat[[usemigmat+2]][,tmp_leaving] <- 0
       usemigmat <- usemigmat + 1
@@ -197,6 +231,13 @@ runFSC_step_agg2 = function(
   nomig_migmat <- length(migmat)-1
 
   migration <- do.call(fscSettingsMigration, migmat)
+
+  ##################################################
+  # ADD HISTORICAL EVENTS TO RESURRECT EXTINCT POPS 
+  ##################################################
+
+
+
   ##################################################
   # COMBINE EVERYTHING, SORT, AND RUN FSC 
   ##################################################
@@ -242,11 +283,19 @@ runFSC_step_agg2 = function(
     tmp_gtype <- df2gtypes(fscout, ploidy = 2)
     varSNPs <- sum(numAlleles(tmp_gtype)$num.alleles == 2)
     message(paste("Subsampling to one SNP per locus...", varSNPs, "loci have at least one polymorphic sites with MAF >", MAF), appendLF=TRUE)
-    
+
     if(varSNPs < loc_parms$nloci) {
-      scaleSNP <- 1.1*(loc_parms$nloci/varSNPs)
+      if(attr(genetics, "num.chrom") == maxloc) {
+        stop("Too few SNPs pass the MAF!  Redrawing parameter values for this replicate!  Setting maxSNPstried to a larger value will lead to longer simulations")
+      }
+      scaleSNP <- 1.1*(attr(genetics, "num.chrom")/varSNPs)
       newSNPnum <- round(scaleSNP*attr(genetics, "num.chrom"),0)
-      message(paste("Coalescent simulation with", attr(genetics, "num.chrom"), "loci resulted in", varSNPs, "variable markers. Trying again with",newSNPnum, "loci!"), appendLF=TRUE)
+      if(newSNPnum > maxloc) {
+        newSNPnum <- maxloc
+        message(paste("Coalescent simulation with", attr(genetics, "num.chrom"), "loci resulted in", varSNPs, "variable markers. Trying again with the maximum number of loci allowable -",newSNPnum, "!"), appendLF=TRUE)
+      } else {
+        message(paste("Coalescent simulation with", attr(genetics, "num.chrom"), "loci resulted in", varSNPs, "variable markers. Trying again with",newSNPnum, "loci!"), appendLF=TRUE)
+      }
       attr(genetics, "num.chrom") <- newSNPnum
       rm(scaleSNP, newSNPnum)
     } else if(varSNPs > loc_parms$nloci) {
