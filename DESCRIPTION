@@ -1,8 +1,8 @@
 Package: holoSimCell
 Type: Package
 Title: Linked demographic/genetic simulation
-Version: 0.0.4
-Date: 2019-05-29
+Version: 0.0.5
+Date: 2020-05-25
 Author: Allan Strand, John Robinson
 Maintainer: Allan Strand <stranda@cofc.edu>
 Description: One paragraph description of what the package does as one
