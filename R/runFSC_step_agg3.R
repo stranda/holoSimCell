@@ -67,10 +67,14 @@ runFSC_step_agg3 = function(
   #New Definition of empty populations... JDR 4/1/2020
   empty <- rep(FALSE, nrow(gmap))
   empty[l$empty] <- TRUE
-  empty_gpops <- sort(unique(c(
+  empty_gpops <- sort(unique(c(                                    #This was causing a problem with multi-cell refugia - JDR 6/12/2020
     gmap$gpop[!gmap$gpop %in% gmap$gpop[empty == FALSE]],
     which(rowSums(ph$Nvecs) == 0),
     gmap$gpop[!gmap$gpop %in% coalhist$src & !gmap$gpop %in% coalhist$snk])))
+
+  #empty_gpoops <- sort(unique(c(
+  #  gmap$gpop[!gmap$gpop %in% gmap$gpop[empty == FALSE]],
+  #  which(rowSums(ph$Nvecs) == 0))))
   
   if(length(empty_gpops) > 0) {
     simhist <- simhist[-empty_gpops,]
@@ -248,7 +252,7 @@ runFSC_step_agg3 = function(
   for(ev in 1:nrow(allevents)) {
     eventlist[[ev]] <- fscEvent(event.time = allevents$time[ev], source = allevents$source[ev], sink = allevents$sink[ev], prop.migrants = allevents$prop_m[ev], new.size = allevents$new_size[ev], new.growth = allevents$new_growth[ev], migr.mat = allevents$new_mig[ev])
   }
-  eventlist[[length(eventlist)+1]] <- fscEvent(event.time = ngens, source = newID[which(simhist[,1] > 0)], sink = newID[which(simhist[,1] > 0)], prop.migrants = 0, new.size = 1, new.growth = 0, migr.mat = nomig_migmat)
+  #eventlist[[length(eventlist)+1]] <- fscEvent(event.time = ngens, source = newID[which(simhist[,1] > 0)], sink = newID[which(simhist[,1] > 0)], prop.migrants = 0, new.size = 1, new.growth = 0, migr.mat = nomig_migmat)   #Commenting this out, unnecessary, allow migration among refugial cells - JDR 6/12/2020
   #hist_ev <- fscHistEv(num.gen = allevents$time, source.deme = allevents$source, sink.deme = allevents$sink, prop.migrants = allevents$prop_m, new.sink.size = allevents$new_size, new.sink.growth = allevents$new_growth, new.mig.mat = allevents$new_mig)
   #hist_ev1 <- fscHistEv(num.gen = ngens, source.deme = newID[which(simhist[,1] > 0)], sink.deme = newID[which(simhist[,1] > 0)], prop.migrants = 0, new.sink.size = 1, new.sink.growth = 0, new.mig.mat = "nomig")
   
@@ -258,7 +262,8 @@ runFSC_step_agg3 = function(
     #hist_ev <- rbind(hist_ev, hist_ev1, hist_ev2)
   } else {
     arb.preLGM.pop <- newID[which(simhist[,1] > 0)][1]
-    for(rem in 2:(length(which(simhist[,1] > 0))-1)) {
+    #for(rem in 2:(length(which(simhist[,1] > 0))-1) {
+    for(rem in 2:length(which(simhist[,1] > 0))) {
       eventlist[[length(eventlist)+1]] <- fscEvent(event.time = preLGMparms$preLGM_t[1]-1, source = newID[which(simhist[,1] >0)][rem], sink = arb.preLGM.pop, prop.migrants = 1, new.size = 1, new.growth = 0, migr.mat = nomig_migmat)
     }
     eventlist[[length(eventlist)+1]] <- fscEvent(event.time = preLGMparms$preLGM_t[1], source = arb.preLGM.pop, sink = arb.preLGM.pop, prop.migrants = 0, new.size = round(preLGMparms$preLGM_Ne/preLGMparms$ref_Ne,5), new.growth = 0, migr.mat = nomig_migmat)
