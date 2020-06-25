@@ -110,14 +110,18 @@ runFSC_step_agg3 = function(
   pop_size <- simhist[,length(simhist[1,])]
   #pop_size[pop_size == 0] <- 500			#!# What should we do here?  set to 1?  Set to K?  Set to max attained in this pop?  Can't be 0!!
   extinct_pops <- which(pop_size == 0)
-  pop_size[extinct_pops] <- 1
-  extinctIDs <- extinct_pops - 1
   base_tmat <- migmat[[1]]
-  migmat[[1]][extinct_pops,] <- 0
-  migmat[[1]][,extinct_pops] <- 0
-  extinctions <- data.frame(pop = extinct_pops, id = extinctIDs, time = NA)
-  for(pop in extinctions$pop) {
-  	extinctions$time[extinctions$pop == pop] <- ngens - max(which(simhist[pop,] != 0))
+  if(length(extinct_pops) > 0) {
+    pop_size[extinct_pops] <- 1
+    extinctIDs <- extinct_pops - 1
+    migmat[[1]][extinct_pops,] <- 0
+    migmat[[1]][,extinct_pops] <- 0
+    extinctions <- data.frame(pop = extinct_pops, id = extinctIDs, time = NA)
+    for(pop in extinctions$pop) {
+  	  extinctions$time[extinctions$pop == pop] <- ngens - max(which(simhist[pop,] != 0))
+    }
+  } else {
+    extinctions <- data.frame(pop = NULL, id = NULL, time = NULL)
   }
 
   #Sample size
