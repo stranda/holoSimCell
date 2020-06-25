@@ -179,7 +179,7 @@ while(repl <= nreps) {
                             preLGM_Ne = parms$preLGM_Ne,
                             ref_Ne = parms$ref_Ne)
   
-  parms_out <- as.data.frame(c(ph$struct[which(!names(ph$struct) %in% names(parms))], parms))
+  parms_out <- as.data.frame(c(ph$struct[which(!names(ph$struct) %in% c(names(parms), names(ph$struct)[grep("refs", names(ph$struct))]))], parms))
   
   #With smaller K, some populations have very very low N at the end of the simulation
   #In those cases, we need to inflate N a bit for the coalescent simulation
