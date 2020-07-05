@@ -12,6 +12,7 @@ testCoal <- function(ch)
 
     ok <- TRUE
 
+    
     ### test for the multiple coalesce problem
     #cho <- ch[order(ch$src,ch$time,ch$snk),]
     coalProps <- sapply(unique(ch$src),function(src)

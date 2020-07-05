@@ -286,13 +286,22 @@ runFSC_step_agg3 = function(
     p <- fscWrite(demes = demes, genetics = genetics, events = events, migration = migration, label = label, use.wd = TRUE)
     p <- fscRun(p, all.sites = FALSE, inf.sites = FALSE, no.arl.output = FALSE, dna.to.snp = TRUE, quiet = FALSE, num.cores = num_cores, exec = exec)
     out <- fscReadArp(p)
+    
+    ##added by AES 7/4/20
+    if (delete_files==TRUE)
+    {
+        print(date())
+        print(paste("cleaning up fsc files:",label))
+        fscCleanup(label)
+    }
+    
     message(paste("Coalescent simulation with",attr(genetics,"num.chrom"), "loci resulted in", (ncol(out)-2)/2, "polymorphic sites"), appendLF=TRUE)
     
     fscout <- sampleOnePerLocus(mat = out, MAF = MAF)
     tmp_gtype <- df2gtypes(fscout, ploidy = 2)
     varSNPs <- sum(numAlleles(tmp_gtype)$num.alleles == 2)
     message(paste("Subsampling to one SNP per locus...", varSNPs, "loci have at least one polymorphic sites with MAF >", MAF), appendLF=TRUE)
-
+    
     if(varSNPs < loc_parms$nloci) {
       if(attr(genetics, "num.chrom") == maxloc) {
         stop("Too few SNPs pass the MAF!  Redrawing parameter values for this replicate!  Setting maxSNPstried to a larger value will lead to longer simulations")

@@ -20,6 +20,10 @@ pophist.aggregate <- function(ph, gmap=NULL)
         refs <- ph$coalhist[ph$coalhist$time==0,]
         refs$snk <- NA
         refs$prop=1.0
+
+        refs <- merge(refs,gmap,by.x="src",by.y="pop",all.x=T)
+        refs <- unique(refs[,c("time","gpop","snk","prop")])
+        names(refs)[which(names(refs)=="gpop")] <- "src"
         
         gh <- merge(ph$coalhist,gmap,by.x="src",by.y="pop",all=T)[,1:4]
         names(gh)[4] <- "gsrc"
@@ -30,13 +34,14 @@ pophist.aggregate <- function(ph, gmap=NULL)
 
         agg <- with(gh,aggregate(cbind(mvsrcsz=srcsz),list(time=time,gsnk=gsnk,gsrc=gsrc),sum))
         
-        nvt <- aggregate(cbind(ph$Nvecs),list(gpop=gmap$gpop),sum)
+        nvt <- aggregate(cbind(ph$Nvecs),list(gpop=gmap$gpop),sum) #assumes that gmap is sorted by pop
         rownames(nvt) <- as.character(nvt$gpop)
         nvt <- nvt[,-1]
         agg$gsrcsz <- apply(agg[,c("gsrc","time")],1,function(x){nvt[x[1],paste0("gen",x[2])]})
         agg$prop <- round(agg$mvsrcsz/agg$gsrcsz,3)
         gh <- agg[agg$gsnk!=agg$gsrc,c("time","gsrc","gsnk","prop")]
         names(gh) <- c("time","src","snk","prop")
+        
         gh <- rbind(refs,gh[order(gh$time,gh$snk,gh$src),])
         if (!testCoal(gh))
         {
