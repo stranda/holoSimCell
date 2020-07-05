@@ -3,28 +3,34 @@
 ### imputed, popmap (individualID->pop mapping), pts (sample locations) and ashpred
 ### are now built into holoSimCell
 ### as built in dataframes (in data/ directory)
-
+## check out the extra two command-line args: simdir and outdir
 args <- commandArgs(TRUE)
 i <- as.numeric(args[1])
 nreps <- as.numeric(args[2]) 
 who <- as.character(args[3])  
 label <- as.character(args[4])
+simdir <- as.character(args[5])
+outdir <- as.character(args[6])
 
-if(length(args) == 0){
+
+if(length(args) == 0) {
   i <- 1
   nreps <- 2
   who <- "JDR"
   label <- "June_test"
+  outdir <- "~/Desktop/hSC_testing/outdir"
+  simdir <- "~/Desktop/hSC_testing/simdir"
 }
+
+if ((is.na(simdir))|(is.na(outdir))) {stop("need to specify a correct simdir and/or outdir")}
+
+cat(paste("Run Details:\ni=",i,"nreps =",nreps,"who=",who,"\nlabel=",label,"\nsimdir=",simdir,"\noutdir=",outdir,"\n"))
 
 library(holoSimCell)
 
 #Set the filename, simulation, and output directories for the run
 fn <- paste0(label,"_",i,"_", who, ".csv")
-#outdir <- "~/Desktop/hSC_testing/outdir"
-#simdir <- "~/Desktop/hSC_testing/simdir"
-outdir <- "."  #set these to the current working directory; manage location of data in calling scripts
-simdir <- "."  #does need up to 3gb but should clean up after each rep
+
 
 rownames(popmap) <- popmap[,1]
 table(popmap[gsub("fp","",names(imputed)),2])
@@ -112,13 +118,16 @@ while(repl <= nreps) {
   set.seed(as.integer(sec))
   
   if(file.exists("Ash_priors.csv")) {
-    parms <- drawParms(control = "Ash_priors.csv")
+      parms <- drawParms(control = "Ash_priors.csv")
+      print("Choosing local prior param file: Ash_priors.csv")
   } else if (file.exists(system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell")))
   {
-    parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))
+      parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))
+      print("Choosing distributed prior param file: extdata/ashpaper/Ash_priors.csv")
   } else 
   {
-    parms <- drawParms(control = system.file("extdata/csv","priors.csv",package="holoSimCell"))
+      parms <- drawParms(control = system.file("extdata/csv","priors.csv",package="holoSimCell"))
+      print("Choosing distributed prior param file: extdata/csv/priors.csv")
   }
   
 
