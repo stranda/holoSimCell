@@ -113,7 +113,11 @@ while(repl <= nreps) {
   
   if(file.exists("Ash_priors.csv")) {
     parms <- drawParms(control = "Ash_priors.csv")
-  } else {
+  } else if (file.exists(system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell")))
+  {
+    parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))
+  } else 
+  {
     parms <- drawParms(control = system.file("extdata/csv","priors.csv",package="holoSimCell"))
   }
   
