@@ -9,6 +9,7 @@
 #holostats function
 #holoStats = function(out, popDF, extent, cores=1) {
 holoStats = function(out, popDF, cores=1) {
+  options(mc.cores = cores)
   #pops.xy = popDF[,c("id","col","row")]
   pops.xy = popDF[,c("pop","x","y")]
   #names(pops.xy)[1] <- "pop"
