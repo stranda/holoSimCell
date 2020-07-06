@@ -16,10 +16,10 @@ outdir <- as.character(args[6])
 if(length(args) == 0) {
   i <- 1
   nreps <- 2
-  who <- "JDR"
+  who <- "AES"
   label <- "June_test"
-  outdir <- "~/Desktop/hSC_testing/outdir"
-  simdir <- "~/Desktop/hSC_testing/simdir"
+  outdir <- "."
+  simdir <- "."
 }
 
 if ((is.na(simdir))|(is.na(outdir))) {stop("need to specify a correct simdir and/or outdir")}
@@ -194,6 +194,14 @@ while(repl <= nreps) {
   ph2$Nvecs[ph2$Nvecs[,702] > 0 & ph2$Nvecs[,702] < 1,702] <- 1
   
   #Run the coalescent simulation
+  ## check and see if the sim dist exists. if not make it and
+  ## set a flag that can be used to delete it below
+  if (!dir.exists(simdir)) 
+  {
+    simdir.existed=F
+    dir.create(simdir)
+  } else simdir.existed=T
+
   setwd(simdir) 
   out <- NULL
   out <- tryCatch({runFSC_step_agg3(ph = ph2,				#A new pophist object - (pophist, Nvecs, tmat, struct, hab_suit, coalhist)
@@ -214,6 +222,8 @@ while(repl <= nreps) {
     return(NULL)
   })
   
+  if (simdir.existed==F) unlink(simdir,force=T,recursive=T)
+
   #Calculate summary statistics
   if(!is.null(out)) {
     popDF <- makePopdf(landscape,"cell")
@@ -233,8 +243,9 @@ while(repl <= nreps) {
       write.table(all_out, fn, quote = FALSE, row.names = FALSE, sep=",", append = TRUE, col.names = FALSE)
     }
     
-    rm(all_out)
-    
+    rm(all_out,out)
+    gc()
+
     repl <- repl+1
   }
   
