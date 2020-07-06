@@ -98,6 +98,7 @@ if (!exists("icelakesland"))
 }
 
 landscape <- icelakesland
+landscape$hab_suit[!is.na(landscape$hab_suit)] <- 1   #Naive habitat suitability, habitable cells all have suitability of 1
 
 if (!uniqueSampled(landscape))
 {
