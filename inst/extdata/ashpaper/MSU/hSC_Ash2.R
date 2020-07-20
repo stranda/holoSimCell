@@ -11,7 +11,7 @@ who <- as.character(args[3])
 label <- as.character(args[4])
 #simdir <- as.character(args[5])
 outdir <- as.character(args[5])
-simdir <- system("echo $TMPDIR", intern = TRUE)
+simdir <- system("echo $SCRATCH", intern = TRUE)
 
 if(length(args) == 0) {
   i <- 1
