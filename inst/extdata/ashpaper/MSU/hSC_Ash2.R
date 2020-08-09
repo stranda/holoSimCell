@@ -162,9 +162,10 @@ while(repl <= nreps) {
                          K = parms$Ne) #maximum population size in a grid cell, scaled with hab_suit from landscape object
   
   #Move this inside ph function?
+  CRSobj <- CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
   tmpcoord <- coordinates(spTransform(coordinates(landscape$sumrast, spatial = TRUE), CRSobj))
   ph$pophist$latitude <- tmpcoord[,2]
-  po$pophist$longitude <- tmpcoord[,1]
+  ph$pophist$longitude <- tmpcoord[,1]
   rm(tmpcoord)
   
   if (!testPophist(ph,landscape))
