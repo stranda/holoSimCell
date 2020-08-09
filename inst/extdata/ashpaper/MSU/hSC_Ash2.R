@@ -161,6 +161,12 @@ while(repl <= nreps) {
                          sz=parms$sz, #size of a cell (same units as longmean and shortscale)
                          K = parms$Ne) #maximum population size in a grid cell, scaled with hab_suit from landscape object
   
+  #Move this inside ph function?
+  tmpcoord <- coordinates(spTransform(coordinates(landscape$sumrast, spatial = TRUE), CRSobj))
+  ph$pophist$latitude <- tmpcoord[,2]
+  po$pophist$longitude <- tmpcoord[,1]
+  rm(tmpcoord)
+  
   if (!testPophist(ph,landscape))
   {
     print("here is where we could do something about non-colonized sample pops")
@@ -221,10 +227,21 @@ while(repl <= nreps) {
     stats <- holoStats(out, popDF, cores = 1)
     
     #Calculate maximum biotic velocity achieved during simulation
-    BVmax <- max(bioticVelocity(ph, metrics = "centroid")$centroidVelocity)
+    times_1k <- seq(-21000,0,by=990)
+    times_1G <- seq(-21000,0,by=30)
+    BVmaxALL <- max(bioticVelocity(ph, metrics = "centroid", times = times_1G)$centroidVelocity)
+    BVmaxSHARED <- max(bioticVelocity(ph, metrics = "centroid", times = times_1G, onlyInSharedCells = TRUE)$centroidVelocity)
+    BVsharedCENT <- bioticVelocity(ph, methrics = "centroid", onlyInSharedCells = TRUE, atTimes = times_1k, times = times_1G)$centroidVelocity  
+    BVallCENT <- bioticVelocity(ph, methrics = "centroid", onlyInSharedCells = FALSE, atTimes = times_1k, times = times_1G)$centroidVelocity  
+    BVsharedQUANT <- quantile(bioticVelocity(ph, methrics = "centroid", onlyInSharedCells = TRUE, times = times_1G)$centroidVelocity)
+    BVallQUANT <- quantile(bioticVelocity(ph, methrics = "centroid", onlyInSharedCells = FALSE, times = times_1G)$centroidVelocity)
+    names(BVsharedCENT) <- paste0("BVshared1k_",times_1k[-length(times_1k)],"to",times_1k[-1])
+    names(BVallCENT) <- paste0("BVall1k_",times_1k[-length(times_1k)],"to",times_1k[-1])
+    names(BVsharedQUANT) <- paste0("BVshared1G_",names(BVsharedQUANT))
+    names(BVallQUANT) <- paste0("BVall1G_",names(BVallQUANT))
     
     #Combine parameters and sumstats into one vector
-    all_out <- c(date = date(), node=i, rep=repl, parms_out, BVmax=BVmax, stats)
+    all_out <- c(date = date(), node=i, rep=repl, parms_out, BVmaxALL=BVmaxALL, BVmaxSHARED = BVmaxSHARED, BVsharedCENT, BVsharedQUANT, BVallCENT, BVallQUANT, stats)
     
     #Write output
     setwd(outdir)

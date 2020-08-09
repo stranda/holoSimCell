@@ -1,5 +1,7 @@
 root=/mnt/research/TIMBER/Ash
 nrep=20
+label=AshESA
+
 #usr=f0007250
 #usr=f0007264
 #usr=f0007265
@@ -17,9 +19,12 @@ echo '#!/bin/sh
 
 newgrp TIMBER 
 
+cd $SCRATCH
+rm -R '$label'_${SLURM_ARRAY_TASK_ID}_*
+
 cd '$root'/code/
 
-singularity run /mnt/research/TIMBER/Ash/holosim.simg Rscript hSC_Ash2.R ${SLURM_ARRAY_TASK_ID} '$nrep' '$USER' AshESA '$root'/OUT/
+singularity run /mnt/research/TIMBER/Ash/holosim.simg Rscript hSC_Ash2.R ${SLURM_ARRAY_TASK_ID} '$nrep' '$USER' '$label' '$root'/OUT/
 
 scontrol show job ${SLURM_JOB_ID}' > hSC_Ash_$USER.sh
 
