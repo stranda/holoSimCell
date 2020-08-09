@@ -208,7 +208,7 @@ while(repl <= nreps) {
                           l = landscape, 			#A new landscape object - (details, occupied, empty, sampled, hab_suit, sumrast, samplocsrast, samplocs)
                           sample_n = 14,		#Number of sampled individuals per population
                           preLGMparms = preLGMparms,		#This has parms for the refuge, preLGM size and timing
-                          label = paste0(label,"_",repl,"-",round(runif(1, min=1, max = 1e6),0)),			#Label for FSC simulation files
+                          label = paste0(label,"_",repl,".",round(runif(1, min=1, max = 1e6),0)),			#Label for FSC simulation files
                           delete_files = TRUE,	#Logical - clear out .par, .arp, and other FSC outputs?
                           num_cores = 1,			#Number of processors to use for FSC
                           exec = "fsc26",			#Executable for FSC (needs to be in a folder in the system $PATH)
