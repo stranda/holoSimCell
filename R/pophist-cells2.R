@@ -651,6 +651,10 @@ getpophist2.cells <- function(h=225, #humber of habitats (populations)
     print(paste("simulating done...",date()))
                                         #pops  #!# output is below
     rl <- parsePopslst(popslst,pops)
+    tmpcoord <- coordinates(hab_suit$sumrast)
+    rl$pophist$longitude <- tmpcoord[,1]
+    rl$pophist$latitude <- tmpcoord[,2]
+    
     out <- list(pophist = rl$pophist, Nvecs = Nvec_hist, tmat = tmat, struct = struct, hab_suit=hab_suit, coalhist=rl$coalhist, popslst=popslst)   #!# output is now a list
     
     return(out)
