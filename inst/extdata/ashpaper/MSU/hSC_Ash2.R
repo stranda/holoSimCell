@@ -98,7 +98,8 @@ if (!exists("icelakesland"))
 }
 
 landscape <- icelakesland
-landscape$hab_suit[!is.na(landscape$hab_suit)] <- 1   #Naive habitat suitability, habitable cells all have suitability of 1
+#landscape$hab_suit[!is.na(landscape$hab_suit)] <- 1   #Naive habitat suitability, habitable cells all have suitability of 1
+landscape$hab_suit[landscape$hab_suit > 0] <- 1   #Cells under the glacier have 0 suitability, not NA suitability
 
 if (!uniqueSampled(landscape))
 {
@@ -153,7 +154,7 @@ while(repl <= nreps) {
   #Forward simulation
   ph = getpophist2.cells(hab_suit=landscape,
                          refs=refpops,  #set at cell 540 right now 
-                         refsz=parms$found_Ne,
+                         refsz=parms$ref_Ne,
                          mix=parms$mix,  #note how small.
                          shortscale=parms$shortscale,  # scale parameter of weibull with shape below
                          shortshape=parms$shortshape, #weibull shape
