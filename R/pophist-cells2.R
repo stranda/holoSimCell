@@ -247,6 +247,8 @@ getpophist.cells <- function(h=225, #humber of habitats (populations)
 
 
 
+
+
 ###
 ### grow a vector of population sizes
 ###
@@ -365,6 +367,8 @@ getpophist2.cells <- function(h=225, #humber of habitats (populations)
                              refsz=c(1000),#the size of each refuge
                              popDispInfl=function(x){return (x)}, #function that maps pop size to col ability
                              sz=1,  #size of each cell
+                             ysz=sz,
+                             xsz=sz,
                              enmstep=NULL, #vector of the number of time clicks for each habitat
                              samptime=0 #if zero runs through.  If >zero reports every samptime
                              
@@ -464,7 +468,8 @@ getpophist2.cells <- function(h=225, #humber of habitats (populations)
                                         #deltK=deltK,
         refs=refs,
         refsz=refsz,
-        sz=sz,
+        xsz=xsz,
+        ysz=ysz,
         samptime=samptime,
         pois.var=pois.var)
 
@@ -527,7 +532,7 @@ getpophist2.cells <- function(h=225, #humber of habitats (populations)
 #    dimnames(colhist) <- list(1:dim(colhist)[1],c("from","to"),1:dim(colhist)[3])
 ###this is supposed to be the among-population migration matrix
 ###should represent the prob of movement from the center of pop i to the center of pop j
-    tmat <- integratedMigMat(landx=xdim,landy=ydim,xnum=5,ynum=5,ysz=sz,xsz=sz,
+    tmat <- integratedMigMat(landx=xdim,landy=ydim,xnum=5,ynum=5,ysz=ysz,xsz=xsz,
                              sshp=shortshape,ssc=shortscale,mix=mix,nmean=longmean,nvar=longmean^2)
 
     if (!is.null(hab_suit)) enmcnt=0  #which enm hindcast are we using each time step? If any

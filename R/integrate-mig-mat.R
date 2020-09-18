@@ -99,7 +99,6 @@ integratedMigMat <- function(landx=15,landy=15,xnum=4,ynum=4,xsz=100,ysz=100,ssh
         } else {
             rmat= makeRmatC(as.matrix(pops),dm,(cent-1)) #c++ version better (code in helpers.cpp)
         }
-#    save(file="lastrmat.rda",rmat)
     rmat   
 }
 
