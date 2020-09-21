@@ -104,8 +104,8 @@ pophist.aggregate <- function(ph, gmap=NULL)
 ###now redo tmat
     ynum <- length(unique(ph$pophist[ph$pophist$pop %in% gmap[gmap$gpop==1,"pop"],"row"]))
     xnum <- length(unique(ph$pophist[ph$pophist$pop %in% gmap[gmap$gpop==1,"pop"],"col"]))
-    ysz <- ph$struct["sz"]*ynum
-    xsz <- ph$struct["sz"]*xnum
+    ysz <- ph$struct["ysz"]*ynum
+    xsz <- ph$struct["xsz"]*xnum
     landx=ceiling(max(gmap$col)/xnum)
     landy=ceiling(max(gmap$row)/ynum)
     tmat <- integratedMigMat(landx=landx,landy=landy,

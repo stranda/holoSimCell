@@ -11,8 +11,12 @@ who <- as.character(args[3])
 label <- as.character(args[4])
 #simdir <- as.character(args[5])
 outdir <- as.character(args[5])
-simdir <- system("echo $SCRATCH", intern = TRUE)
-
+if (FALSE) #TRUE means production
+    {
+        simdir <- system("echo $SCRATCH", intern = TRUE)
+    } else {
+        simdir <- "."
+    }
 if(length(args) == 0) {
   i <- 1
   nreps <- 2
@@ -93,7 +97,8 @@ icelakesland <- def_grid_pred2(pred=1-newrs,
 
 
 landscape <- icelakesland
-landscape$hab_suit[!is.na(landscape$hab_suit)] <- 1   #Naive habitat suitability, habitable cells all have suitability of 1
+landscape$hab_suit[landscape$hab_suit > 0] <- 1 #Cells under the glacier have 0 suitability, not NA suitability
+
 
 if (!uniqueSampled(landscape))
 {
