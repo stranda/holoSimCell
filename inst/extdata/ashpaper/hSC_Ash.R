@@ -133,19 +133,15 @@ while(repl <= nreps) {
   parms$refs <- sample(c("PA","TX","GA","ALL"), 1, replace = FALSE)
   
   if(parms$refs == "PA") {
-    refpops <- c(1301, 1302, 1300, 1345, 1257)
-    #refpops <- 1301
+    refpops <- c(1000, 1001, 999, 1051, 949)
   } else if(parms$refs == "TX") {
-    refpops <- c(586, 587, 585, 630, 542)
-    #refpops <- 586
+    refpops <- c(526, 527, 525, 577, 475)
   } else if(parms$refs == "GA") {
-    refpops <- c(638, 639, 637, 682, 594)
-    #refpops <- 638
+    refpops <- c(536, 537, 535, 587, 485)
   } else if(parms$refs == "ALL") {
-    refpops <- c(1301, 1302, 1300, 1345, 1257,
-                 586, 587, 585, 630, 542,
-                 638, 639, 637, 682, 594)
-    #refpops <- c(1301, 587, 638)
+    refpops <- c(536, 537, 535, 587, 485,
+                 526, 527, 525, 577, 475,
+                 1000, 1001, 999, 1051, 949)
   }
 
 ### NEW COMMENT IN SEPT 2020
@@ -236,22 +232,64 @@ ph2 <- pophist.aggregate(ph,gmap=gmap)
     popDF <- makePopdf(landscape,"cell")
     stats <- holoStats(out, popDF, cores = 1)
     
+    
     #Calculate maximum biotic velocity achieved during simulation
     times_1k <- seq(-21000,0,by=990)
     times_1G <- seq(-21000,0,by=30)
-    BVmaxALL <- max(bioticVelocity(ph, metrics = "centroid", times = times_1G)$centroidVelocity)
-    BVmaxSHARED <- max(bioticVelocity(ph, metrics = "centroid", times = times_1G, onlyInSharedCells = TRUE)$centroidVelocity)
-    BVsharedCENT <- bioticVelocity(ph, methrics = "centroid", onlyInSharedCells = TRUE, atTimes = times_1k, times = times_1G)$centroidVelocity  
-    BVallCENT <- bioticVelocity(ph, methrics = "centroid", onlyInSharedCells = FALSE, atTimes = times_1k, times = times_1G)$centroidVelocity  
-    BVsharedQUANT <- quantile(bioticVelocity(ph, methrics = "centroid", onlyInSharedCells = TRUE, times = times_1G)$centroidVelocity)
-    BVallQUANT <- quantile(bioticVelocity(ph, methrics = "centroid", onlyInSharedCells = FALSE, times = times_1G)$centroidVelocity)
-    names(BVsharedCENT) <- paste0("BVshared1k_",times_1k[-length(times_1k)],"to",times_1k[-1])
-    names(BVallCENT) <- paste0("BVall1k_",times_1k[-length(times_1k)],"to",times_1k[-1])
+    
+    pharray <- pophistToArray(ph)
+    #Only run the bioticVelocity function 4 times...
+    BV_pergen_shared <- bioticVelocity(pharray, times = times_1G, onlyInSharedCells = TRUE)
+    BV_permill_shared <- bioticVelocity(pharray, times = times_1G, atTimes = times_1k, onlyInSharedCells = TRUE)
+    BV_pergen_all <- bioticVelocity(pharray, times = times_1G, onlyInSharedCells = FALSE)
+    BV_permill_all <- bioticVelocity(pharray, times = times_1G, atTimes = times_1k, onlyInSharedCells = FALSE)
+    
+    #Then calculate the metrics you want to record from these 4 objects and add names
+    #Maximum per-generation biotic velocity attained during the simulation
+    BVmaxSHARED <- max(BV_pergen_shared$centroidVelocity)
+    BVmaxALL <- max(BV_pergen_all$centroidVelocity)
+    #biotic velocity per millenium
+    BVsharedMILL <- BV_permill_shared$centroidVelocity
+    names(BVsharedMILL) <- paste0("BVshared1k_",times_1k[-length(times_1k)],"to",times_1k[-1])
+    BVallMILL <- BV_permill_all$centroidVelocity
+    names(BVallMILL) <- paste0("BVall1k_",times_1k[-length(times_1k)],"to",times_1k[-1])
+    #quantiles of per-generation biotic velocity
+    BVsharedQUANT <- quantile(BV_pergen_shared$centroidVelocity)
     names(BVsharedQUANT) <- paste0("BVshared1G_",names(BVsharedQUANT))
+    BVallQUANT <- quantile(BV_pergen_all$centroidVelocity)
     names(BVallQUANT) <- paste0("BVall1G_",names(BVallQUANT))
+    #prevalence per millenium
+    BVprevMILL <- BV_permill_all$prevalence
+    names(BVprevMILL) <- paste0("BVprev1k_",times_1k[-length(times_1k)],"to",times_1k[-1])
+    #mean abundance per millenium
+    BVmeanMILL <- BV_permill_all$mean
+    names(BVmeanMILL) <- paste0("BVmean1k_",times_1k[-length(times_1k)],"to",times_1k[-1])
+    #North quantile movement per millenium
+    BVNQsharedMILL <- BV_permill_shared$nsQuantVelocity_quant0p95
+    names(BVNQsharedMILL) <- paste0("BVNQshared1k_",times_1k[-length(times_1k)],"to",times_1k[-1])
+    BVNQallMILL <- BV_permill_all$nsQuantVelocity_quant0p95
+    names(BVNQallMILL) <- paste0("BVNQall1k_",times_1k[-length(times_1k)],"to",times_1k[-1])
+    #South quantile movement per millenium
+    BVSQsharedMILL <- BV_permill_shared$nsQuantVelocity_quant0p05
+    names(BVSQsharedMILL) <- paste0("BVSQshared1k_",times_1k[-length(times_1k)],"to",times_1k[-1])
+    BVSQallMILL <- BV_permill_all$nsQuantVelocity_quant0p05
+    names(BVSQallMILL) <- paste0("BVSQall1k_",times_1k[-length(times_1k)],"to",times_1k[-1])
+    #Quantiles of north quantile movement per generation
+    BVNQsharedQUANT <- quantile(BV_pergen_shared$nsQuantVelocity_quant0p95)
+    names(BVNQsharedQUANT) <- paste0("BVNQshared1G_", names(BVNQsharedQUANT))
+    BVNQallQUANT <- quantile(BV_pergen_all$nsQuantVelocity_quant0p95)
+    names(BVNQallQUANT) <- paste0("BVNQall1G_", names(BVNQallQUANT))
+    #Quantiles of south quantile movement per generation
+    BVSQsharedQUANT <- quantile(BV_pergen_shared$nsQuantVelocity_quant0p05)
+    names(BVSQsharedQUANT) <- paste0("BVSQshared1G_", names(BVSQsharedQUANT))
+    BVSQallQUANT <- quantile(BV_pergen_all$nsQuantVelocity_quant0p05)
+    names(BVSQallQUANT) <- paste0("BVSQall1G_", names(BVSQallQUANT))
     
     #Combine parameters and sumstats into one vector
-    all_out <- c(date = date(), node=i, rep=repl, parms_out, BVmaxALL=BVmaxALL, BVmaxSHARED = BVmaxSHARED, BVsharedCENT, BVsharedQUANT, BVallCENT, BVallQUANT, stats)
+    all_out <- c(date = date(), node=i, rep=repl, parms_out, 
+                 BVmaxALL=BVmaxALL, BVmaxSHARED = BVmaxSHARED, BVprevMILL, BVmeanMILL,
+                 BVsharedMILL, BVsharedQUANT, BVNQsharedMILL, BVSQsharedMILL, BVNQsharedQUANT, BVSQsharedQUANT,
+                 BVallMILL, BVallQUANT, BVNQallMILL, BVSQallMILL, BVNQallQUANT, BVSQallQUANT, stats)
     
     #Write output
     setwd(outdir)
