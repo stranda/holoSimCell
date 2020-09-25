@@ -38,7 +38,7 @@ pophist.aggregate <- function(ph, gmap=NULL)
         rownames(nvt) <- as.character(nvt$gpop)
         nvt <- nvt[,-1]
         agg$gsrcsz <- apply(agg[,c("gsrc","time")],1,function(x){nvt[x[1],paste0("gen",x[2])]})
-        agg$prop <- round(agg$mvsrcsz/agg$gsrcsz,3)
+        agg$prop <- round(agg$mvsrcsz/agg$gsrcsz,6)
         gh <- agg[agg$gsnk!=agg$gsrc,c("time","gsrc","gsnk","prop")]
         names(gh) <- c("time","src","snk","prop")
         
