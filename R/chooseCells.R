@@ -3,7 +3,7 @@
 #' @param r this is the surface (a single raster layer)
 #'
 #' @export
-chooseRefugeCells <- function(r)
+chooseRefugeCellsWrong <- function(r)
 {
     if ("RasterLayer" %in% class(r))
     {

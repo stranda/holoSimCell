@@ -371,7 +371,6 @@ getpophist2.cells <- function(h=225, #humber of habitats (populations)
                              xsz=sz,
                              enmstep=NULL, #vector of the number of time clicks for each habitat
                              samptime=0 #if zero runs through.  If >zero reports every samptime
-                             
                              )
 {
 
@@ -659,7 +658,9 @@ getpophist2.cells <- function(h=225, #humber of habitats (populations)
     tmpcoord <- coordinates(hab_suit$sumrast)
     popcoords <- data.frame(pop = c(1:length(tmpcoord[,1])), longitude = tmpcoord[,1], latitude = tmpcoord[,2])
     rl$pophist <- merge(rl$pophist, popcoords)
-    out <- list(pophist = rl$pophist, Nvecs = Nvec_hist, tmat = tmat, struct = struct, hab_suit=hab_suit, coalhist=rl$coalhist, popslst=popslst)   #!# output is now a list
+    out <- list(pophist = rl$pophist, Nvecs = Nvec_hist, tmat = tmat,
+                struct = struct, hab_suit=hab_suit, coalhist=rl$coalhist,
+                popslst=popslst)   #!# output is now a list
     
     return(out)
 }
