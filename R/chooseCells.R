@@ -3,7 +3,7 @@
 #' @param r this is the surface (a single raster layer)
 #'
 #' @export
-chooseRefugeCellsWrong <- function(r)
+chooseRefugeCells <- function(r)
 {
     if ("RasterLayer" %in% class(r))
     {
@@ -13,7 +13,7 @@ chooseRefugeCellsWrong <- function(r)
         #rw = rowFromY(pr, p$y)
         rw = seq(nrow(pr),1)[rowFromY(pr, p$y)]
         cl = colFromX(pr, p$x)
-        
+
         rcells = c(
             cellFromRowCol(pr, rw,cl),
             cellFromRowCol(pr, rw,cl+1),
