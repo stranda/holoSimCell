@@ -159,7 +159,8 @@ while(repl <= nreps) {
 
 avgCellsz <- mean(c(res(landscape$sumrast)))  ### if the cells are not square, then use the average of the cell width and length
                                           #Forward simulation
-ph = getpophist2.cells(hab_suit=landscape,
+ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,
+                       hab_suit=landscape,
                        refs=refpops,  #set at cell 540 right now 
                        refsz=parms$ref_Ne,
                        mix=parms$mix,  #note how small.
@@ -239,16 +240,16 @@ ph2 <- pophist.aggregate(ph,gmap=gmap)
     ####Calculate several measures of biotic velocity####
     times_1k <- seq(-21000,0,by=990)
     times_1G <- seq(-21000,0,by=30)
-
-    pharray <- pophistToArray(ph, times = times_1G)
-
+    
+    pharray <- pophistToArray(NvecNAs(ph, landscape), times = times_1G)
+    
     # metrics to use… I just added “sum”, which will give you total population size
     metrics <- c('centroid', 'nsQuants', 'mean', 'prevalence', 'sum')
     
     # note that this will calculate BV across 990-yr intervals for all four metrics listed at once
     # should be run twice, once with onlyInSharedCells TRUE and once FALSE
     BV_pergen_shared <- bioticVelocity(
-      x=pharray$pophistAsArray[,,-1],
+      x=pharray$pophistAsArray,
       times = times_1G,
       atTimes = times_1G,
       longitude=pharray$longitude,
@@ -259,7 +260,7 @@ ph2 <- pophist.aggregate(ph,gmap=gmap)
     
     #now with onlyInSharedCells FALSE
     BV_pergen_all <- bioticVelocity(
-      x=pharray$pophistAsArray[,,-1],
+      x=pharray$pophistAsArray,
       times = times_1G,
       atTimes = times_1G,
       longitude=pharray$longitude,
@@ -270,7 +271,7 @@ ph2 <- pophist.aggregate(ph,gmap=gmap)
     
     #now per mill with onlyInSharedCells TRUE
     BV_permill_shared <- bioticVelocity(
-      x=pharray$pophistAsArray[,,-1],
+      x=pharray$pophistAsArray,
       times = times_1G,
       atTimes = times_1k,
       longitude=pharray$longitude,
@@ -281,7 +282,7 @@ ph2 <- pophist.aggregate(ph,gmap=gmap)
     
     #now per mill with onlyInSharedCells FALSE
     BV_permill_all <- bioticVelocity(
-      x=pharray$pophistAsArray[,,-1],
+      x=pharray$pophistAsArray,
       times = times_1G,
       atTimes = times_1k,
       longitude=pharray$longitude,
