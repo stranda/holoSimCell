@@ -297,18 +297,18 @@ ph2 <- pophist.aggregate(ph,gmap=gmap)
     BVmaxALL <- max(BV_pergen_all$centroidVelocity)
     #prevalence per millenium
     BVprevMILL <- BV_permill_all$prevalence
-    names(BVprevMILL) <- paste0("BVprev_",times_1k[-1])
+    names(BVprevMILL) <- paste0("BVprev_",-1*times_1k[-1],"ybp")
     #mean abundance per millenium
     BVmeanMILL <- BV_permill_all$mean
-    names(BVmeanMILL) <- paste0("BVmean_",times_1k[-1])
+    names(BVmeanMILL) <- paste0("BVmean_",-1*times_1k[-1],"ybp")
     #total abundance per millenium
     BVtotMILL <- BV_permill_all$sum
-    names(BVtotMILL) <- paste0("BVtotal_",times_1k[-1])
+    names(BVtotMILL) <- paste0("BVtotal_",-1*times_1k[-1],"ybp")
     #biotic velocity per millenium
     BVsharedMILL <- BV_permill_shared$centroidVelocity
-    names(BVsharedMILL) <- paste0("BVshared1k_",times_1k[-length(times_1k)],"to",times_1k[-1])
+    names(BVsharedMILL) <- paste0("BVshared1k_",-1*times_1k[-length(times_1k)],"to",-1*times_1k[-1],"ybp")
     BVallMILL <- BV_permill_all$centroidVelocity
-    names(BVallMILL) <- paste0("BVall1k_",times_1k[-length(times_1k)],"to",times_1k[-1])
+    names(BVallMILL) <- paste0("BVall1k_",-1*times_1k[-length(times_1k)],"to",-1*times_1k[-1],"ybp")
     #quantiles of per-generation biotic velocity
     BVsharedQUANT <- quantile(BV_pergen_shared$centroidVelocity)
     names(BVsharedQUANT) <- paste0("BVshared1G_",names(BVsharedQUANT))
@@ -316,14 +316,14 @@ ph2 <- pophist.aggregate(ph,gmap=gmap)
     names(BVallQUANT) <- paste0("BVall1G_",names(BVallQUANT))
     #North quantile movement per millenium
     BVNQsharedMILL <- BV_permill_shared$nsQuantVelocity_quant0p95
-    names(BVNQsharedMILL) <- paste0("BVNQshared1k_",times_1k[-length(times_1k)],"to",times_1k[-1])
+    names(BVNQsharedMILL) <- paste0("BVNQshared1k_",-1*times_1k[-length(times_1k)],"to",-1*times_1k[-1],"ybp")
     BVNQallMILL <- BV_permill_all$nsQuantVelocity_quant0p95
-    names(BVNQallMILL) <- paste0("BVNQall1k_",times_1k[-length(times_1k)],"to",times_1k[-1])
+    names(BVNQallMILL) <- paste0("BVNQall1k_",-1*times_1k[-length(times_1k)],"to",-1*times_1k[-1],"ybp")
     #South quantile movement per millenium
     BVSQsharedMILL <- BV_permill_shared$nsQuantVelocity_quant0p05
-    names(BVSQsharedMILL) <- paste0("BVSQshared1k_",times_1k[-length(times_1k)],"to",times_1k[-1])
+    names(BVSQsharedMILL) <- paste0("BVSQshared1k_",-1*times_1k[-length(times_1k)],"to",-1*times_1k[-1],"ybp")
     BVSQallMILL <- BV_permill_all$nsQuantVelocity_quant0p05
-    names(BVSQallMILL) <- paste0("BVSQall1k_",times_1k[-length(times_1k)],"to",times_1k[-1])
+    names(BVSQallMILL) <- paste0("BVSQall1k_",-1*times_1k[-length(times_1k)],"to",-1*times_1k[-1],"ybp")
     #Quantiles of north quantile movement per generation
     BVNQsharedQUANT <- quantile(BV_pergen_shared$nsQuantVelocity_quant0p95)
     names(BVNQsharedQUANT) <- paste0("BVNQshared1G_", names(BVNQsharedQUANT))
