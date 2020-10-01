@@ -57,7 +57,8 @@ holoStats = function(out, popDF, cores=1) {
   #}
 
   locMAF <- loc.mafreq(split_out, minor)
-
+  DW <- colSums(locMAF/allMAF)
+  names(DW) <- paste0("DW_",names(DW))
 
 #  colnames(locMAF) <- names(split_out)
   locHe <- colMeans(2*locMAF*(1-locMAF))
@@ -453,7 +454,7 @@ holoStats = function(out, popDF, cores=1) {
   
   ################################################################
   
-  stats = c(SNPs, localSNP, privateSNP, total_priv, pairFst.loc, pairnei,
+  stats = c(SNPs, localSNP, privateSNP, DW, total_priv, pairFst.loc, pairnei,
             ibdfst.slope=ibdfst.slope,ibdfst.int=ibdfst.int,bsfst.break=bsfst[1],bsfst.ll=bsfst[2],
             ibdedist.slope=ibdedist.slope,ibdedist.int=ibdedist.int,bsedist.break=bsedist[1],bsedist.ll=bsedist[2],
             ibdnei.slope=ibdnei.slope,ibdnei.int=ibdnei.int,bsnei.break=bsnei[1],bsnei.ll=bsnei[2],
