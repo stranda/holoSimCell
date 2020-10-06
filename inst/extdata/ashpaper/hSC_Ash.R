@@ -163,6 +163,7 @@ ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.
                        hab_suit=landscape,
                        refs=refpops,  #set at cell 540 right now 
                        refsz=parms$ref_Ne,
+                       lambda=parms$lambda,
                        mix=parms$mix,  #note how small.
                        shortscale=parms$shortscale*avgCellsz,  # scale parameter of weibull with shape below
                        shortshape=parms$shortshape, #weibull shape
