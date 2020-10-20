@@ -66,7 +66,7 @@ pophistToArray <- function(
 		latitude <- matrix(latitude, nrow=nRows, ncol=nCols, byrow=TRUE)
 	}
 	
-	list(pophistAsArray=xNew, longitude=longitude, latitude=latitude, times=times)
+	list(pophistAsArray=xNew[c(nrow(xNew[,,1]):1),,], longitude=longitude, latitude=latitude, times=times)
 	
 }
 

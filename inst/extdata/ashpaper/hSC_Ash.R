@@ -11,7 +11,7 @@ who <- as.character(args[3])
 label <- as.character(args[4])
 #simdir <- as.character(args[5])
 outdir <- as.character(args[5])
-if (FALSE) #TRUE means production
+if (TRUE) #TRUE means production
     {
         simdir <- system("echo $SCRATCH", intern = TRUE)
     } else {
@@ -21,7 +21,7 @@ if(length(args) == 0) {
   i <- 1
   nreps <- 2
   who <- "JDR"
-  label <- "June_test"
+  label <- "Ashpaper_test"
   outdir <- "~/Desktop/hSC_testing/outdir"
   #simdir <- "~/Desktop/hSC_testing/simdir"
 }
@@ -249,27 +249,6 @@ ph2 <- pophist.aggregate(ph,gmap=gmap)
     
     # note that this will calculate BV across 990-yr intervals for all four metrics listed at once
     # should be run twice, once with onlyInSharedCells TRUE and once FALSE
-    BV_pergen_shared <- bioticVelocity(
-      x=pharray$pophistAsArray,
-      times = times_1G,
-      atTimes = times_1G,
-      longitude=pharray$longitude,
-      latitude=pharray$latitude,
-      metrics=metrics,
-      quants=c(0.05, 0.1, 0.9, 0.95),
-      onlyInSharedCells = TRUE)
-    
-    #now with onlyInSharedCells FALSE
-    BV_pergen_all <- bioticVelocity(
-      x=pharray$pophistAsArray,
-      times = times_1G,
-      atTimes = times_1G,
-      longitude=pharray$longitude,
-      latitude=pharray$latitude,
-      metrics=metrics,
-      quants=c(0.05, 0.1, 0.9, 0.95),
-      onlyInSharedCells = FALSE)
-    
     #now per mill with onlyInSharedCells TRUE
     BV_permill_shared <- bioticVelocity(
       x=pharray$pophistAsArray,
@@ -292,10 +271,18 @@ ph2 <- pophist.aggregate(ph,gmap=gmap)
       quants=c(0.05, 0.1, 0.9, 0.95),
       onlyInSharedCells = FALSE)
     
+    #velocity from 21,000 ybp to today
+    BV_21kyr_shared <- bioticVelocity(
+      x=pharray$pophistAsArray,
+      times = times_1G,
+      atTimes = c(-21000,0),
+      longitude=pharray$longitude,
+      latitude=pharray$latitude,
+      metrics=metrics,
+      quants=c(0.05, 0.95),
+      onlyInSharedCells = TRUE)
+
     #Then calculate the metrics you want to record from these 4 objects and add names
-    #Maximum per-generation biotic velocity attained during the simulation
-    BVmaxSHARED <- max(BV_pergen_shared$centroidVelocity)
-    BVmaxALL <- max(BV_pergen_all$centroidVelocity)
     #prevalence per millenium
     BVprevMILL <- BV_permill_all$prevalence
     names(BVprevMILL) <- paste0("BVprev_",-1*times_1k[-1],"ybp")
@@ -310,11 +297,6 @@ ph2 <- pophist.aggregate(ph,gmap=gmap)
     names(BVsharedMILL) <- paste0("BVshared1k_",-1*times_1k[-length(times_1k)],"to",-1*times_1k[-1],"ybp")
     BVallMILL <- BV_permill_all$centroidVelocity
     names(BVallMILL) <- paste0("BVall1k_",-1*times_1k[-length(times_1k)],"to",-1*times_1k[-1],"ybp")
-    #quantiles of per-generation biotic velocity
-    BVsharedQUANT <- quantile(BV_pergen_shared$centroidVelocity)
-    names(BVsharedQUANT) <- paste0("BVshared1G_",names(BVsharedQUANT))
-    BVallQUANT <- quantile(BV_pergen_all$centroidVelocity)
-    names(BVallQUANT) <- paste0("BVall1G_",names(BVallQUANT))
     #North quantile movement per millenium
     BVNQsharedMILL <- BV_permill_shared$nsQuantVelocity_quant0p95
     names(BVNQsharedMILL) <- paste0("BVNQshared1k_",-1*times_1k[-length(times_1k)],"to",-1*times_1k[-1],"ybp")
@@ -325,22 +307,18 @@ ph2 <- pophist.aggregate(ph,gmap=gmap)
     names(BVSQsharedMILL) <- paste0("BVSQshared1k_",-1*times_1k[-length(times_1k)],"to",-1*times_1k[-1],"ybp")
     BVSQallMILL <- BV_permill_all$nsQuantVelocity_quant0p05
     names(BVSQallMILL) <- paste0("BVSQall1k_",-1*times_1k[-length(times_1k)],"to",-1*times_1k[-1],"ybp")
-    #Quantiles of north quantile movement per generation
-    BVNQsharedQUANT <- quantile(BV_pergen_shared$nsQuantVelocity_quant0p95)
-    names(BVNQsharedQUANT) <- paste0("BVNQshared1G_", names(BVNQsharedQUANT))
-    BVNQallQUANT <- quantile(BV_pergen_all$nsQuantVelocity_quant0p95)
-    names(BVNQallQUANT) <- paste0("BVNQall1G_", names(BVNQallQUANT))
-    #Quantiles of south quantile movement per generation
-    BVSQsharedQUANT <- quantile(BV_pergen_shared$nsQuantVelocity_quant0p05)
-    names(BVSQsharedQUANT) <- paste0("BVSQshared1G_", names(BVSQsharedQUANT))
-    BVSQallQUANT <- quantile(BV_pergen_all$nsQuantVelocity_quant0p05)
-    names(BVSQallQUANT) <- paste0("BVSQall1G_", names(BVSQallQUANT))
+    #Velocity over 21kyr - centroid, northern and southern margins
+    BV_21kyr <- BV_21kyr_shared$centroidVelocity
+    BVNQ_21kyr <- BV_21kyr_shared$nsQuantVelocity_quant0p95
+    BVSQ_21kyr <- BV_21kyr_shared$nsQuantVelocity_quant0p05
     
     #Combine parameters and sumstats into one vector
     all_out <- c(date = date(), node=i, rep=repl, parms_out, 
-                 BVmaxALL=BVmaxALL, BVmaxSHARED = BVmaxSHARED, BVprevMILL, BVmeanMILL, BVtotMILL,
-                 BVsharedMILL, BVsharedQUANT, BVNQsharedMILL, BVSQsharedMILL, BVNQsharedQUANT, BVSQsharedQUANT,
-                 BVallMILL, BVallQUANT, BVNQallMILL, BVSQallMILL, BVNQallQUANT, BVSQallQUANT, stats)
+                 BVprevMILL, BVmeanMILL, BVtotMILL,
+                 BVsharedMILL, BVNQsharedMILL, BVSQsharedMILL, 
+                 BVallMILL, BVNQallMILL, BVSQallMILL, 
+                 BV_21kyr = BV_21kyr, BVNQ_21kyr = BVNQ_21kyr, BVSQ_21kyr= BVSQ_21kyr,
+                 stats)
     
     #Write output
     setwd(outdir)
