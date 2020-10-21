@@ -245,7 +245,7 @@ ph2 <- pophist.aggregate(ph,gmap=gmap)
     pharray <- pophistToArray(NvecNAs(ph, landscape), times = times_1G)
     
     # metrics to use… I just added “sum”, which will give you total population size
-    metrics <- c('centroid', 'nsQuants', 'mean', 'prevalence', 'sum')
+    metrics <- c('centroid', 'nsQuants', 'summary')
     
     # note that this will calculate BV across 990-yr intervals for all four metrics listed at once
     # should be run twice, once with onlyInSharedCells TRUE and once FALSE
