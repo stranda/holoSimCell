@@ -105,8 +105,11 @@ par(mai=mai)
 
     recentph <- ph
     recentph$pophist <- pops 
-    cent <- bioticVelocity(recentph,metrics="centroid")$centroidVelocity
-    ncent <- bioticVelocity(recentph,metrics="nCentroid")$nCentroidVelocity
+    recentph$Nvecs <- recentph$Nvecs[,-1]
+    pharray <- pophistToArray(recentph, times = seq(-21000,0,by=30))
+    bV <- bioticVelocity(pharray$pophistAsArray, metrics = c("centroid","nCentroid"), times = pharray$times, longitude = pharray$longitude, latitude = pharray$latitude, atTimes = seq(-21000,0,by=990))
+    cent <- bV$centroidVelocity
+    ncent <- bV$nCentroidVelocity
     both <- c(cent,ncent)
     both <- both[!is.na(both)|is.finite(both)]
 
