@@ -4,10 +4,21 @@
 \alias{runFSC_step_agg3}
 \title{run fastsimcoal}
 \usage{
-runFSC_step_agg3(ph = ph, l = landscape, sample_n = NULL,
-  preLGMparms = NULL, label = "test", delete_files = TRUE,
-  num_cores = 1, exec = "fsc25", loc_parms = NULL, found_Ne = NULL,
-  gmap = NULL, MAF = NULL, maxloc = 2e+05)
+runFSC_step_agg3(
+  ph = ph,
+  l = landscape,
+  sample_n = NULL,
+  preLGMparms = NULL,
+  label = "test",
+  delete_files = TRUE,
+  num_cores = 1,
+  exec = "fsc25",
+  loc_parms = NULL,
+  found_Ne = NULL,
+  gmap = NULL,
+  MAF = NULL,
+  maxloc = 2e+05
+)
 }
 \description{
 takes a population history and creates sequences based on the coalscent

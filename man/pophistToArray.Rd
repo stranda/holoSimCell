@@ -4,8 +4,7 @@
 \alias{pophistToArray}
 \title{Convert "pophist" object to an array}
 \usage{
-pophistToArray(x, longitude = NULL, latitude = NULL, times = NULL,
-  warn = TRUE)
+pophistToArray(x, longitude = NULL, latitude = NULL, times = NULL, warn = TRUE)
 }
 \arguments{
 \item{x}{A pophist object (a list).}

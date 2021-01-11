@@ -4,9 +4,19 @@
 \alias{integratedMigMat}
 \title{calc dispersal into a cell}
 \usage{
-integratedMigMat(landx = 15, landy = 15, xnum = 4, ynum = 4,
-  xsz = 100, ysz = 100, sshp = 1, ssc = 10, mix = 0.1,
-  nmean = 100, nvar = nmean)
+integratedMigMat(
+  landx = 15,
+  landy = 15,
+  xnum = 4,
+  ynum = 4,
+  xsz = 100,
+  ysz = 100,
+  sshp = 1,
+  ssc = 10,
+  mix = 0.1,
+  nmean = 100,
+  nvar = nmean
+)
 }
 \description{
 calculates the amount of dispersal into a cell based on the popsize and distance of other cells

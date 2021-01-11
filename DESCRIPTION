@@ -41,5 +41,5 @@ Remotes: adamlilith/omnibus,
 	 stranda/gstudio
 Suggests: testthat
 LinkingTo: Rcpp
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.1
 LazyData: true

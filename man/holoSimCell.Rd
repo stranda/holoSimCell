@@ -3,7 +3,6 @@
 \docType{package}
 \name{holoSimCell}
 \alias{holoSimCell}
-\alias{holoSimCell-package}
 \title{holoSimCell}
 \description{
 forward-backward simulation for TIMBER
