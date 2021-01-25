@@ -38,7 +38,8 @@ Remotes: adamlilith/omnibus,
 	 adamlilith/statisfactory,
 	 adamlilith/enmSdm,
 	 dyerlab/popgraph,
-	 stranda/gstudio
+	 stranda/gstudio,
+	 EricArcher/strataG
 Suggests: testthat
 LinkingTo: Rcpp
 RoxygenNote: 7.1.1
