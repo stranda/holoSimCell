@@ -370,6 +370,7 @@ getpophist2.cells <- function(h=225, #humber of habitats (populations)
                              ysz=sz,
                              xsz=sz,
                              enmstep=NULL, #vector of the number of time clicks for each habitat
+                             numcolonists=1, #number of colonists in a newly colonized cell
                              samptime=0 #if zero runs through.  If >zero reports every samptime
                              )
 {
@@ -543,8 +544,6 @@ getpophist2.cells <- function(h=225, #humber of habitats (populations)
     for (gen in 1:maxtime)
     {
 
-
-        
         src <- getsrcC(tmat,popDispInfl(Nvec))
 
 #        print(Nvec)
@@ -559,7 +558,7 @@ getpophist2.cells <- function(h=225, #humber of habitats (populations)
             
             pops$arrive[as.numeric(disp$snk)] <- gen
             pops$source[as.numeric(disp$snk)] <- disp$src
-            Nvec[disp$snk] <- 1
+            Nvec[disp$snk] <- numcolonists
             colhist[[gen]] <- pops[as.numeric(disp$snk),]
             
         } else {#end if cells had movement
