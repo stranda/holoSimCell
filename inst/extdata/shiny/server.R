@@ -5,110 +5,74 @@ require(shiny)
 
 # Define server logic required to draw a histogram
 server <- function(input, output,session) {
+    land <- reactive({
+        if (FALSE)
+            ashSetupLandscape(equalsuit=T,xlim=50,ylim=50,timesteps=701) else ashSetupLandscape()
+    })
+    getparms <- reactive({
+        data.frame(shortscale=input$ssc, shortshape=input$ssh, longmean=input$nmn,
+                   lambda=input$lambda,
+                   mix=input$mix,
+                   refs=input$refs,
+                   Ne=input$K, ref_Ne=100*input$K)
+    })
 
-    habgrid <- reactive({
-        if (input$usehab=="Pollen")
-        {
-            ashpollen
-        } else if (input$usehab=="ENM")
-            {
-                ashenm
-            } else if (input$usehab=="Workshop ENM")
-            {
-                workshop_enm_landscape
-            } else if (input$usehab=="Workshop Pollen")
-            {
-                ashpollen
-            } else {NULL}
+    ph <- reactive({
+print("bout to call  landscape")
+landscape <- land()
+print("got past the landscape reactive")
+        parms <- getparms()
+
+print("made it past landscape and getparms")
         
-        })
+        if(parms$refs == "PA") {
+            refpops <- c(1000, 1001, 999, 1051, 949)
+                                        #refpops <- 1000
+        } else if(parms$refs == "TX") {
+            refpops <- c(526, 527, 525, 577, 475)
+                                        #refpops <- 526
+        } else if(parms$refs == "GA") {
+            refpops <- c(536, 537, 535, 587, 485)
+                                        #refpops <- 536
+        } else if(parms$refs == "ALL") {
+            refpops <- c(536, 537, 535, 587, 485,
+                         526, 527, 525, 577, 475,
+                         1000, 1001, 999, 1051, 949)
+                                        #refpops <- c(526,536,1000)
+        }
 
-    observeEvent(input$usehab,{
-        hg <- habgrid()
-        details <- hg$details
-        updateNumericInput(session,"ref1",max=details[1,"ncells"])
-        updateNumericInput(session,"ref2",max=details[1,"ncells"])
-        updateNumericInput(session,"xdim",value=details[1,"x.dim"])
-        updateNumericInput(session,"ydim",value=details[1,"y.dim"])
-        updateNumericInput(session,"gens",value=dim(hg$hab_suit)[1])
+print(parms)
+print(refpops)
+
+avgCellsz <- mean(c(res(landscape$sumrast)))  ### if the cells are not square, then use the average of the cell width and length
+p <- getpophist2.cells(h = landscape$details$ncells,
+                       xdim = landscape$details$x.dim,
+                       ydim = landscape$details$y.dim,
+                       hab_suit=landscape,
+                       refs=refpops, 
+                       refsz=parms$ref_Ne,
+                       lambda=parms$lambda,
+                       mix=parms$mix,
+                       shortscale=(parms$shortscale/100)*avgCellsz,
+                       shortshape=parms$shortshape,
+                      longmean=(parms$longmean/100)*avgCellsz,
+                       ysz=res(landscape$sumrast)[2], 
+                       xsz=res(landscape$sumrast)[1], 
+                      K = parms$Ne)
+save(file="p.rda",p,parms,landscape)
+p
     })
-    
-    output$dispkern <- renderPlot({
-        thresh = 1e-9
-        dom=0:100000
-        dens <- distancePDF(dom,ssh=input$ssh,ssc=(input$ssc/100)*input$sz,
-                            lmn=(input$nmn/100)*input$sz,
-                            lsd=sqrt(input$nmn),mix=input$mix)
-        nonzero.dens <- dens[1:max(which(dens>thresh))]
-        nonzero.dom <- dom[1:max(which(dens>thresh))]
-        prop.dom = nonzero.dom
-        plot(nonzero.dens ~ prop.dom,
-             type="l", xlab="Dispersal distance in same units as cell width",
-             ylab="Density")
-        text(0.9*max(nonzero.dom),0.9*max(nonzero.dens),paste("Only densities >",thresh,"shown"))
-    })
+
     
     output$histplot <- renderPlot({
         input$doplot
         isolate({
-            if ((input$ref1>0)&(input$ref2>0))
-            {
-                refs=c(input$ref1,input$ref2)
-                refsz=c(input$ref1size,input$ref2size)
-            } else {
-                if (input$ref1>0)
-                {
-                    refs=c(input$ref1)
-                    refsz=c(input$ref1size)
-                } else {
-                    refs=c(input$ref2)
-                    refsz=c(input$ref2size)
-                }
-                
-            }
-
-            hs=habgrid() #hab suit unless NULL
-            
-            ph <- getpophist.cells(h=input$xdim*input$ydim,          ##demography, num habitats
-                                         xdim=input$xdim,        ##num cols
-                                         ydim=input$ydim,        ##num rows
-                                         maxtime=input$gens,  ##num time clicks to simulate (yrs, decades cents?) (call em decades here)
-                                         lambda=input$lambda, ##intrisic rate of growth (discrete-time...right? can be modified with deltLambda)
-                                        #deltLambda: see function definition
-                                         K=input$K,        ##carry capacity (can be modified with deltK)
-                                        #deltK: see function definition
-                                         refs=refs,    ##pop ids of refugia
-                                         refsz=refsz, ##sizes of refugia indicated in refs
-                                         sz=input$sz,   ##number of spatial units per grid cell
-                                        #dispersal traits
-                                         distance.fun=distancePDF, #takes a length and 5 parameters and creates mig matrix
-                                         shortscale=(input$ssc/100)*input$sz, #scale of short distance weibull
-                                         longmean=(input$nmn/100)*input$sz,      #mean of long-distance norm (var is the same as the mean)
-                                         shortshape=input$ssh,    #shape of short-distance
-                                         mix=input$mix,         #proportion of LDD
-                                         popDispInfl=function(x){log(x+1)},
-                                         samptime = 1,  #!# sample every X generations
-                                         CVn = NULL,       #!# coefficient of variation X% 
-                                         pois.var = FALSE, #!# Poisson distribution for demographic stochasticity
-                                         extFUN = NULL,
-                                         hab_suit = hs
-                                       )
-#            print(ph$coalhist)
-            print("about to plot")
-            if (sum(!is.na(ph$pophist$source))>1)
-            {
-                if (input$sc2mxTime) mxt = input$gens else mxt= NULL 
-                plothist(ph,maxtime=mxt)
-            }
-            else
-            {
-                plot(1~1,xlab="",ylab="",type="n")
-                text(1,1,"No populations colonized!" )
-            }
-            print("plotting done")
-            
+            ph1 <- ph()
+            print(names(ph1))
+            plothist(ph1,maxtime=nrow(land()$hab_suit))
+            })
         })
-   })
+   
 }
 
 # Run the application 

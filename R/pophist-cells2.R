@@ -549,7 +549,7 @@ getpophist2.cells <- function(h=225, #humber of habitats (populations)
 #        print(Nvec)
 #        print(src)
         
-        if (sum(src!=1:npop)!=0)  #some cells had movement
+        if (sum(src!=(1:npop))!=0)  #some cells had movement
         {
             dispersed=T
             disp <- data.frame(src=src[src!=(1:npop)],snk=c(1:npop)[src!=(1:npop)])

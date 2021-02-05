@@ -29,6 +29,7 @@ getpophist2.cells(
   ysz = sz,
   xsz = sz,
   enmstep = NULL,
+  numcolonists = 1,
   samptime = 0
 )
 }

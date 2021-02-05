@@ -10,7 +10,6 @@ Description: One paragraph description of what the package does as one
 License: GPL (>= 2)
 Imports: Rcpp (>= 1.0.1)
 Depends: R (>= 3.5),
-	 cubature,
 	 matrixStats,
 	 tripack,
 	 vegan,
@@ -31,6 +30,7 @@ Depends: R (>= 3.5),
 	 plyr,
 	 shiny,
 	 tripack,
+	 pracma,
 	 popgraph,
 	 igraph,
 	 gstudio

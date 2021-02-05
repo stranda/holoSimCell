@@ -44,6 +44,7 @@ IntegerVector getsrcC(NumericMatrix tmat, NumericVector nv) {
   int k=tmat.nrow();
   int choice;
   NumericVector mprb(k) ;
+  double tmp=0;
   NumericVector prbs(k);
   IntegerVector out(k);
 
@@ -51,16 +52,21 @@ IntegerVector getsrcC(NumericMatrix tmat, NumericVector nv) {
     {
       prbs=tmat(i,_);
       prbs(i)=0;
+      
       mprb=prbs * nv;
-      
-      if (sum(mprb)>=1) mprb[i] = 0.0; else mprb[i] = 1-sum(mprb);
-      
-      mprb=mprb/sum(mprb);
+
+      if (sum(mprb)>1) //prob of dispersing out of cell needt to be normalized; should be really uncommon
+	{
+	  mprb=mprb/sum(mprb);
+	  mprb[i]=0;
+	} else { //more normal process
+	mprb[i]=1-sum(mprb);
+	mprb=mprb/sum(mprb);
+      }
       
       //      Rprintf("i %i, out[i], %i, mprb[i], %g\n",i,out[i],mprb[i]);
       
       choice = whichMultinom(mprb);
-      //choice = gsl_mult1(mprb)[0];
       
       //      Rprintf("out[i] %i \n",out[i]);
       

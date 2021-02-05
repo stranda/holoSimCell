@@ -17,9 +17,17 @@ integratedDispMat <- function(xnum=4,ynum=4,xsz=100,ysz=100,sshp=1,ssc=10,mix=0.
 
     if (FALSE)
     {
-       xnum=10;ynum=10;xsz=1;ysz=1;sshp=1;ssc=10;mix=0.1;nmean=1;nvar=nmean 
+       xnum=10;ynum=10;xsz=100;ysz=100;sshp=1;ssc=60;mix=0.05;nmean=100;nvar=sqrt(nmean )
     }
- 
+
+    topolar <- function(x,y)
+    {
+        r <- sqrt(x^2+y^2)
+        theta <- atan(y/x)
+        cbind(theta,r)
+    }
+    
+    
   ynum1 = ynum+1
   xnum1 = xnum+1
   
@@ -28,24 +36,37 @@ integratedDispMat <- function(xnum=4,ynum=4,xsz=100,ysz=100,sshp=1,ssc=10,mix=0.
  
   for (x in 1:xnum1)
   {
-    if (x==1) lft=0.5*xsz else lft = (x-1)*xsz
-    rgt = lft+xsz
-    for (y in 1:ynum1)
-    {
-      if (y==1) bt = 0.5*ysz else bt = (y-1)*ysz
-      tp = bt+ysz
- #     print(paste(lft,rgt))
- #     print(paste(bt,tp))
-      qmat[y,x] <- cubature::adaptIntegrate(
-        function(l)
-          {
-            (1-mix)*dweibull(l[1],shape=sshp,scale=ssc)+mix*dnorm(l[1],mean=nmean,sd=sqrt(nvar))+
-            (1-mix)*dweibull(l[2],shape=sshp,scale=ssc)+mix*dnorm(l[2],mean=nmean,sd=sqrt(nvar))
-          },
-        c(lft,bt),c(rgt,tp))$integral
-    }
+      if (x==1) lft = xsz/2 else lft = (x-1)*xsz
+      rgt = lft+xsz
+      for (y in 1:ynum1)
+      {
+         if (y==1) bt=ysz/2 else  bt = (y-1)*ysz
+          tp = bt+ysz
+#          print(paste(lft,rgt))
+#          print(paste(bt,tp))
+          if (FALSE)
+          {####this is wrong, need to work in polar coordinates and integrate under a surface of rotation
+              qmat[y,x] <- cubature::adaptIntegrate(
+                                         function(l)
+                                         {
+                                             (1-mix)*dweibull(l[1],shape=sshp,scale=ssc)+mix*dnorm(l[1],mean=nmean,sd=sqrt(nvar))+
+                                                 (1-mix)*dweibull(l[2],shape=sshp,scale=ssc)+mix*dnorm(l[2],mean=nmean,sd=sqrt(nvar))
+                                         },
+                                         c(lft,bt),c(rgt,tp))$integral
+          } else {##integrating under a surface of rotation.  effen polar coordinates! This works AES 2/2/21
+              f=function(x,y)
+              {
+                  d=sqrt(x^2+y^2)
+                  (1-mix)*dweibull(d,shape=sshp,scale=ssc) + mix*dnorm(d,mean=nmean,sd=sqrt(nvar))
+              }
+              
+              polar <- topolar(x=c(lft,rgt,lft,rgt),y=c(tp,tp,bt,bt))
+              qmat[y,x] <- pracma::integral2(f,min(polar[,1],na.rm=T),max(polar[,1],na.rm=T),min(polar[,2],na.rm=T),
+                                             max(polar[,2],na.rm=T),sector=T)$Q
+          }
+      }
   }
-  
+    
   qmat[1,1]=4*qmat[1,1]  #becaus we only integrated across 1/4 of central cell
   
   #make the single quadrant reflect across a 2d surface
@@ -77,34 +98,50 @@ integratedDispMat <- function(xnum=4,ynum=4,xsz=100,ysz=100,sshp=1,ssc=10,mix=0.
 #' each population to determine dispersal into the others.
 #' 
 #' @export
-integratedMigMat <- function(landx=15,landy=15,xnum=4,ynum=4,xsz=100,ysz=100,sshp=1,ssc=10,mix=0.1,nmean=100,nvar=nmean)
+integratedMigMat <- function(landx=15,landy=15,xnum=4,ynum=4,xsz=100,ysz=100,sshp,ssc,mix,nmean,nvar)
 {
     if (FALSE)
     {
-        landx=10
-        landy=10
-       xnum=2;ynum=2;xsz=1;ysz=1;sshp=1;ssc=1.6;mix=0.1;nmean=1;nvar=nmean 
+        landx=10;
+        landy=10;
+        xnum=3;
+        ynum=3;
+        xsz=102;
+        ysz=102;
+        sshp=1;
+        ssc=10;
+        mix=0.001;
+        nmean=70;
+        nvar=(nmean)*10;
+        dom=seq(0,2*xsz,length=100)
+        plot(dnorm(dom,nmean,sqrt(nvar))*(mix)+(1-mix)*dweibull(dom,shape=sshp,scale=ssc)~dom,type="l")
     }
     
-    dm = integratedDispMat(xnum=xnum,ynum=ynum,xsz=xsz,ysz=ysz,sshp=sshp,ssc=ssc,mix=mix,nmean=nmean,nvar=nmean)
+    dm = integratedDispMat(xnum=xnum,ynum=ynum,xsz=xsz,ysz=ysz,sshp=sshp,ssc=ssc,mix=mix,nmean=nmean,nvar=nvar)
+    dm=dm/sum(dm)   
     dmcol <- dim(dm)[2];     dmrow <- dim(dm)[1]
+
     cent=c(ceiling(dim(dm)[1]/2),ceiling(dim(dm)[2]/2))
-    
+    prop.tail.out.cent=1-dm[cent[1],cent[2]]
+    print("prop.tail.out.cent")
+    print(prop.tail.out.cent)
     lmat <- matrix(0,ncol=landx,nrow=landy)
    
     pops <- cbind(data.frame(pop=1:(landx*landy)),expand.grid(x=1:landx,y=1:landy))
+
     if (FALSE)
         {
             rmat=makeRmat(pops,dm,cent)             #rversion fine for small landscapes
         } else {
             rmat= makeRmatC(as.matrix(pops),dm,(cent-1)) #c++ version better (code in helpers.cpp)
         }
+#    rmat=rmat/sum(rmat)
     rmat   
 }
 
 makeRmat <- function(pops,dm,cent=c(0,0))
 {
-    rmat <-     rmat <- matrix(0,ncol=dim(pops)[1],nrow=dim(pops)[1]) #from cols to rows transition/migration matrix
+    rmat <- matrix(0,ncol=dim(pops)[1],nrow=dim(pops)[1]) #from cols to rows transition/migration matrix
     for (i in 1:dim(pops)[1])
     {
         for (j in 1:dim(pops)[1])
@@ -119,6 +156,33 @@ makeRmat <- function(pops,dm,cent=c(0,0))
             }
         }
     }
+    rmat
+}
+
+makeRmatBetter <- function(pops,dm,cent=c(0,0))
+{
+
+    dimnames(dm) <- dimnames(dm) <- list(1:nrow(dm),1:ncol(dm))
+    dmd=data.frame(cellx=colnames(dm)[col(dm)], celly=rownames(dm)[row(dm)], dens=c(dm))
+
+    m=as.matrix(dist(pops[,2:3],diag=T,upper=T))
+
+    
+    d=data.frame(pop1=colnames(m)[col(m)], pop2=rownames(m)[row(m)], dist=c(m))
+    d$pop1 <- as.character(d$pop1)
+    d$pop2 <- as.character(d$pop2)
+#    d=d[d$dist<((nrow(dm)-1)/2),]
+    d$offy=pops[d$pop1,"y"]-pops[d$pop2,"y"]+cent[1]
+    d$offx=pops[d$pop1,"x"]-pops[d$pop2,"x"]+cent[2]
+    d <- d[(d$offx>0)&(d$offx<=ncol(dm)),]
+    d <- d[(d$offy>0)&(d$offy<=nrow(dm)),]
+
+    d <- merge(d,dmd,all.x=T,by.x=c("offx","offy"),by.y=c("cellx","celly"))
+    rdf=merge(expand.grid(pop1=1:max(as.numeric(d$pop1)),pop2=1:max(as.numeric(d$pop2))),d,all.x=T)
+    rdf=rdf[order(as.numeric(rdf$pop1),as.numeric(rdf$pop2)),]
+
+    rmat=matrix(rdf$dens,nrow=length(unique(rdf$pop1)),ncol=length(unique(rdf$pop2)))
+    rmat[is.na(rmat)]=0
     rmat
 }
 
