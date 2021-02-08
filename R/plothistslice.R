@@ -27,7 +27,7 @@ plotHistSlice <- function(timeslice,ph,landscape,window=c(0,timeslice))
 
     opar=par()
     par(mar=c(2,2,2,0.5)+0.1)
-    plot(flip(r,2), legend=F)
+    sp::plot(flip(r,2), legend=F)
 
     szfunc <- function(x) {log(x+1)/6}
     
