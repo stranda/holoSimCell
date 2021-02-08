@@ -18,13 +18,10 @@ server <- function(input, output,session) {
     })
 
     ph <- reactive({
-print("bout to call  landscape")
-landscape <- land()
-print("got past the landscape reactive")
+        print("recalculating pophistory")
+        landscape <- land()
         parms <- getparms()
 
-print("made it past landscape and getparms")
-        
         if(parms$refs == "PA") {
             refpops <- c(1000, 1001, 999, 1051, 949)
                                         #refpops <- 1000
@@ -41,8 +38,8 @@ print("made it past landscape and getparms")
                                         #refpops <- c(526,536,1000)
         }
 
-print(parms)
-print(refpops)
+#print(parms)
+#print(refpops)
 
 avgCellsz <- mean(c(res(landscape$sumrast)))  ### if the cells are not square, then use the average of the cell width and length
 p <- getpophist2.cells(h = landscape$details$ncells,
@@ -59,8 +56,8 @@ p <- getpophist2.cells(h = landscape$details$ncells,
                        ysz=res(landscape$sumrast)[2], 
                        xsz=res(landscape$sumrast)[1], 
                       K = parms$Ne)
-save(file="p.rda",p,parms,landscape)
-p
+#        save(file="p.rda",p,parms,landscape)
+        p
     })
 
     
@@ -72,9 +69,13 @@ p
             plothist(ph1,maxtime=nrow(land()$hab_suit))
             })
         })
-   
-}
+    
+    output$histsliceplot <- renderPlot({
+        ts=input$timeslice
+        window=c(ifelse((ts-input$window)>=0,ts-input$window,0), ts)
+        plotHistSlice(timeslice=ts,ph=ph(),landscape=land(),window=window)
+    })
 
 # Run the application 
 #shinyApp(ui = ui, server = server)
-
+}

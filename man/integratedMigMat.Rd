@@ -11,11 +11,11 @@ integratedMigMat(
   ynum = 4,
   xsz = 100,
   ysz = 100,
-  sshp = 1,
-  ssc = 10,
-  mix = 0.1,
-  nmean = 100,
-  nvar = nmean
+  sshp,
+  ssc,
+  mix,
+  nmean,
+  nvar
 )
 }
 \description{
