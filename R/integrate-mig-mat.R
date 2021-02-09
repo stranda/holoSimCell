@@ -9,15 +9,16 @@
 #' returns a matrix with the centermost value corresponding to the source and the surrounding cells represent
 #' the probability of dispersal into those cells.  Essentially this produces the dispersal kernel for a single
 #' source population.  The migration matrix could be created by moving the center of this functions output to 
-#' each population to determine dispersal into the others.
+#' each population to determine dispersal into the others.  The approx parameter is a factor >=1 that determines how many
+#' times to subset the grid squares to better approximate the polar-cartesian conversion
 #' 
 #' @export
-integratedDispMat <- function(xnum=4,ynum=4,xsz=100,ysz=100,sshp=1,ssc=10,mix=0.1,nmean=100,nvar=(nmean))
+integratedDispMat <- function(xnum=4,ynum=4,xsz=100,ysz=100,sshp=1,ssc=10,mix=0.1,nmean=100,nvar=(nmean),approx=5)
 {
 
     if (FALSE)
     {
-       xnum=10;ynum=10;xsz=100;ysz=100;sshp=1;ssc=60;mix=0.05;nmean=100;nvar=sqrt(nmean )
+       xnum=10;ynum=10;xsz=100;ysz=100;sshp=1;ssc=60;mix=0.05;nmean=100;nvar=sqrt(nmean );approx=10
     }
 
     topolar <- function(x,y)
@@ -28,8 +29,11 @@ integratedDispMat <- function(xnum=4,ynum=4,xsz=100,ysz=100,sshp=1,ssc=10,mix=0.
     }
     
     
-  ynum1 = ynum+1
-  xnum1 = xnum+1
+    if (approx<1) approx=1
+
+
+    ynum1 = ynum+1
+    xnum1 = xnum+1
   
   qmat = matrix(0,nrow = ynum1, ncol = xnum1)
 
@@ -40,32 +44,38 @@ integratedDispMat <- function(xnum=4,ynum=4,xsz=100,ysz=100,sshp=1,ssc=10,mix=0.
       rgt = lft+xsz
       for (y in 1:ynum1)
       {
-         if (y==1) bt=ysz/2 else  bt = (y-1)*ysz
+          if (y==1) bt=ysz/2 else  bt = (y-1)*ysz
           tp = bt+ysz
-#          print(paste(lft,rgt))
-#          print(paste(bt,tp))
-          if (FALSE)
-          {####this is wrong, need to work in polar coordinates and integrate under a surface of rotation
-              qmat[y,x] <- cubature::adaptIntegrate(
-                                         function(l)
-                                         {
-                                             (1-mix)*dweibull(l[1],shape=sshp,scale=ssc)+mix*dnorm(l[1],mean=nmean,sd=sqrt(nvar))+
-                                                 (1-mix)*dweibull(l[2],shape=sshp,scale=ssc)+mix*dnorm(l[2],mean=nmean,sd=sqrt(nvar))
-                                         },
-                                         c(lft,bt),c(rgt,tp))$integral
-          } else {##integrating under a surface of rotation.  effen polar coordinates! This works AES 2/2/21
-              f=function(x,y)
-              {
-                  d=sqrt(x^2+y^2)
-                  (1-mix)*dweibull(d,shape=sshp,scale=ssc) + mix*dnorm(d,mean=nmean,sd=sqrt(nvar))
-              }
-              
-              polar <- topolar(x=c(lft,rgt,lft,rgt),y=c(tp,tp,bt,bt))
-              qmat[y,x] <- pracma::integral2(f,min(polar[,1],na.rm=T),max(polar[,1],na.rm=T),min(polar[,2],na.rm=T),
-                                             max(polar[,2],na.rm=T),sector=T)$Q
+                                        #          print(paste(lft,rgt))
+                                        #          print(paste(bt,tp))
+###integrating under a surface of rotation.  effen polar coordinates! This works AES 2/2/21
+          f=function(x,y)
+          {
+              d=sqrt(x^2+y^2)
+              (1-mix)*dweibull(d,shape=sshp,scale=ssc) + mix*dnorm(d,mean=nmean,sd=sqrt(nvar))
           }
+
+          xseq=seq(lft,rgt,length=approx+1)
+          xdiff=diff(xseq[1:2])
+          yseq=seq(bt,tp,length=approx+1)
+          ydiff=diff(yseq[1:2])
+
+          totprob <- 0
+          
+          for (xs in xseq[-length(xseq)])
+              for (ys in yseq[-length(yseq)])
+              {
+                  
+###                      polar <- topolar(x=c(lft,rgt,lft,rgt),y=c(tp,tp,bt,bt))
+                  polar <- topolar(x=c(xs,xs+xdiff,xs,xs+xdiff),y=c(ys+ydiff,ys+ydiff,ys,ys))
+                  
+                  totprob <- totprob + pracma::integral2(f,min(polar[,1],na.rm=T),max(polar[,1],na.rm=T),min(polar[,2],na.rm=T),
+                                                         max(polar[,2],na.rm=T),sector=T)$Q
+              }
+          qmat[y,x]=totprob
       }
   }
+
     
   qmat[1,1]=4*qmat[1,1]  #becaus we only integrated across 1/4 of central cell
   
