@@ -8,7 +8,7 @@ mu,1.00E-07,NA,fixed,FALSE
 G,30,NA,fixed,FALSE
 longmean,0.55,NA,fixed,FALSE
 lambda,1.05,NA,fixed,FALSE
-mix,1.00E-05,0.25,uniform,FALSE
+mix,1.00E-05,0.25,loguniform,FALSE
 Ne,400,10000,uniform,TRUE
 preLGM_t,100000,150000,uniform,TRUE
 preLGM_Ne,10000,100000,uniform,TRUE
