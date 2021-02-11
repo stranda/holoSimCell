@@ -36,75 +36,9 @@ library(holoSimCell)
 fn <- paste0(label,"_",i,"_", who, ".csv")
 
 
-###
-### popmap is a built-in dataframe with all empirical individuals and their population membership
-###
-rownames(popmap) <- popmap[,1]
-table(popmap[gsub("fp","",names(imputed)),2]) #printout popnames and samples
 
-
-###
-### There are some cells that contain two empirical populations.  Right now we are dropping one in
-### each of these cells with the following code.  'imputed' is a built-in dataframe in the holosimcell
-### package that has snp data for fraxinus pennsylvanica.
-###
-imputed.pruned=imputed[,-which(gsub("fp","",names(imputed))%in%popmap[popmap$abbrev=="Michigan","id"])]
-imputed.pruned=imputed.pruned[,-which(gsub("fp","",names(imputed.pruned))%in%popmap[popmap$abbrev=="UNK","id"])]
-imputed.pruned=imputed.pruned[,-which(gsub("fp","",names(imputed.pruned))%in%popmap[popmap$abbrev=="MO1","id"])]
-imputed.pruned=imputed.pruned[,-which(gsub("fp","",names(imputed.pruned))%in%popmap[popmap$abbrev=="ON1","id"])]
-imputed.pruned=imputed.pruned[,-which(gsub("fp","",names(imputed.pruned))%in%popmap[popmap$abbrev=="VA1","id"])]
-imputed.pruned=imputed.pruned[,-which(gsub("fp","",names(imputed.pruned))%in%popmap[popmap$abbrev=="MB1","id"])]
-removes <- c()
-popids <- popmap[gsub("fp","",names(imputed.pruned)),2]
-table(popids)
-for (a in unique(popids))
-{
-  if (sum(popids==a)>14)
-  {
-    removes <- c(removes,sample(which(popids==a),1))
-  }
-}
-imputed.pruned <- imputed.pruned[,-1*removes]
-
-poptbl <- table(popmap[gsub("fp","",names(imputed.pruned)),2])
-
-samppts <- pts[pts$abbrev %in% names(poptbl),]
-
-rs <- brick(paste0(system.file("extdata","rasters",package="holoSimCell"),"/","study_region_daltonIceMask_lakesMasked_linearIceSheetInterpolation.tif"))
-
-####
-#### this function (newLandscapeDim) takes a rasterbrick and a proportion of cols to resample to.  So if there are 100 cols
-#### and proportion is 0.5, the landscape is resampled to 50 columns (cells get twice as wide).  The rows are resampled to
-#### make the cells as square as possible
-####  it's easy to change this proportion and see the implications for execution times, etc.
-#### on the current (Ash) problem, 0.45 gives a forward time simulation of about 2 minutes.
-
-newrs <- newLandscapeDim(rs,0.45)
-
-
-print("original rasterbrick dimensions:")
-print(dim(rs))
-
-print("new resampled rasterbrick dimensions:")
-print(dim(newrs))
-
-icelakesland <- def_grid_pred2(pred=1-newrs,
-                                     samps=transSampLoc(samppts,
-                                                          range.epsg=4326,
-                                                          raster.proj=crs(rs)@projargs),
-                                     raster.proj=crs(rs)@projargs
-                                     )
-
-
-landscape <- icelakesland
-landscape$hab_suit[landscape$hab_suit > 0] <- 1 #Cells under the glacier have 0 suitability, not NA suitability
-
-
-if (!uniqueSampled(landscape))
-{
-  stop("The landscape you are using is combining multiple sampled populations into a single raster cell")
-}
-
+landscape <- ashSetupLandscape(brickname=paste0(system.file("extdata","rasters",package="holoSimCell"),"/","study_region_daltonIceMask_lakesMasked_linearIceSheetInterpolation.tif"),cellreduce=0.45)
+    
 ###seed is based on time in seconds and the number of characters in the library path
 ###
 ###
