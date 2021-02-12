@@ -4,7 +4,7 @@
 ### are now built into holoSimCell
 ### as built in dataframes (in data/ directory)
 ## check out the extra two command-line args: simdir and outdir
-args <- cohmmandArgs(TRUE)
+args <- commandArgs(TRUE)
 i <- as.numeric(args[1])
 nreps <- as.numeric(args[2]) 
 who <- as.character(args[3])  
@@ -53,10 +53,9 @@ landscape <- ashSetupLandscape(
 repl <- 1
 while(repl <= nreps) {
   sec=as.numeric(Sys.time())-1500000000
-  lp= as.numeric(as.character(nchar(paste(.libPaths(), collapse = " "))))
-  slp <- as.integer(floor(sec*lp))
+  slp <- sec*(as.numeric(i)/100000)
   
-  set.seed(as.integer(sec))
+  set.seed(as.integer(slp))
   
   if(file.exists("Ash_priors.csv")) {
       parms <- drawParms(control = "Ash_priors.csv")
