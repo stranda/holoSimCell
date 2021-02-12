@@ -4,7 +4,7 @@
 ### are now built into holoSimCell
 ### as built in dataframes (in data/ directory)
 ## check out the extra two command-line args: simdir and outdir
-args <- cohmmandArgs(TRUE)
+args <- commandArgs(TRUE)
 i <- as.numeric(args[1])
 nreps <- as.numeric(args[2]) 
 who <- as.character(args[3])  
