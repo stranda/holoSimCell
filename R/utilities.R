@@ -27,7 +27,7 @@ ashRemoveGeneticPops <- function(popmap,pops)
 ##' Setup a landscape for Ash for our simulations. everything but the surface is baked into holoSimCell
 ##' @param brickname name of a file of a geotiff object.  layers correspond to time clicks in simulations
 ##' @export
-ashSetupLandscape <- function(brickname=paste0(system.file("extdata","rasters",package="holoSimCell"),"/","study_region_daltonIceMask_lakesMasked_linearIceSheetInterpolation.tif"),equalsuit=F,cellreduce=0.45,xlim=NULL,ylim=NULL,timesteps=NULL)
+ashSetupLandscape <- function(brickname=paste0(system.file("extdata","rasters",package="holoSimCell"),"/","study_region_daltonIceMask_lakesMasked_linearIceSheetInterpolation.tif"),equalsuit=F,partialsuit=F,cellreduce=0.45,xlim=NULL,ylim=NULL,timesteps=NULL)
 {
     rownames(popmap) <- popmap[,1]
 ###
@@ -71,7 +71,7 @@ land <- def_grid_pred2(pred=1-newrs,
 
 
 landscape <- land
-landscape$hab_suit[landscape$hab_suit > 0] <- 1 #Cells under the glacier have 0 suitability, not NA suitability
+if (partialsuit==F) landscape$hab_suit[landscape$hab_suit > 0] <- 1 #Cells under the glacier have 0 suitability, not NA suitability
 if (!uniqueSampled(landscape))
 {
   stop("The landscape you are using is combining multiple sampled populations into a single raster cell")
