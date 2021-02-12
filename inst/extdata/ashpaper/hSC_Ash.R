@@ -53,7 +53,6 @@ landscape <- ashSetupLandscape(
 repl <- 1
 while(repl <= nreps) {
   sec=as.numeric(Sys.time())-1500000000
-  slp <- sec*(as.numeric(i)/100000)
   
   set.seed(as.integer(slp))
   
