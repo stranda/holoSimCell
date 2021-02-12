@@ -17,6 +17,16 @@ drawParms <- function(control = NULL) {
 			parms[p] <- runif(1, min, max)
 			rm(min)
 			rm(max)
+		} else if(priors$type[p] == "loguniform") {
+		  min <- as.numeric(as.character(priors$min[p]))
+		  max <- as.numeric(as.character(priors$max[p]))
+		  parms[p] <- exp(runif(1, log(min), log(max)))
+		  rm(min)
+		  rm(max)
+		} else if(priors$type[p] == "beta") {
+		  max <- as.numeric(as.character(priors$max)[p])
+		  parms[p]<- max*rbeta(1,1,4)
+		  rm(max)
 		} else if(priors$type[p] == "conditional") {
 			if(length(which(rownames(priors)==as.character(priors$min[p]))) == 0) {
 				min <- as.numeric(as.character(priors$min[p]))
