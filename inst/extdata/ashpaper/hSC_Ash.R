@@ -53,7 +53,6 @@ landscape <- ashSetupLandscape(
 repl <- 1
 while(repl <= nreps) {
   sec=as.numeric(Sys.time())-1500000000
-  
   set.seed(as.integer(slp))
   
   if(file.exists("Ash_priors.csv")) {
