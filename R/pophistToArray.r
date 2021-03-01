@@ -1,6 +1,6 @@
 #' Convert "pophist" object to an array
 #'
-#' This function converts a "pophist" object to an array. This function is helpful for converting a "pophist" object to input for the \code{\link[enmSdm]{bioticVelocuty}} function.
+#' This function converts a "pophist" object to an array. This function is helpful for converting a "pophist" object to input for the \code{\link[enmSdm]{bioticVelocity}} function.
 #' @param x A pophist object (a list).
 #' @param longitude Either \code{NULL} (default) or a vector of longitudes, one per column in the output object. Note that if \code{longitude} is \code{NULL} and the "pophist" object in \code{x} contains a field named \code{x$pophist$longitude}, then this will be used (and will override the values in \code{longitude} if it is specified).
 #' @param latitude Either \code{NULL} (default) or a vector of latitudes, one per row in the output object. Note that if \code{latitude} is \code{NULL} and the "pophist" object in \code{x} contains a field named \code{x$pophist$latitude}, then this will be used (and will override the values in \code{latitude} if it is specified).
