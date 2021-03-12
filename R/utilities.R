@@ -29,6 +29,7 @@ ashRemoveGeneticPops <- function(popmap,pops)
 ##' @export
 ashSetupLandscape <- function(brickname=paste0(system.file("extdata","rasters",package="holoSimCell"),"/","study_region_daltonIceMask_lakesMasked_linearIceSheetInterpolation.tif"),equalsuit=F,partialsuit=F,cellreduce=0.45,xlim=NULL,ylim=NULL,timesteps=NULL)
 {
+
     rownames(popmap) <- popmap[,1]
 ###
 ### There are some cells that contain two empirical populations.  Right now we are dropping one in
@@ -51,13 +52,20 @@ ashSetupLandscape <- function(brickname=paste0(system.file("extdata","rasters",p
 
     if (!equalsuit)
     {
-        rs <- raster::brick(brickname)
-        newrs <- newLandscapeDim(rs,cellreduce)
+        if (class(brickname)=="RasterBrick")
+        {
+            newrs <- brickname #passed a brick instead of a path ot a brick
+                               ##assumes that the brick is in the correct resolution
+        } else {
+            rs <- raster::brick(brickname)
+            newrs <- newLandscapeDim(rs,cellreduce)
+        }
     } else {
         if (is.null(xlim)|is.null(ylim))
-            newrs=raster::raster(nrows=50,ncols=50,xmn=0,xmx=5000,ymn=0,ymx=5000,vals=1) else newrs=raster::raster(nrows=ylim,ncols=xlim,xmn=0,xmx=5000,ymn=0,ymx=5000,vals=1)
+            newrs=raster::raster(nrows=50,ncols=50,xmn=0,xmx=5000,ymn=0,ymx=5000,vals=1)
+        else
+            newrs=raster::raster(nrows=ylim,ncols=xlim,xmn=0,xmx=5000,ymn=0,ymx=5000,vals=1)
         newrs = raster::brick(newrs,nl=701)
-                                                                                     
     }
 
 

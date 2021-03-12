@@ -30,6 +30,9 @@ if ((is.na(simdir))|(is.na(outdir))) {stop("need to specify a correct simdir and
 
 cat(paste("Run Details:\ni=",i,"nreps =",nreps,"who=",who,"\nlabel=",label,"\nsimdir=",simdir,"\noutdir=",outdir,"\n"))
 
+tmp = .libPaths()
+.libPaths(tmp[!grepl("home",tmp)])  ##remove any paths that have "home" in them, like: /home/f0007250  
+
 library(holoSimCell)
 
 #Set the filename, simulation, and output directories for the run
@@ -42,10 +45,13 @@ fn <- paste0(label,"_",i,"_", who, ".csv")
 ### landscapes and pushes them into a list that we can read off the disk once per simulation rather than repeatedly reading them
 ### I'm assuming the memory cost is not too high
 
-landscape <- ashSetupLandscape(
-    brickname=paste0(system.file("extdata","rasters",package="holoSimCell"),"/","study_region_daltonIceMask_lakesMasked_linearIceSheetInterpolation.tif"),
-    cellreduce=0.45
-)
+if (FALSE) ##the landscape information is now in the enmScenarios object distributed with the package
+    {
+        landscape <- ashSetupLandscape(
+            brickname=paste0(system.file("extdata","rasters",package="holoSimCell"),"/","study_region_daltonIceMask_lakesMasked_linearIceSheetInterpolation.tif"),
+            cellreduce=0.45
+        )
+    }
  
 ###seed is based on time in seconds and the number of characters in the library path
 ###
@@ -53,7 +59,8 @@ landscape <- ashSetupLandscape(
 repl <- 1
 while(repl <= nreps) {
   sec=as.numeric(Sys.time())-1500000000
-  slp=sec+as.numeric(i)
+  slp <- sec+(as.numeric(i))
+  
   set.seed(as.integer(slp))
   
   if(file.exists("Ash_priors.csv")) {
@@ -70,24 +77,13 @@ while(repl <= nreps) {
   }
   
 
-  parms$refs <- sample(c("PA","TX","GA","ALL"), 1, replace = FALSE)
+###choose enm model and refugia
+###
+  modchoice <- as.integer(round(runif(1,min=1,max=nrow(enmScenarios$enms))))
+  parms$refs <- paste0("ENM_",modchoice)
+  landscape <- enmScenarios$landscapes[[modchoice]]
+  refpops <- enmScenarios$refugeCellIds[[modchoice]] 
   
-  if(parms$refs == "PA") {
-    refpops <- c(1000, 1001, 999, 1051, 949)
-    #refpops <- 1000
-  } else if(parms$refs == "TX") {
-    refpops <- c(526, 527, 525, 577, 475)
-    #refpops <- 526
-  } else if(parms$refs == "GA") {
-    refpops <- c(536, 537, 535, 587, 485)
-    #refpops <- 536
-  } else if(parms$refs == "ALL") {
-    refpops <- c(536, 537, 535, 587, 485,
-                 526, 527, 525, 577, 475,
-                 1000, 1001, 999, 1051, 949)
-    #refpops <- c(526,536,1000)
-  }
-
   ### NEW COMMENT IN SEPT 2020
   ### Because the size of the cells is now carried through the simulation better, it seems like the
   ### dispersal parameters should scale with it as well.  The next line calcs the average of the width

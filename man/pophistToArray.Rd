@@ -27,5 +27,5 @@ A list object with:
 }
 }
 \description{
-This function converts a "pophist" object to an array. This function is helpful for converting a "pophist" object to input for the \code{\link[enmSdm]{bioticVelocuty}} function.
+This function converts a "pophist" object to an array. This function is helpful for converting a "pophist" object to input for the \code{\link[enmSdm]{bioticVelocity}} function.
 }

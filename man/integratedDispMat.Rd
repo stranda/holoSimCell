@@ -13,7 +13,8 @@ integratedDispMat(
   ssc = 10,
   mix = 0.1,
   nmean = 100,
-  nvar = (nmean)
+  nvar = (nmean),
+  approx = 5
 )
 }
 \description{
@@ -23,5 +24,6 @@ calculates the amount of dispersal into a cell based on the popsize and distance
 returns a matrix with the centermost value corresponding to the source and the surrounding cells represent
 the probability of dispersal into those cells.  Essentially this produces the dispersal kernel for a single
 source population.  The migration matrix could be created by moving the center of this functions output to 
-each population to determine dispersal into the others.
+each population to determine dispersal into the others.  The approx parameter is a factor >=1 that determines how many
+times to subset the grid squares to better approximate the polar-cartesian conversion
 }
