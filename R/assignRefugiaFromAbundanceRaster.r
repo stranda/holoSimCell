@@ -4,11 +4,10 @@
 #'
 #' @param abund Abundance raster.
 #' @param sim Simulation raster.
-#' @param threshold Numeric or \code{NULL}. Value at which to threshold the abundance raster. Values that fall above this threshold will be assumed to represent a refuge.
-#' @param intermediate Logical. If \code{FALSE} (default), return a raster stack with refuge ID and abundance with the same extent and resolution as the simulation raster. If \code{TRUE}, return a list. One item in the list is the raster stack previously described, and the other is a stack with refuge ID and abundance at the same extent and resolution as the abundance raster.
+#' @param threshold Numeric. Value at which to threshold the abundance raster. Values that fall above this threshold will be assumed to represent a refuge and values below will be assumed to be outside (i.e., zero abundance).
 #'
 #' @details
-#' This function attempts to rescale the identify of refugia and abundances obtained from the abundance raster to a new spatial resolution and extent. Since the simulation raster often has cells that are larger than the cells in the abundance raster, in some cases it cannot faithfully retain abundances or even all unique refugia identified in the abundance raster. The procedure first thresholds the abundance raster using either a user-defined value above which it is assumed a cell was inside a refuge and below which it was assumed to be outside any refuge.  All cells that are equal to or above this threshold are assumed to be a potential refuge.  A unique "abundId" raster is then created by assigning a unique integer number for each block of contiguous cells (using Moore neighborhood adjacency). This raster is then resampled to the resolution used by the simulation raster. The renumbering is redone so that cells that refugial were not adjacent at the original resolution but are in the new resolution are assigned to the same refuge. \cr
+#' This function rescales abundances obtained from the abundance raster to a new spatial resolution and extent used for demographic simulations. Since the demographic simulation raster often has cells that are larger than the cells in the abundance raster, it cannot faithfully retain abundances or even all unique refugia identified in the abundance raster. The procedure first thresholds the abundance raster using a user-defined value above which it is assumed a cell was inside a refuge and below which it was assumed to be outside any refuge (zero abundance).  A unique "abundId" raster is then created by assigning a unique integer number for each block of contiguous cells (using Moore neighborhood adjacency). This raster is then resampled to the resolution used by the simulation raster. The renumbering is redone so that cells that refugial were not adjacent at the original resolution but are in the new resolution are assigned to the same refuge. \cr
 #' Then, a "simAbund" raster is created with the same extent and resolution as the simulation raster. For each each cell in this raster, the function determines if it contains at least one cell in the "abundId" raster that is assigned to a refuge. The challenge here is that a single "simAbund" cell can contain cells that are assigned to multiple refugia in the "abundId" raster, and that "simAbund" cell can also include cells that have abundances that are assigned to no refugia in the abundance raster. Thus, if we simply assigned abundances to the "simAbund" cell by resampling the abundance raster, we would in some cases be too generous because a single "simAbund" cell can include cells that do not belong to this refuge. \cr
 #' The procedure assigns abundances by first calculating a proportionality scalar where the numerator is the sum of abundances of abundance raster cells in this refugium and in the "simAbund" cell, and the denominator the sum of all abundances of all cells in this "simAbund" cell. The abundance assigned to this "simAbund" cell for this particular refugium is this scalar times the abundance from the resampling of the abundance raster to the extent/resolution of the simulation raster. Thus, abundances assigned to any particular cell in a refuge will be equal to or less than the abundance of the resampled values. \cr
 #' The procedure then assigns each cell an integer number identifying which refugium to belongs to and an abundance corresponding to the given refuge. When cells contain more than one "abundId" refuge cell, the refuge with the greater abundance is assigned to the cell.  As a consequence, a refuge that appears in the "abundId" raster could be trimmed in extent or even eliminated if it is only represented by a few cells that have small abundances relative to a more "massive" refugium in the same cell. Also, as a result, it is possible to have distinct refugia in cells that are adjacent to one another when rescaled to the extent/resolution of the simulation raster but are spatially distinct at the scale of the abundance raster.
@@ -22,7 +21,7 @@
 #' 
 #' sim <- raster('E:/Ecology/Drive/Research/ABC vs Biogeography/NSF_ABI_2018_2021/data_and_analyses/green_ash/study_region/!study_region_raster_masks/study_region_resampled_to_genetic_demographic_simulation_resolution.tif')
 #' 
-#' refs <- assignRefugiaFromAbundanceRaster(abund, sim, 0.6, intermediate=TRUE)
+#' refs <- assignRefugiaFromAbundanceRaster(abund, sim, 0.6)
 #' 
 #' cols <- c('red', 'orange', 'yellow', 'green', 'blue', 'purple', 'gray',
 #' 	'chartreuse', 'darkgreen', 'cornflowerblue', 'goldenrod3', 'black',
@@ -31,9 +30,9 @@
 #' par(mfrow=c(2, 2))
 #' 
 #' # plot(abund, main='abundance at native resolution')
-#' col <- cols[1:cellStats(rasts$abund[['id']], 'max')]
+#' col <- cols[1:cellStats(rasts$abund[['idOrig']], 'max')]
 #' plot(refs$originalScale[['id']], col=col, main='refugia ID at native resolution')
-#' plot(refs$originalScale[['abundRefuge']], main='relative abundance in refugia at native resolution')
+#' plot(refs$originalScale[['origAbund']], main='relative abundance in refugia at native resolution')
 #' col <- cols[1:cellStats(rasts$sim[['id']], 'max')]
 #' plot(refs$simulationScale[['id']], col=col, main='refuge ID at simulation resolution')
 #' plot(refs$simulationScale[['abundance']], main='relative abundance at simulation resolution')
@@ -42,8 +41,7 @@
 assignRefugiaFromAbundanceRaster <- function(
 	abund,
 	sim,
-	threshold = NULL,
-	intermediate = FALSE
+	threshold
 ) {
 
 	### abundance raster
@@ -58,31 +56,37 @@ assignRefugiaFromAbundanceRaster <- function(
 	# cell number in simulation raster
 
 	# "abundance"
-	names(abund) <- 'abundAbund'
+	names(abund) <- 'origAbund'
 	
 	# mask refugia
-	maskAbund <- abund >= threshold
-	names(maskAbund) <- 'mask'
+	origMask <- abund >= threshold
+	names(origMask) <- 'origMask'
 	
 	# identify refugia
-	idsAbund <- raster::clump(maskAbund, directions=8, gaps=FALSE)
-	names(idsAbund) <- 'id'
-	numRefugia <- raster::cellStats(idsAbund, 'max')
-	
+	idsOrig <- raster::clump(origMask, directions=8, gaps=FALSE)
+	names(idsOrig) <- 'idOrig'
+
 	# abundance in refugial cells
-	abundRefugeAbund <- abund * maskAbund
-	names(abundRefugeAbund) <- 'abundRefuge'
+	abundRefugeAbund <- abund * origMask
+	names(abundRefugeAbund) <- 'abundOrigRefuge'
 	
 	# long/lat
 	ll <- enmSdm::longLatRasters(abund)
 
+	# re-assess ID number based on resolution of simulation raster
+	idsSim <- raster::resample(idsOrig, sim)
+	idsSim <- raster::clump(idsSim, directions=8, gaps=FALSE)
+	idsSim <- raster::extract(idsSim, raster::as.data.frame(ll))
+	numRefugia <- max(idsSim, na.rm=TRUE)
+
 	# cell numbers
 	cellsAbund <- raster::setValues(abund, 1:raster::ncell(abund))
-	names(cellsAbund) <- 'cellNumAbund'
+	names(cellsAbund) <- 'cellNumOrig'
 	
-	suitStack <- raster::stack(cellsAbund, ll, maskAbund, idsAbund, abund, abundRefugeAbund)
+	suitStack <- raster::stack(cellsAbund, ll, origMask, idsOrig, abund, abundRefugeAbund)
 	suitFrame <- as.data.frame(suitStack)
 
+	suitFrame$idSim <- idsSim
 	suitFrame$cellNumSim <- raster::cellFromXY(sim, suitFrame[ , c('longitude', 'latitude')])
 
 	### simulation raster
@@ -106,7 +110,6 @@ assignRefugiaFromAbundanceRaster <- function(
 	names(cellsSim) <- 'cellNumSim'
 	
 	simStack <- raster::stack(cellsSim, abundSim)
-	
 	simFrame <- as.data.frame(simStack)
 	
 	### calculate abundances in simulation raster for each refuge
@@ -115,8 +118,8 @@ assignRefugiaFromAbundanceRaster <- function(
 		simFrame$DUMMY <- NA
 		names(simFrame)[ncol(simFrame)] <- paste0('refuge', countRefuge)
 		
-		suitFrameOutsideRefuge <- suitFrame[!is.na(suitFrame$abundAbund) & (is.na(suitFrame$id) | omnibus::naCompare('!=', suitFrame$id, countRefuge)), ]
-		suitFrameInsideRefuge <- suitFrame[omnibus::naCompare('==', suitFrame$id, countRefuge), ]
+		suitFrameOutsideRefuge <- suitFrame[!is.na(suitFrame$origAbund) & (is.na(suitFrame$idSim) | omnibus::naCompare('!=', suitFrame$idSim, countRefuge)), ]
+		suitFrameInsideRefuge <- suitFrame[omnibus::naCompare('==', suitFrame$idSim, countRefuge), ]
 		
 		# assign scaled abundances to each simulation raster cell in this refuge
 		# For each simulation cell that overlaps with at least one cell in the abundance raster assigned to a particular refuge, find:
@@ -127,8 +130,8 @@ assignRefugiaFromAbundanceRaster <- function(
 		for (simCell in simCellsInRefuge) {
 		
 			simCellInterpAbund <- simFrame$abundSim[simFrame$cellNumSim == simCell]
-			abundInSimCellOutsideRefuge <- suitFrameOutsideRefuge$abundAbund[suitFrameOutsideRefuge$cellNumSim == simCell]
-			abundInSimCellInsideRefuge <- suitFrameInsideRefuge$abundAbund[suitFrameInsideRefuge$cellNumSim == simCell]
+			abundInSimCellOutsideRefuge <- suitFrameOutsideRefuge$origAbund[suitFrameOutsideRefuge$cellNumSim == simCell]
+			abundInSimCellInsideRefuge <- suitFrameInsideRefuge$origAbund[suitFrameInsideRefuge$cellNumSim == simCell]
 			
 			if (length(abundInSimCellOutsideRefuge) == 0) {
 				simAbund <- simCellInterpAbund
@@ -169,11 +172,11 @@ assignRefugiaFromAbundanceRaster <- function(
 	
 	# cell numbers and mean abundance
 	refugeCellIds <- simFrame$cellNumSim[which(!is.na(simFrame$refugeAbund))]
-	meanRefugeAbund <- cellStats(abundSim, 'mean')
+	meanRefugeAbund <- raster::cellStats(abundSim, 'mean')
 	
 	out <- list(
 		simulationScale = raster::stack(idsSimRast, abundSim),
-		originalScale = suitStack[[c('id', 'abundRefuge')]],
+		originalScale = suitStack[[c('idOrig', 'origAbund')]],
 		refugeCellIds = refugeCellIds,
 		meanRefugeAbund = meanRefugeAbund
 	)
