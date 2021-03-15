@@ -45,6 +45,16 @@ fn <- paste0(label,"_",i,"_", who, ".csv")
 ### landscapes and pushes them into a list that we can read off the disk once per simulation rather than repeatedly reading them
 ### I'm assuming the memory cost is not too high
 
+if (FALSE)  #logic used to create landscapes from enmScenarios--don't run, built-in to package for speed
+    {
+        enmScenarios$landscapes <- vector("list",4)
+        for (m in 1:4)
+        {
+            enmScenarios$landscapes[[m]] <- ashSetupLandscape(brickname=paste0(system.file("extdata","rasters",package="holoSimCell"),"/",enmScenarios$enms$rasterStackName[[m]],".tif"),cellreduce=0.45,partialsuit=T)
+        }
+    }
+
+
 if (FALSE) ##the landscape information is now in the enmScenarios object distributed with the package
     {
         landscape <- ashSetupLandscape(
@@ -83,6 +93,12 @@ while(repl <= nreps) {
   parms$refs <- paste0("ENM_",modchoice)
   landscape <- enmScenarios$landscapes[[modchoice]]
   refpops <- enmScenarios$refugeCellIds[[modchoice]] 
+
+  rast_grid <-
+      matrix(data = c(1:landscape$details$ncells), nrow = landscape$details$y.dim, ncol = landscape$details$x.dim, byrow = TRUE)
+  hSC_grid <- rast_grid[nrow(rast_grid):1,]
+  refpops <- hSC_grid[which(rast_grid %in% enmScenarios$refugeCellIds[[modchoice]])]
+
   
   ### NEW COMMENT IN SEPT 2020
   ### Because the size of the cells is now carried through the simulation better, it seems like the
