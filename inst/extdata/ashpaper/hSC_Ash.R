@@ -50,10 +50,12 @@ lnum=nrow(enmScenarios$enms) #number of landscapes to make (number of enm raster
 
 if (FALSE)  #logic used to create landscapes from enmScenarios--don't run, built-in to package for speed
 {
-    enmScenarios$landscapes <- vector("list",lnum)
     for (m in 1:lnum)
     {
-        enmScenarios$landscapes[[m]] <- ashSetupLandscape(brickname=paste0(system.file("extdata","rasters",package="holoSimCell"),"/",enmScenarios$enms$rasterStackName[[m]],".tif"),cellreduce=0.45,partialsuit=T)
+        print(m)
+        landscape <- ashSetupLandscape(brickname=paste0("../rasters/",enmScenarios$enms$rasterStackName[[m]],".tif"),cellreduce=0.45,partialsuit=T)
+        
+        save(file=paste0("../landscapes/",enmScenarios$enms$rasterStackName[[m]],".rda"),landscape)
     }
 }
 
@@ -94,7 +96,10 @@ while(repl <= nreps) {
 ###
   modchoice <- as.integer(round(runif(1,min=1,max=nrow(enmScenarios$enms))))
   parms$refs <- paste0("ENM_",modchoice)
-  landscape <- enmScenarios$landscapes[[modchoice]]
+
+###read the pre-calculated landscape off the disk.  stored in inst/extdata/landscapes/*.rda
+  load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",enmScenarios$enms$rasterStackName[modchoice],".rda"))
+  
   refpops <- enmScenarios$refugeCellIds[[modchoice]] 
 
   rast_grid <-
