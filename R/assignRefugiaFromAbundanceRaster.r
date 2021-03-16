@@ -30,10 +30,10 @@
 #' par(mfrow=c(2, 2))
 #' 
 #' # plot(abund, main='abundance at native resolution')
-#' col <- cols[1:cellStats(rasts$abund[['idOrig']], 'max')]
-#' plot(refs$originalScale[['id']], col=col, main='refugia ID at native resolution')
-#' plot(refs$originalScale[['origAbund']], main='relative abundance in refugia at native resolution')
-#' col <- cols[1:cellStats(rasts$sim[['id']], 'max')]
+#' col <- cols[1:cellStats(refs$originalScale[['idOrig']], 'max')]
+#' plot(refs$originalScale[['idOrig']], col=col, main='refugia ID at native resolution')
+#' plot(refs$originalScale[['abundOrigRefuge']], main='relative abundance in refugia at native resolution')
+#' col <- cols[1:cellStats(refs$sim[['id']], 'max')]
 #' plot(refs$simulationScale[['id']], col=col, main='refuge ID at simulation resolution')
 #' plot(refs$simulationScale[['abundance']], main='relative abundance at simulation resolution')
 #' 
@@ -170,14 +170,22 @@ assignRefugiaFromAbundanceRaster <- function(
 	names(idsSimRast) <- 'id'
 	names(abundSim) <- 'abundance'
 	
-	# cell numbers and mean abundance
-	refugeCellIds <- simFrame$cellNumSim[which(!is.na(simFrame$refugeAbund))]
+	# cell numbers: renumber so bottom left is (1, 1), increments to the right, then wraps around to next row up
+	refugeCellIds <- simFrame$cellNumSim[which(!is.na(simFrame$refugeAbund))] # gets "raster" cell numbers
+	
+	nrows <- nrow(sim)
+	ncols <- ncol(sim)
+	ncells <- raster::ncell(sim)
+	newCellNums <- matrix(ncols * rep((nrows - 1):0, each=ncols) + rep(1:ncols, nrows), byrow=TRUE, nrow=nrows, ncol=ncols)
+	newRefugeCellIds <- newCellNums[refugeCellIds]
+	
+	# mean abundance in all refugia
 	meanRefugeAbund <- raster::cellStats(abundSim, 'mean')
 	
 	out <- list(
 		simulationScale = raster::stack(idsSimRast, abundSim),
-		originalScale = suitStack[[c('idOrig', 'origAbund')]],
-		refugeCellIds = refugeCellIds,
+		originalScale = suitStack[[c('idOrig', 'abundOrigRefuge')]],
+		refugeCellIds = newRefugeCellIds,
 		meanRefugeAbund = meanRefugeAbund
 	)
 	
