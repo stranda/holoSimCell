@@ -45,14 +45,17 @@ fn <- paste0(label,"_",i,"_", who, ".csv")
 ### landscapes and pushes them into a list that we can read off the disk once per simulation rather than repeatedly reading them
 ### I'm assuming the memory cost is not too high
 
+lnum=nrow(enmScenarios$enms) #number of landscapes to make (number of enm rasters)
+
+
 if (FALSE)  #logic used to create landscapes from enmScenarios--don't run, built-in to package for speed
+{
+    enmScenarios$landscapes <- vector("list",lnum)
+    for (m in 1:lnum)
     {
-        enmScenarios$landscapes <- vector("list",4)
-        for (m in 1:4)
-        {
-            enmScenarios$landscapes[[m]] <- ashSetupLandscape(brickname=paste0(system.file("extdata","rasters",package="holoSimCell"),"/",enmScenarios$enms$rasterStackName[[m]],".tif"),cellreduce=0.45,partialsuit=T)
-        }
+        enmScenarios$landscapes[[m]] <- ashSetupLandscape(brickname=paste0(system.file("extdata","rasters",package="holoSimCell"),"/",enmScenarios$enms$rasterStackName[[m]],".tif"),cellreduce=0.45,partialsuit=T)
     }
+}
 
 
 if (FALSE) ##the landscape information is now in the enmScenarios object distributed with the package
