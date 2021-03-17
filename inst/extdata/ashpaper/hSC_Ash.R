@@ -102,10 +102,10 @@ while(repl <= nreps) {
   
   refpops <- enmScenarios$refugeCellIds[[modchoice]] 
 
-  rast_grid <-
-      matrix(data = c(1:landscape$details$ncells), nrow = landscape$details$y.dim, ncol = landscape$details$x.dim, byrow = TRUE)
-  hSC_grid <- rast_grid[nrow(rast_grid):1,]
-  refpops <- hSC_grid[which(rast_grid %in% enmScenarios$refugeCellIds[[modchoice]])]
+#  rast_grid <-
+#      matrix(data = c(1:landscape$details$ncells), nrow = landscape$details$y.dim, ncol = landscape$details$x.dim, byrow = TRUE)
+#  hSC_grid <- rast_grid[nrow(rast_grid):1,]
+#  refpops <- hSC_grid[which(rast_grid %in% enmScenarios$refugeCellIds[[modchoice]])]
 
   
   ### NEW COMMENT IN SEPT 2020
