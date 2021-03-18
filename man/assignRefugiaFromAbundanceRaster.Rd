@@ -33,20 +33,17 @@ abund <- abund[[1]]
 
 sim <- raster('E:/Ecology/Drive/Research/ABC vs Biogeography/NSF_ABI_2018_2021/data_and_analyses/green_ash/study_region/!study_region_raster_masks/study_region_resampled_to_genetic_demographic_simulation_resolution.tif')
 
-refs <- assignRefugiaFromAbundanceRaster(abund, sim, 0.6)
+threshold <- 0.6
+refs <- assignRefugiaFromAbundanceRaster(abund, sim, threshold)
 
 cols <- c('red', 'orange', 'yellow', 'green', 'blue', 'purple', 'gray',
 	'chartreuse', 'darkgreen', 'cornflowerblue', 'goldenrod3', 'black',
 	'steelblue3', 'forestgreen', 'pink', 'cyan', 'darkred')
 
-par(mfrow=c(2, 2))
+par(mfrow=c(1, 2))
 
-# plot(abund, main='abundance at native resolution')
-col <- cols[1:cellStats(refs$originalScale[['idOrig']], 'max')]
-plot(refs$originalScale[['idOrig']], col=col, main='refugia ID at native resolution')
-plot(refs$originalScale[['abundOrigRefuge']], main='relative abundance in refugia at native resolution')
-col <- cols[1:cellStats(refs$sim[['id']], 'max')]
-plot(refs$simulationScale[['id']], col=col, main='refuge ID at simulation resolution')
-plot(refs$simulationScale[['abundance']], main='relative abundance at simulation resolution')
+col <- cols[1:maxValue(refs$sim[['refugiaId']])]
+plot(refs$simulationScale[['refugiaId']], col=col, main='refuge ID')
+plot(refs$simulationScale[['refugiaAbund']], main='refuge abundance')
 
 }
