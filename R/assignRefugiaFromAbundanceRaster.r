@@ -199,6 +199,9 @@ assignRefugiaFromAbundanceRaster <- function(
 	origRefugiaAbund <- abund * origRefugia
 	simAbund <- raster::resample(origRefugiaAbund, sim)
 	
+	simAbund <- raster::calc(simAbund, function=fun(x) ifelse(x > 1, 1, x))
+	simAbund <- raster::calc(simAbund, function=fun(x) ifelse(x < 0, 0, x))
+	
 	# identify refugia
 	simRefugia <- simAbund >= threshold
 	simRefugiaId <- raster::clump(simRefugia, directions=8, gaps=FALSE)
