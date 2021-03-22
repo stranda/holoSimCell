@@ -70,7 +70,7 @@ ashSetupLandscape <- function(brickname=paste0(system.file("extdata","rasters",p
 
 
     
-land <- def_grid_pred2(pred=1-newrs,
+land <- def_grid_pred2(pred=newrs,
                                      samps=transSampLoc(samppts,
                                                           range.epsg=4326,
                                                           raster.proj=crs(rs)@projargs),
