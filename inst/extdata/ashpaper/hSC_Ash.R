@@ -53,7 +53,7 @@ if (FALSE)  #logic used to create landscapes from enmScenarios--don't run, built
     for (m in 1:lnum)
     {
         print(m)
-        landscape <- ashSetupLandscape(brickname=paste0("../rasters/",enmScenarios$enms$rasterStackName[[m]],".tif"),cellreduce=0.45,partialsuit=T)
+        landscape <- ashSetupLandscape(brickname=paste0("~/GoogleDrive/doc/proposals/nsf/2017/NSF_ABI_2018_2021/data_and_analyses/green_ash/enms/predictions/",enmScenarios$enms$rasterStackName[[m]],".tif"),cellreduce=0.45,partialsuit=T)
         
         save(file=paste0("../landscapes/",enmScenarios$enms$rasterStackName[[m]],".rda"),landscape)
     }
