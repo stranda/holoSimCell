@@ -30,9 +30,6 @@ if ((is.na(simdir))|(is.na(outdir))) {stop("need to specify a correct simdir and
 
 cat(paste("Run Details:\ni=",i,"nreps =",nreps,"who=",who,"\nlabel=",label,"\nsimdir=",simdir,"\noutdir=",outdir,"\n"))
 
-tmp = .libPaths()
-.libPaths(tmp[!grepl("home",tmp)])  ##remove any paths that have "home" in them, like: /home/f0007250  
-
 library(holoSimCell)
 
 #Set the filename, simulation, and output directories for the run
@@ -45,28 +42,12 @@ fn <- paste0(label,"_",i,"_", who, ".csv")
 ### landscapes and pushes them into a list that we can read off the disk once per simulation rather than repeatedly reading them
 ### I'm assuming the memory cost is not too high
 
-lnum=nrow(enmScenarios$enms) #number of landscapes to make (number of enm rasters)
-
-
-if (FALSE)  #logic used to create landscapes from enmScenarios--don't run, built-in to package for speed
-{
-    for (m in 1:lnum)
-    {
-        print(m)
-        landscape <- ashSetupLandscape(brickname=paste0("~/GoogleDrive/doc/proposals/nsf/2017/NSF_ABI_2018_2021/data_and_analyses/green_ash/enms/predictions/",enmScenarios$enms$rasterStackName[[m]],".tif"),cellreduce=0.45,partialsuit=T)
-        
-        save(file=paste0("../landscapes/",enmScenarios$enms$rasterStackName[[m]],".rda"),landscape)
-    }
-}
-
-
-if (FALSE) ##the landscape information is now in the enmScenarios object distributed with the package
-    {
-        landscape <- ashSetupLandscape(
-            brickname=paste0(system.file("extdata","rasters",package="holoSimCell"),"/","study_region_daltonIceMask_lakesMasked_linearIceSheetInterpolation.tif"),
-            cellreduce=0.45
-        )
-    }
+rs <- raster::brick(paste0(system.file("extdata","rasters",package="holoSimCell"),"/","study_region_daltonIceMask_lakesMasked_linearIceSheetInterpolation.tif"))
+newrs <- newLandscapeDim(1-rs,fac=0.45)
+landscape <- ashSetupLandscape(
+    brickname=newrs,
+    cellreduce=1 #already transformed in previoius line
+)
  
 ###seed is based on time in seconds and the number of characters in the library path
 ###
@@ -92,22 +73,24 @@ while(repl <= nreps) {
   }
   
 
-###choose enm model and refugia
-###
-  modchoice <- as.integer(round(runif(1,min=1,max=nrow(enmScenarios$enms))))
-  parms$refs <- paste0("ENM_",modchoice)
-
-###read the pre-calculated landscape off the disk.  stored in inst/extdata/landscapes/*.rda
-  load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",enmScenarios$enms$rasterStackName[modchoice],".rda"))
+  parms$refs <- sample(c("PA","TX","GA","ALL"), 1, replace = FALSE)
   
-  refpops <- enmScenarios$refugeCellIds[[modchoice]] 
+  if(parms$refs == "PA") {
+    refpops <- c(1000, 1001, 999, 1051, 949)
+    #refpops <- 1000
+  } else if(parms$refs == "TX") {
+    refpops <- c(526, 527, 525, 577, 475)
+    #refpops <- 526
+  } else if(parms$refs == "GA") {
+    refpops <- c(536, 537, 535, 587, 485)
+    #refpops <- 536
+  } else if(parms$refs == "ALL") {
+    refpops <- c(536, 537, 535, 587, 485,
+                 526, 527, 525, 577, 475,
+                 1000, 1001, 999, 1051, 949)
+    #refpops <- c(526,536,1000)
+  }
 
-#  rast_grid <-
-#      matrix(data = c(1:landscape$details$ncells), nrow = landscape$details$y.dim, ncol = landscape$details$x.dim, byrow = TRUE)
-#  hSC_grid <- rast_grid[nrow(rast_grid):1,]
-#  refpops <- hSC_grid[which(rast_grid %in% enmScenarios$refugeCellIds[[modchoice]])]
-
-  
   ### NEW COMMENT IN SEPT 2020
   ### Because the size of the cells is now carried through the simulation better, it seems like the
   ### dispersal parameters should scale with it as well.  The next line calcs the average of the width
@@ -120,7 +103,8 @@ while(repl <= nreps) {
   avgCellsz <- mean(c(res(landscape$sumrast)))  ### if the cells are not square, then use the average of the cell width and length
 
   print(parms)
-                                          #Forward simulation
+  
+###Forward simulation
   ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,
                        hab_suit=landscape,
                        refs=refpops,  #set at cell 540 right now 
@@ -144,6 +128,7 @@ while(repl <= nreps) {
     incomplete <- FALSE
   }
 
+  
   if(incomplete == FALSE) {
     print ("Creating aggregation map")
     ###Cell aggregation for coalescent
