@@ -272,7 +272,7 @@ growpops <- function(nv,
     rl <- ((rl-1) * ((loK-nv)/loK))+1 #adjust that lambda based on K to approximate logistic growth
     rl[rl < 0] <- 0         #Trying to fix a problem with -Inf population sizes in unsuitable patches!!  JDR 3/23/19
     rl[is.na(rl)] <- 0
-    new_nv <- round(nv*rl,2)
+    new_nv <- nv*rl
 
     if(pois.var == TRUE) {
         new_nv = rpois(length(new_nv), new_nv)
@@ -434,6 +434,9 @@ getpophist2.cells <- function(h=225, #humber of habitats (populations)
 ####
 
     samptime=1
+
+    #Setting hab_suit to 0 if parms$Ne*relative suitability < 1 - JDR 4/9/21
+    hab_suit$hab_suit[K*(hab_suit$hab_suit/max(hab_suit$hab_suit, na.rm = TRUE)) < 1] <- 0
     
     if (!is.null(hab_suit))
     {
