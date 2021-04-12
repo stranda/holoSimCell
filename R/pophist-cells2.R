@@ -469,7 +469,7 @@ getpophist2.cells <- function(h=225, #humber of habitats (populations)
                                         #deltLambda=deltLambda,
         K=K,
                                         #deltK=deltK,
-        refs=refs,
+                                        #refs=refs,
         refsz=refsz,
         xsz=xsz,
         ysz=ysz,
@@ -501,8 +501,11 @@ getpophist2.cells <- function(h=225, #humber of habitats (populations)
     {
         refsz <- rep(refsz[1],length(refs))
     }
+
     
-    Nvec[refs] <- refsz
+#    Nvec[refs] <- refsz
+    Nvec[refs] <- refsz * (hab_suit$hab_suit[1,refs]/max(hab_suit$hab_suit,na.rm=T))
+    
     pops$arrive[refs] <- 0
     cnt <- 1
 
