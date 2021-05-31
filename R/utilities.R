@@ -52,14 +52,16 @@ ashSetupLandscape <- function(brickname=paste0(system.file("extdata","rasters",p
 
     if (!equalsuit)
     {
-        if (class(brickname)=="RasterBrick")
+        if ("RasterBrick" %in% class(brickname))
         {
-            newrs <- brickname #passed a brick instead of a path ot a brick
-                               ##assumes that the brick is in the correct resolution
+            rs <- brickname #passed a brick instead of a path of a brick in a file
+
         } else {
-            rs <- raster::brick(brickname)
-            newrs <- newLandscapeDim(rs,cellreduce)
+            rs <- raster::brick(brickname) # passed a brick filename
         }
+        
+        newrs <- newLandscapeDim(rs,cellreduce)
+        
     } else {
         if (is.null(xlim)|is.null(ylim))
             newrs=raster::raster(nrows=50,ncols=50,xmn=0,xmx=5000,ymn=0,ymx=5000,vals=1)
