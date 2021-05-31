@@ -45,24 +45,27 @@ fn <- paste0(label,"_",i,"_", who, ".csv")
 ### landscapes and pushes them into a list that we can read off the disk once per simulation rather than repeatedly reading them
 ### I'm assuming the memory cost is not too high
 
-lnum=nrow(pollenSurfaces$pulls) #number of landscapes to make (number of enm rasters)
-
-
 if (FALSE)  #logic used to create landscapes from pollen objects--don't run, built-in to package for speed
 {
-    ##get the suitabilities
-    tmp <- readRDS("~/GoogleDrive/doc/proposals/nsf/2017/NSF_ABI_2018_2021/data_and_analyses/pg_pollen/preds_for_ABC_n50.RDS")
-    for (m in 1:length(tmp) )
+    ##get the suitabilities and refs
+    preds <- readRDS("~/GoogleDrive/doc/proposals/nsf/2017/NSF_ABI_2018_2021/data_and_analyses/pg_pollen/preds_for_ABC_n50.RDS")
+    refs <- readRDS("~/GoogleDrive/doc/proposals/nsf/2017/NSF_ABI_2018_2021/data_and_analyses/pg_pollen/refuge_rasters_n50.RDS")
+
+    pollenPulls <- vector("list",length(preds))
+
+    for (m in 1:length(preds) )
     {
         print(m)
-        landscape <- ashSetupLandscape(brickname=raster::brick(tmp[[m]]),cellreduce=0.45,partialsuit=T)
-        save(file=paste0("../landscapes/pollenPull_",m,".rda"),landscape)
+        landscape <- ashSetupLandscape(brickname=raster::brick(preds[[m]]),cellreduce=0.45,partialsuit=T)
+        fn=paste0("pollenPull_",m,".rda")
+        save(file=paste0("../landscapes/",fn),landscape)
+        ##These two lines change the coordinate system between raster and holosim...I think (AES)
+        mat=t(raster::as.matrix(refs[[m]]>0)) 
+        mat=mat[,ncol(mat):1]
+        
+        pollenPulls[[m]] <- list(file=fn,refs=which(mat>0))
     }
-    ##get the refuge numbers
-    tmp <- readRDS("~/GoogleDrive/doc/proposals/nsf/2017/NSF_ABI_2018_2021/data_and_analyses/pg_pollen/refuge_rasters_n50.RDS")
-    
-
-    
+    save(file="../../../data/pollenPulls.rda",pollenPulls)
 }
 
 
@@ -94,14 +97,14 @@ while(repl <= nreps) {
 ###choose enm model and refugia
 ###
 # modchoice <- as.integer(round(runif(1,min=1,max=nrow(enmScenarios$enms))))
-  modchoice <- sample(c(1:nrow(enmScenarios$enms)),1,replace=FALSE)
+  modchoice <- sample(c(1:length(pollenPulls)),1,replace=FALSE)
   
-  parms$refs <- paste0("ENM_",modchoice)
+  parms$refs <- paste0("POL_",modchoice)
 
 ###read the pre-calculated landscape off the disk.  stored in inst/extdata/landscapes/*.rda
-  load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",enmScenarios$enms$rasterStackName[modchoice],".rda"))
+  load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[modchoice]]$file))
   
-  refpops <- enmScenarios$refugeCellNum[[modchoice]] 
+  refpops <- pollenPulls[[modchoice]]$refs
 
 #  rast_grid <-
 #      matrix(data = c(1:landscape$details$ncells), nrow = landscape$details$y.dim, ncol = landscape$details$x.dim, byrow = TRUE)
@@ -120,7 +123,7 @@ while(repl <= nreps) {
 
   avgCellsz <- mean(c(res(landscape$sumrast)))  ### if the cells are not square, then use the average of the cell width and length
                                         #Forward simulation
-  save(file="parms.rda",parms,landscape,refpops,avgCellsz)
+  #save(file="parms.rda",parms,landscape,refpops,avgCellsz)
   ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,
                        hab_suit=landscape,
                        refs=refpops,  #set at cell 540 right now 
