@@ -48,8 +48,10 @@ fn <- paste0(label,"_",i,"_", who, ".csv")
 if (FALSE)  #logic used to create landscapes from pollen objects--don't run, built-in to package for speed
 {
     ##get the suitabilities and refs
-    preds <- readRDS("~/GoogleDrive/doc/proposals/nsf/2017/NSF_ABI_2018_2021/data_and_analyses/pg_pollen/preds_for_ABC_n50.RDS")
-    refs <- readRDS("~/GoogleDrive/doc/proposals/nsf/2017/NSF_ABI_2018_2021/data_and_analyses/pg_pollen/refuge_rasters_n50.RDS")
+#    preds <- readRDS("~/GoogleDrive/doc/proposals/nsf/2017/NSF_ABI_2018_2021/data_and_analyses/pg_pollen/preds_for_ABC_n50.RDS")
+#    refs <- readRDS("~/GoogleDrive/doc/proposals/nsf/2017/NSF_ABI_2018_2021/data_and_analyses/pg_pollen/refuge_rasters_n50.RDS")
+    preds <- readRDS("~/GoogleDrive/doc/proposals/nsf/2017/NSF_ABI_2018_2021/data_and_analyses/pg_pollen/preds_for_ABC_n50_latent_overdispersed_v3.2_final.RDS")
+    refs <- readRDS("~/GoogleDrive/doc/proposals/nsf/2017/NSF_ABI_2018_2021/data_and_analyses/pg_pollen/refuge_rasters_n50_latent_overdispersed_v3.2.RDS")
 
     pollenPulls <- vector("list",length(preds))
 
@@ -59,11 +61,8 @@ if (FALSE)  #logic used to create landscapes from pollen objects--don't run, bui
         landscape <- ashSetupLandscape(brickname=raster::brick(preds[[m]]),cellreduce=0.45,partialsuit=T)
         fn=paste0("pollenPull_",m,".rda")
         save(file=paste0("../landscapes/",fn),landscape)
-        ##These two lines change the coordinate system between raster and holosim...I think (AES)
-        mat=t(raster::as.matrix(refs[[m]]>0)) 
-        mat=mat[,ncol(mat):1]
         
-        pollenPulls[[m]] <- list(file=fn,refs=which(mat>0))
+        pollenPulls[[m]] <- list(file=fn,refs=refs[[m]]$refugeCellNum)
     }
     save(file="../../../data/pollenPulls.rda",pollenPulls)
 }

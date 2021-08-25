@@ -120,7 +120,8 @@ while(repl <= nreps) {
   ### Would be easy to change the prior file instead....
 
   avgCellsz <- mean(c(res(landscape$sumrast)))  ### if the cells are not square, then use the average of the cell width and length
-                                          #Forward simulation
+                                        #Forward simulation
+  save(file="parms.rda",parms,landscape,refpops,avgCellsz)
   ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,
                        hab_suit=landscape,
                        refs=refpops,  #set at cell 540 right now 
