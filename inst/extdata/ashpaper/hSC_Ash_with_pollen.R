@@ -50,8 +50,8 @@ if (FALSE)  #logic used to create landscapes from pollen objects--don't run, bui
     ##get the suitabilities and refs
 #    preds <- readRDS("~/GoogleDrive/doc/proposals/nsf/2017/NSF_ABI_2018_2021/data_and_analyses/pg_pollen/preds_for_ABC_n50.RDS")
 #    refs <- readRDS("~/GoogleDrive/doc/proposals/nsf/2017/NSF_ABI_2018_2021/data_and_analyses/pg_pollen/refuge_rasters_n50.RDS")
-    preds <- readRDS("~/GoogleDrive/doc/proposals/nsf/2017/NSF_ABI_2018_2021/data_and_analyses/pg_pollen/preds_for_ABC_n50_latent_overdispersed_v3.2_final.RDS")
-    refs <- readRDS("~/GoogleDrive/doc/proposals/nsf/2017/NSF_ABI_2018_2021/data_and_analyses/pg_pollen/refuge_rasters_n50_latent_overdispersed_v3.2.RDS")
+    preds <- readRDS("//opt/data2/ash/pollen_surfaces/preds_for_ABC_n200_v4.0.RDS")
+    refs <- readRDS("~/GoogleDrive/doc/proposals/nsf/2017/NSF_ABI_2018_2021/data_and_analyses/pg_pollen/refuge_rasters_n200_v4.0.RDS")
 
     pollenPulls <- vector("list",length(preds))
 
@@ -61,8 +61,13 @@ if (FALSE)  #logic used to create landscapes from pollen objects--don't run, bui
         landscape <- ashSetupLandscape(brickname=raster::brick(preds[[m]]),cellreduce=0.45,partialsuit=T)
         fn=paste0("pollenPull_",m,".rda")
         save(file=paste0("../landscapes/",fn),landscape)
-        
-        pollenPulls[[m]] <- list(file=fn,refs=refs[[m]]$refugeCellNum)
+##next two line convert the suitable refuge raster to cell numbers
+##
+        mat = t(raster::as.matrix(refs[[m]]))
+        cxy = which(mat[,ncol(mat):1]>0)
+
+###      plotCellsOnSuit(cxy,landscape)
+        pollenPulls[[m]] <- list(file=fn,refs=cxy)
     }
     save(file="../../../data/pollenPulls.rda",pollenPulls)
 }

@@ -10,6 +10,7 @@ ashRemoveGeneticPops <- function(popmap,pops)
 
 
     removes <- c()
+    rownames(popmap) <- popmap$id
     popids <- popmap[gsub("fp","",names(imputed.pruned)),2]
     
     ##table(popids)
