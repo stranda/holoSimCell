@@ -120,6 +120,6 @@ newLandscapeDim <- function(rs, fac=1.0)
     
     r = enmSdm::rastWithSquareCells(raster::subset(rs,1),ncells)
     
-    resample(rs,raster::brick(r,dim(rs)[3]))
+    raster::resample(rs,raster::brick(r,dim(rs)[3]))
     
 }

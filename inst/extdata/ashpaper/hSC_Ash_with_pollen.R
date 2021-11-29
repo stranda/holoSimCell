@@ -50,8 +50,8 @@ if (FALSE)  #logic used to create landscapes from pollen objects--don't run, bui
     ##get the suitabilities and refs
 #    preds <- readRDS("~/GoogleDrive/doc/proposals/nsf/2017/NSF_ABI_2018_2021/data_and_analyses/pg_pollen/preds_for_ABC_n50.RDS")
 #    refs <- readRDS("~/GoogleDrive/doc/proposals/nsf/2017/NSF_ABI_2018_2021/data_and_analyses/pg_pollen/refuge_rasters_n50.RDS")
-    preds <- readRDS("//opt/data2/ash/pollen_surfaces/preds_for_ABC_n200_v4.0.RDS")
-    refs <- readRDS("~/GoogleDrive/doc/proposals/nsf/2017/NSF_ABI_2018_2021/data_and_analyses/pg_pollen/refuge_rasters_n200_v4.0.RDS")
+    preds <- readRDS("/opt/data3/TIMBER/pg-pollen/output/preds_for_ABC_n200_v4.1.RDS")
+    refs <- readRDS("/opt/data3/TIMBER/pg-pollen/output/refuge_rasters_n200_V4.1.RDS")
 
     pollenPulls <- vector("list",length(preds))
 
