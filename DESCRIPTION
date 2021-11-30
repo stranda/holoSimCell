@@ -1,7 +1,7 @@
 Package: holoSimCell
 Type: Package
 Title: Linked demographic/genetic simulation
-Version: 0.1.1
+Version: 0.1.4
 Date: 2020-07-20
 Author: Allan Strand, John Robinson
 Maintainer: Allan Strand <stranda@cofc.edu>
@@ -9,7 +9,7 @@ Description: One paragraph description of what the package does as one
         or more full sentences.
 License: GPL (>= 2)
 Imports: Rcpp (>= 1.0.1)
-Depends: R (>= 3.5),
+Depends: R (>= 4.0),
 	 matrixStats,
 	 tripack,
 	 vegan,
@@ -18,6 +18,7 @@ Depends: R (>= 3.5),
 	 parallel,
 	 gdata,
 	 adegenet,
+	 adespatial,
 	 ape,
 	 omnibus,
 	 statisfactory,
