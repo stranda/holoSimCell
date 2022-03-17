@@ -2,13 +2,28 @@
 % Please edit documentation in R/chooseCells.R
 \name{chooseRefugeCells}
 \alias{chooseRefugeCells}
-\title{Choose cells from a plot of suitability surface.}
+\title{Choose refuge cells from a plot of the landscape used in the simulations.}
 \usage{
 chooseRefugeCells(r)
 }
 \arguments{
 \item{r}{this is the surface (a single raster layer)}
 }
+\value{
+A vector of five cell IDs associated with the user-specified refuge location
+}
 \description{
-Choose cells from a plot of suitability surface.
+Interactive function allowing a user to identify specific cells on the landscape, which are subsequently used as starting locations for a forward-time demographic simulation.
+}
+\details{
+Interactive function using locator() to identify cell IDs from user input. Assumes refugia include a central cell and adjacent cells in each cardinal direction (5 total).
+}
+\examples{
+library(holoSimCell)
+rs <- raster::brick(paste0(system.file("extdata","rasters",package="holoSimCell"),"/","study_region_daltonIceMask_lakesMasked_linearIceSheetInterpolation.tif"))
+chooseRefugeCells(rs[[1]])
+
+}
+\seealso{
+\code{\link[graphics]{locator}}, \code{\link{getpophist2.cells}}
 }

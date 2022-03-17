@@ -2,12 +2,12 @@
 % Please edit documentation in R/aggregate.R
 \name{make.gmap}
 \alias{make.gmap}
-\title{make a genetic subset map for rectangular landscape}
+\title{Make a genetic subset map for rectangular landscape}
 \usage{
 make.gmap(pophist, xnum = 2, ynum = 2)
 }
 \arguments{
-\item{pophist}{a demographic population history}
+\item{pophist}{a demographic population history from getpophist2.cells()}
 
 \item{xnum}{number of columns to aggregate}
 
@@ -17,8 +17,40 @@ make.gmap(pophist, xnum = 2, ynum = 2)
 a gmap object used for pophist.aggregate
 }
 \description{
-make a genetic subset map for rectangular landscape
+Function to generate a map for aggregating populations from a fine-resolution forward-simulation for coalescent simulations.
 }
 \details{
-If the size of the landscape in pophist is not evenly divisible by xnum and ynum, "remainder" cells on the top and righthand sides of the landscape will be included in genetic clusters.  As a result the numbers of cells per cluster will vary
+Allows the user to specify a scheme for aggregation (e.g., 2x2 blocks of cells are combined if xnum and ynum = 2).  If the size of the landscape in pophist is not evenly divisible by xnum and ynum, "remainder" cells on the top and righthand sides of the landscape will be included in genetic clusters.  As a result the numbers of cells per cluster will vary
+}
+\examples{
+library(holoSimCell)
+
+parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))
+modchoice <- 1
+load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[modchoice]]$file))
+refpops <- pollenPulls[[modchoice]]$refs
+avgCellsz <- mean(c(res(landscape$sumrast)))
+
+ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,
+                       hab_suit=landscape,
+                       refs=refpops,  #set at cell 540 right now 
+                       refsz=parms$ref_Ne,
+                       lambda=parms$lambda,
+                       mix=parms$mix,  #note how small.
+                       shortscale=parms$shortscale*avgCellsz,  # scale parameter of weibull with shape below
+                       shortshape=parms$shortshape, #weibull shape
+                       longmean=parms$longmean*avgCellsz,  # mean of normal with sd = longmean
+                       ysz=res(landscape$sumrast)[2], #height of cell in raster (same units as longmean and shortscale)
+                       xsz=res(landscape$sumrast)[1], #width of cell in raster
+                       K = parms$Ne) #maximum population size in a grid cell, scaled with hab_suit from landscape object
+
+gmap=make.gmap(ph$pophist,
+               xnum=2, #number of cells to aggregate in x-direction
+               ynum=2) #number of aggregate in the y-direction
+
+ph2 <- pophist.aggregate(ph,gmap=gmap)
+
+}
+\seealso{
+\code{\link{pophist.aggregate}}, \code{\link{getpophist2.cells}}, \code{\link{run_FSC_step_agg3}}
 }

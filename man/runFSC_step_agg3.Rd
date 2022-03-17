@@ -2,7 +2,7 @@
 % Please edit documentation in R/runFSC_step_agg3.R
 \name{runFSC_step_agg3}
 \alias{runFSC_step_agg3}
-\title{run fastsimcoal}
+\title{Run fastsimcoal}
 \usage{
 runFSC_step_agg3(
   ph = ph,
@@ -20,6 +20,93 @@ runFSC_step_agg3(
   maxloc = 2e+05
 )
 }
+\arguments{
+\item{ph}{A pophist object, output by the forward demographic simulation function: \code{getpophist2.cells}.  Includes slots: \code{pophist}, \code{Nvecs}, \code{tmat}, \code{struct}, \code{hab_suit}, \code{coalhist}, \code{popslst}, \code{old_hab_suit}, \code{old_tmat}, \code{gmap}.}
+
+\item{l}{An object that defines the simulation landscape from the forward demographic simulation, includes slots: \code{details}, \code{occupied}, \code{empty}, \code{sampled}, \code{hab_suit}, \code{sumrast}, \code{samplocsrast}, \code{samplocs}, \code{sampdf}, \code{NAmask}.}
+
+\item{sample_n}{The number of sampled (diploid) individuals per population.  Assumed to be equal across all sampled populations.}
+
+\item{preLGMparms}{Parameters related to the size and history of populations in glacial refugia: \code{preLGM_t}, \code{preLGM_Ne}, \code{ref_Ne}}
+
+\item{label}{A text string specifying a filename prefix for output from fastsimcoal.}
+
+\item{delete_files}{A logical (TRUE/FALSE) indicating whether temporary simulation files and directories from fastsimcoal should be deleted after genetic data are read into R.}
+
+\item{num_cores}{Number of processors to use for fastsimcoal simulations.}
+
+\item{exec}{The filename for the fastsimcoal executable.}
+
+\item{loc_parms}{Parameters related to simulated genetic markers: \code{marker}, \code{nloci}, \code{seq_length}, \code{mu}.}
+
+\item{found_Ne}{The effective population size associated with newly colonized populations in the coalescent simulation.}
+
+\item{gmap}{A map specifying a scheme for aggregating cells from the finer grained forward demographic simulation for more efficient coalescent simulation.}
+
+\item{MAF}{A numeric value specifying a minor allele frequency filter.  SNP loci with minor alleles below this frequency are excluded from output.}
+
+\item{maxloc}{The maximum number of marker loci to attempt to simulate in fastsimcoal.  If too few variable sites are generated, additional markers are simulated up to this value.}
+}
+\value{
+Returns a data frame of individual SNP genotypes from fastsimcoal.  The first column of this data frame provides an individual ID, the second specifies the population or deme associated with the individual, and columns that follow provide diploid genotypes for simulated individuals (in two-column format).
+}
 \description{
-takes a population history and creates sequences based on the coalscent
+Takes a population history from the forward demographic simulation and parameterizes a coalescent simulation in fastsimcoal (Excoffier et al. 2013)
+}
+\details{
+Provides a wrapper for several helpful functions from the \code{strataG} R package.  Input parameters include a pophist object (from \code{getpophist2.cells}), a landscape object, and parameter values associated with refugial populations and genetic markers. Population size changes are limited to step-changes from founding population size (\code{found_Ne}) to the population size at the end of the forward simulation (from elements of \code{ph$Nvecs}). To improve computational efficiency, coalescent simulations are conducted for aggregated groups of cells, with an aggregation scheme defined by the function \code{make.gmap}. \emph{Note that the fastsimcoal executable must be installed and in a directory in the user's $PATH for coalescent simulations.}
+}
+\examples{
+library(holoSimCell)
+parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))
+modchoice <- 1
+load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[modchoice]]$file))
+refpops <- pollenPulls[[modchoice]]$refs
+avgCellsz <- mean(c(res(landscape$sumrast)))
+
+ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,
+                       hab_suit=landscape,
+                       refs=refpops,   
+                       refsz=parms$ref_Ne,
+                       lambda=parms$lambda,
+                       mix=parms$mix,  
+                       shortscale=parms$shortscale*avgCellsz,  
+                       shortshape=parms$shortshape, 
+                       longmean=parms$longmean*avgCellsz,  
+                       ysz=res(landscape$sumrast)[2], 
+                       xsz=res(landscape$sumrast)[1], 
+                       K = parms$Ne) 
+
+gmap=make.gmap(ph$pophist,
+               xnum=2, #number of cells to aggregate in x-direction
+               ynum=2) #number of aggregate in the y-direction
+
+ph2 <- pophist.aggregate(ph,gmap=gmap)
+
+loc_parms <- data.frame(marker = "snp",
+                        nloci = parms$nloci,           
+                        seq_length = parms$seq_length,
+                        mu = parms$mu)
+  
+preLGMparms <- data.frame(preLGM_t = parms$preLGM_t/parms$G,   
+                          preLGM_Ne = parms$preLGM_Ne,
+                         ref_Ne = parms$ref_Ne)
+
+out <- runFSC_step_agg3(ph = ph2,
+                        l = landscape,
+                        sample_n = 14,
+                        preLGMparms = preLGMparms,
+                        label = "test",
+                        delete_files = TRUE,
+                        num_cores = 1,
+                        exec = "fsc26",
+                        loc_parms = loc_parms,
+                        found_Ne = parms$found_Ne,
+                        gmap = gmap,
+                        MAF = 0.01,
+                        maxloc = 50000)
+
+}
+\seealso{
+\code{\link[strataG]{fscTutorial}}, \code{\link[strataG]{fscWrite}}, \code{\link[strataG]{fscRun}}, \code{\link[strataG]{fscReadArp}}, \code{\link{getpophist2.cells}}, \code{\link{pophist.aggregate}}, \code{\link{make.gmap}}, \url{http://cmpg.unibe.ch/software/fastsimcoal26/man/fastsimcoal26.pdf}
 }
