@@ -1,598 +1,369 @@
-out[[lk]]$benSR <- length(out[[lk]]$ben)
-out[[1]]
-out[[1]]$surf %in% out[[1]]$ben
-which(out[[1]]$surf %in% out[[1]]$ben)
-which(!out[[1]]$surf %in% out[[1]]$ben)
-tmpUNIQ2SURF <- names(out[[lk]]$surf)[which(!out[[lk]]$surf %in% out[[lk]]$ben)]
-tmpUNIQ2BEN <- names(out[[lk]]$ben)[which(!out[[lk]]$ben %in% out[[lk$surf]])]
-tmpUNIQ2BEN <- names(out[[lk]]$ben)[which(!out[[lk]]$ben %in% out[[lk]]$surf)]
-tmpUNIQ2SURF
-names(out[[1]]$surf)
-out[[1]]$surf
-tmpUNIQ2SURF <- out[[lk]]$surf[which(!out[[lk]]$surf %in% out[[lk]]$ben)]
-tmpUNIQ2BEN <- out[[lk]]$ben[which(!out[[lk]]$ben %in% out[[lk]]$surf)]
-tmpUNIQ2SURF
-tmpSURF[,grep(tmpUNIQ2SURF, colnames(tmpSURF))]
-tmpSURF[,grepl(tmpUNIQ2SURF, colnames(tmpSURF))]
-tmpSURF[,tmpUNIQ2SURF]
-colSums(tmpSURF[,tmpUNIQ2SURF] > 0)
-colSums(tmpSURF[,tmpUNIQ2SURF])
-setwd("~/Desktop")
-e16S <- read.csv("16S_0diff_fish.condensed.cleaned.community.matrix_sampling_info_no_mock_sorted.csv", header = TRUE)
-sp_names <- colnames(e16S)
-sp_names <- sp_names[-c(1:17)]
-lake_names <- unique(e16S$lake_name)
-out <- vector("list", 22)
-for(lk in 1:length(lake_names)) {#
-    tmp <- e16S[e16S$lake_name == lake_names[lk],]#
-    tmpSURF <- tmp[tmp$sample_type == "surface",]#
-    tmpBEN <- tmp[tmp$sample_type == "benthic",]#
-    out[[lk]]$SR <- length(which(colSums(tmp[,-c(1:17)] >0) > 0))#
-    out[[lk]]$surf <- names(tmpSURF[,-c(1:17)])[which(colSums(tmpSURF[,-c(1:17)] > 0) > 0)]#
-    out[[lk]]$ben <- names(tmpBEN[,-c(1:17)])[which(colSums(tmpBEN[,-c(1:17)] > 0) > 0)]#
-    out[[lk]]$surfSR <- length(out[[lk]]$surf)#
-    out[[lk]]$benSR <- length(out[[lk]]$ben)#
-    tmpUNIQ2SURF <- out[[lk]]$surf[which(!out[[lk]]$surf %in% out[[lk]]$ben)]#
-    tmpUNIQ2BEN <- out[[lk]]$ben[which(!out[[lk]]$ben %in% out[[lk]]$surf)]#
-    out[[lk]]$uniq2surf <- data.frame(species = tmpUNIQ2SURF, #
-                                        samples = colSums(tmpSURF[,tmpUNIQ2SURF] > 0), #
-                                        tot_reads = colSums(tmpSURF[,tmpUNIQ2SURF]))#
-    out[[lk]]$uniq2ben <- data.frame(species = tmpUNIQ2BEN, #
-                                        samples = colSums(tmpBEN[,tmpUNIQ2BEN] > 0), #
-                                        tot_reads = colSums(tmpBEN[,tmpUNIQ2BEN]))#
-#
-    rm(tmp, tmpSURF, tmpBEN, tmpUNIQ2SURF, tmpUNIQ2BEN)#
-}
-setwd("~/Desktop")
-e16S <- read.csv("16S_0diff_fish.condensed.cleaned.community.matrix_sampling_info_no_mock_sorted.csv", header = TRUE)
-sp_names <- colnames(e16S)
-sp_names <- sp_names[-c(1:17)]
-lake_names <- unique(e16S$lake_name)
-out <- vector("list", 22)
-for(lk in 1:length(lake_names)) {#
-    print(lk)#
-    tmp <- e16S[e16S$lake_name == lake_names[lk],]#
-    tmpSURF <- tmp[tmp$sample_type == "surface",]#
-    tmpBEN <- tmp[tmp$sample_type == "benthic",]#
-    out[[lk]]$SR <- length(which(colSums(tmp[,-c(1:17)] >0) > 0))#
-    out[[lk]]$surf <- names(tmpSURF[,-c(1:17)])[which(colSums(tmpSURF[,-c(1:17)] > 0) > 0)]#
-    out[[lk]]$ben <- names(tmpBEN[,-c(1:17)])[which(colSums(tmpBEN[,-c(1:17)] > 0) > 0)]#
-    out[[lk]]$surfSR <- length(out[[lk]]$surf)#
-    out[[lk]]$benSR <- length(out[[lk]]$ben)#
-    tmpUNIQ2SURF <- out[[lk]]$surf[which(!out[[lk]]$surf %in% out[[lk]]$ben)]#
-    tmpUNIQ2BEN <- out[[lk]]$ben[which(!out[[lk]]$ben %in% out[[lk]]$surf)]#
-    out[[lk]]$uniq2surf <- data.frame(species = tmpUNIQ2SURF, #
-                                        samples = colSums(tmpSURF[,tmpUNIQ2SURF] > 0), #
-                                        tot_reads = colSums(tmpSURF[,tmpUNIQ2SURF]))#
-    out[[lk]]$uniq2ben <- data.frame(species = tmpUNIQ2BEN, #
-                                        samples = colSums(tmpBEN[,tmpUNIQ2BEN] > 0), #
-                                        tot_reads = colSums(tmpBEN[,tmpUNIQ2BEN]))#
-#
-    rm(tmp, tmpSURF, tmpBEN, tmpUNIQ2SURF, tmpUNIQ2BEN)#
-}
-out
-out[[1]]
-setwd("~/Desktop")
-e16S <- read.csv("16S_0diff_fish.condensed.cleaned.community.matrix_sampling_info_no_mock_sorted.csv", header = TRUE)
-sp_names <- colnames(e16S)
-sp_names <- sp_names[-c(1:17)]
-lake_names <- unique(e16S$lake_name)
-out <- vector("list", 22)
-for(lk in 1:length(lake_names)) {#
-    print(lk)#
-    tmp <- e16S[e16S$lake_name == lake_names[lk],]#
-    tmpSURF <- tmp[tmp$sample_type == "surface",]#
-    tmpBEN <- tmp[tmp$sample_type == "benthic",]#
-    out[[lk]]$SR <- length(which(colSums(tmp[,-c(1:17)] >0) > 0))#
-    out[[lk]]$surf <- names(tmpSURF[,-c(1:17)])[which(colSums(tmpSURF[,-c(1:17)] > 0) > 0)]#
-    out[[lk]]$ben <- names(tmpBEN[,-c(1:17)])[which(colSums(tmpBEN[,-c(1:17)] > 0) > 0)]#
-    out[[lk]]$surfSR <- length(out[[lk]]$surf)#
-    out[[lk]]$benSR <- length(out[[lk]]$ben)#
-    out[[lk]]$sp_uniq2surf <- out[[lk]]$surf[which(!out[[lk]]$surf %in% out[[lk]]$ben)]#
-    out[[lk]]$sp_uniq2ben <- out[[lk]]$ben[which(!out[[lk]]$ben %in% out[[lk]]$surf)]#
-    out[[lk]]$uniq2surf <- data.frame(species = out[[lk]]$sp_uniq2surf, #
-                                        samples = colSums(tmpSURF[,out[[lk]]$sp_uniq2surf] > 0), #
-                                        tot_reads = colSums(tmpSURF[,out[[lk]]$sp_uniq2surf]))#
-    out[[lk]]$uniq2ben <- data.frame(species = out[[lk]]$sp_uniq2ben, #
-                                        samples = colSums(tmpBEN[,out[[lk]]$sp_uniq2ben] > 0), #
-                                        tot_reads = colSums(tmpBEN[,out[[lk]]$sp_uniq2ben]))#
-#
-    rm(tmp, tmpSURF, tmpBEN)#
-}
-out[[1]]
-setwd("~/Desktop")
-e16S <- read.csv("16S_0diff_fish.condensed.cleaned.community.matrix_sampling_info_no_mock_sorted.csv", header = TRUE)
-sp_names <- colnames(e16S)
-sp_names <- sp_names[-c(1:17)]
-lake_names <- unique(e16S$lake_name)
-out <- vector("list", 22)
-for(lk in 1:length(lake_names)) {#
-    print(lk)#
-    tmp <- e16S[e16S$lake_name == lake_names[lk],]#
-    tmpSURF <- tmp[tmp$sample_type == "surface",]#
-    tmpBEN <- tmp[tmp$sample_type == "benthic",]#
-    out[[lk]]$SR <- length(which(colSums(tmp[,-c(1:17)] >0) > 0))#
-    out[[lk]]$surf <- names(tmpSURF[,-c(1:17)])[which(colSums(tmpSURF[,-c(1:17)] > 0) > 0)]#
-    out[[lk]]$ben <- names(tmpBEN[,-c(1:17)])[which(colSums(tmpBEN[,-c(1:17)] > 0) > 0)]#
-    out[[lk]]$surfSR <- length(out[[lk]]$surf)#
-    out[[lk]]$benSR <- length(out[[lk]]$ben)#
-    out[[lk]]$sp_uniq2surf <- out[[lk]]$surf[which(!out[[lk]]$surf %in% out[[lk]]$ben)]#
-    out[[lk]]$sp_uniq2ben <- out[[lk]]$ben[which(!out[[lk]]$ben %in% out[[lk]]$surf)]#
-    if(length(out[[lk]]$sp_uniq2surf) > 1) {#
-        out[[lk]]$uniq2surf <- data.frame(species = out[[lk]]$sp_uniq2surf, #
-                                        samples = colSums(tmpSURF[,out[[lk]]$sp_uniq2surf] > 0), #
-                                        tot_reads = colSums(tmpSURF[,out[[lk]]$sp_uniq2surf]))#
-    } else {#
-        out[[lk]]$uniq2surf <- data.frame(species = out[[lk]]$sp_uniq2surf, #
-                                        samples = sum(tmpSURF[,out[[lk]]$sp_uniq2surf] > 0), #
-                                        tot_reads = sum(tmpSURF[,out[[lk]]$sp_uniq2surf]))#
-    }#
-#
-    if(length(out[[lk]]$sp_uniq2ben) > 1) {#
-        out[[lk]]$uniq2ben <- data.frame(species = out[[lk]]$sp_uniq2ben, #
-                                        samples = colSums(tmpBEN[,out[[lk]]$sp_uniq2ben] > 0), #
-                                        tot_reads = colSums(tmpBEN[,out[[lk]]$sp_uniq2ben]))#
-    } else {#
-        out[[lk]]$uniq2ben <- data.frame(species = out[[lk]]$sp_uniq2ben, #
-                                        samples = sum(tmpBEN[,out[[lk]]$sp_uniq2ben] > 0), #
-                                        tot_reads = sum(tmpBEN[,out[[lk]]$sp_uniq2ben]))#
-    }#
-#
-    rm(tmp, tmpSURF, tmpBEN)#
-}
-lk
-out[[11]]
-setwd("~/Desktop")
-e16S <- read.csv("16S_0diff_fish.condensed.cleaned.community.matrix_sampling_info_no_mock_sorted.csv", header = TRUE)
-sp_names <- colnames(e16S)
-sp_names <- sp_names[-c(1:17)]
-lake_names <- unique(e16S$lake_name)
-out <- vector("list", 22)
-for(lk in 1:length(lake_names)) {#
-    print(lk)#
-    tmp <- e16S[e16S$lake_name == lake_names[lk],]#
-    tmpSURF <- tmp[tmp$sample_type == "surface",]#
-    tmpBEN <- tmp[tmp$sample_type == "benthic",]#
-    out[[lk]]$SR <- length(which(colSums(tmp[,-c(1:17)] >0) > 0))#
-    out[[lk]]$surf <- names(tmpSURF[,-c(1:17)])[which(colSums(tmpSURF[,-c(1:17)] > 0) > 0)]#
-    out[[lk]]$ben <- names(tmpBEN[,-c(1:17)])[which(colSums(tmpBEN[,-c(1:17)] > 0) > 0)]#
-    out[[lk]]$surfSR <- length(out[[lk]]$surf)#
-    out[[lk]]$benSR <- length(out[[lk]]$ben)#
-    out[[lk]]$sp_uniq2surf <- out[[lk]]$surf[which(!out[[lk]]$surf %in% out[[lk]]$ben)]#
-    out[[lk]]$sp_uniq2ben <- out[[lk]]$ben[which(!out[[lk]]$ben %in% out[[lk]]$surf)]#
-    if(length(out[[lk]]$sp_uniq2surf) == 0) {#
-        out[[lk]]$uniq2surf <- "none"#
-    } else if(length(out[[lk]]$sp_uniq2surf) > 1) {#
-        out[[lk]]$uniq2surf <- data.frame(species = out[[lk]]$sp_uniq2surf, #
-                                        samples = colSums(tmpSURF[,out[[lk]]$sp_uniq2surf] > 0), #
-                                        tot_reads = colSums(tmpSURF[,out[[lk]]$sp_uniq2surf]))#
-    } else {#
-        out[[lk]]$uniq2surf <- data.frame(species = out[[lk]]$sp_uniq2surf, #
-                                        samples = sum(tmpSURF[,out[[lk]]$sp_uniq2surf] > 0), #
-                                        tot_reads = sum(tmpSURF[,out[[lk]]$sp_uniq2surf]))#
-    }#
-#
-    if(length(out[[lk]]$sp_uniq2ben) == 0) {#
-        out[[lk]]$uniq2ben <- "none"#
-    } else if(length(out[[lk]]$sp_uniq2ben) > 1) {#
-        out[[lk]]$uniq2ben <- data.frame(species = out[[lk]]$sp_uniq2ben, #
-                                        samples = colSums(tmpBEN[,out[[lk]]$sp_uniq2ben] > 0), #
-                                        tot_reads = colSums(tmpBEN[,out[[lk]]$sp_uniq2ben]))#
-    } else {#
-        out[[lk]]$uniq2ben <- data.frame(species = out[[lk]]$sp_uniq2ben, #
-                                        samples = sum(tmpBEN[,out[[lk]]$sp_uniq2ben] > 0), #
-                                        tot_reads = sum(tmpBEN[,out[[lk]]$sp_uniq2ben]))#
-    }#
-#
-    rm(tmp, tmpSURF, tmpBEN)#
-}
-out
-save(out, "SURFvsBEN.rda")
-save(out, file = "SURFvsBEN.rda")
-out[[1]]
-setwd("~/Desktop")
-e16S <- read.csv("16S_0diff_fish.condensed.cleaned.community.matrix_sampling_info_no_mock_sorted.csv", header = TRUE)
-sp_names <- colnames(e16S)
-sp_names <- sp_names[-c(1:17)]
-lake_names <- unique(e16S$lake_name)
-out <- vector("list", 22)
-for(lk in 1:length(lake_names)) {#
-    print(lk)#
-    tmp <- e16S[e16S$lake_name == lake_names[lk],]#
-    tmpSURF <- tmp[tmp$sample_type == "surface",]#
-    tmpBEN <- tmp[tmp$sample_type == "benthic",]#
-    out[[lk]]$lake <- lake_names[lk]#
-    out[[lk]]$SR <- length(which(colSums(tmp[,-c(1:17)] >0) > 0))#
-    out[[lk]]$surf <- names(tmpSURF[,-c(1:17)])[which(colSums(tmpSURF[,-c(1:17)] > 0) > 0)]#
-    out[[lk]]$ben <- names(tmpBEN[,-c(1:17)])[which(colSums(tmpBEN[,-c(1:17)] > 0) > 0)]#
-    out[[lk]]$surfSR <- length(out[[lk]]$surf)#
-    out[[lk]]$benSR <- length(out[[lk]]$ben)#
-    out[[lk]]$sp_uniq2surf <- out[[lk]]$surf[which(!out[[lk]]$surf %in% out[[lk]]$ben)]#
-    out[[lk]]$sp_uniq2ben <- out[[lk]]$ben[which(!out[[lk]]$ben %in% out[[lk]]$surf)]#
-    if(length(out[[lk]]$sp_uniq2surf) == 0) {#
-        out[[lk]]$uniq2surf <- "none"#
-    } else if(length(out[[lk]]$sp_uniq2surf) > 1) {#
-        out[[lk]]$uniq2surf <- data.frame(species = out[[lk]]$sp_uniq2surf, #
-                                        samples = colSums(tmpSURF[,out[[lk]]$sp_uniq2surf] > 0), #
-                                        tot_reads = colSums(tmpSURF[,out[[lk]]$sp_uniq2surf]))#
-    } else {#
-        out[[lk]]$uniq2surf <- data.frame(species = out[[lk]]$sp_uniq2surf, #
-                                        samples = sum(tmpSURF[,out[[lk]]$sp_uniq2surf] > 0), #
-                                        tot_reads = sum(tmpSURF[,out[[lk]]$sp_uniq2surf]))#
-    }#
-#
-    if(length(out[[lk]]$sp_uniq2ben) == 0) {#
-        out[[lk]]$uniq2ben <- "none"#
-    } else if(length(out[[lk]]$sp_uniq2ben) > 1) {#
-        out[[lk]]$uniq2ben <- data.frame(species = out[[lk]]$sp_uniq2ben, #
-                                        samples = colSums(tmpBEN[,out[[lk]]$sp_uniq2ben] > 0), #
-                                        tot_reads = colSums(tmpBEN[,out[[lk]]$sp_uniq2ben]))#
-    } else {#
-        out[[lk]]$uniq2ben <- data.frame(species = out[[lk]]$sp_uniq2ben, #
-                                        samples = sum(tmpBEN[,out[[lk]]$sp_uniq2ben] > 0), #
-                                        tot_reads = sum(tmpBEN[,out[[lk]]$sp_uniq2ben]))#
-    }#
-#
-    rm(tmp, tmpSURF, tmpBEN)#
-}
-save(out, file = "SURFvsBEN.rda")
-out[[1]]
-c(lake_names[1],out[[1]]$uniq2surf)
-cbind(lake_names[1], out[[1]]$uniq2surf)
-cbind(out[[1]]$lake, out[[1]]$uniq2surf)
-cbind(out[[1]]$lake, "surface", out[[1]]$uniq2surf)
-for(x in 1:22) {#
-    tmpSURF <- cbind(out[[x]]$lake, "surface", out[[x]]$uniq2surf)#
-    tmpBEN <- cbind(out[[x]]$lake, "benthic", out[[x]]$uniq2ben)#
-    tmpo <- rbind(tmpSURF, tmpBEN)#
-#
-    if(x == 1) {#
-        big_out <- tmpo#
-        colnames(big_out) <- c("lake", "sample_type", "species", "samples", "reads")#
-    } else {#
-        big_out <- rbind(big_out, tmpo)#
-    }#
-    rm(tmpo, tmpSURF, tmpBEN)#
-}
-big_out
-x <- 1
-tmpSURF <- cbind(out[[x]]$lake, "surface", out[[x]]$uniq2surf)
-tmpBEN <- cbind(out[[x]]$lake, "benthic", out[[x]]$uniq2ben)
-tmpo <- rbind(tmpSURF, tmpBEN)
-tmpSURF
-tmpBEN
-tmpSURF <- cbind(out[[x]]$lake, "surface", out[[x]]$uniq2surf)
-colnames(tmpSURF) <- c("lake", "sample_type", "species", "samples", "reads")
-tmpBEN <- cbind(out[[x]]$lake, "benthic", out[[x]]$uniq2ben)
-colnames(tmpBEN) <- c("lake", "sample_type", "species", "samples", "reads")
-tmpo <- rbind(tmpSURF, tmpBEN)
-if(x == 1) {#
-        big_out <- tmpo#
-    } else {#
-        big_out <- rbind(big_out, tmpo)#
-    }
-big_out
-for(x in 1:22) {#
-    tmpSURF <- cbind(out[[x]]$lake, "surface", out[[x]]$uniq2surf)#
-    colnames(tmpSURF) <- c("lake", "sample_type", "species", "samples", "reads")#
-    tmpBEN <- cbind(out[[x]]$lake, "benthic", out[[x]]$uniq2ben)#
-    colnames(tmpBEN) <- c("lake", "sample_type", "species", "samples", "reads")#
-    tmpo <- rbind(tmpSURF, tmpBEN)#
-#
-    if(x == 1) {#
-        big_out <- tmpo#
-    } else {#
-        big_out <- rbind(big_out, tmpo)#
-    }#
-    rm(tmpo, tmpSURF, tmpBEN)#
-}
-for(x in 1:22) {#
-    print(x)#
-    tmpSURF <- cbind(out[[x]]$lake, "surface", out[[x]]$uniq2surf)#
-    colnames(tmpSURF) <- c("lake", "sample_type", "species", "samples", "reads")#
-    tmpBEN <- cbind(out[[x]]$lake, "benthic", out[[x]]$uniq2ben)#
-    colnames(tmpBEN) <- c("lake", "sample_type", "species", "samples", "reads")#
-    tmpo <- rbind(tmpSURF, tmpBEN)#
-#
-    if(x == 1) {#
-        big_out <- tmpo#
-    } else {#
-        big_out <- rbind(big_out, tmpo)#
-    }#
-    rm(tmpo, tmpSURF, tmpBEN)#
-}
-x
-print(x)
-tmpSURF <- cbind(out[[x]]$lake, "surface", out[[x]]$uniq2surf)
-colnames(tmpSURF) <- c("lake", "sample_type", "species", "samples", "reads")
-tmpBEN <- cbind(out[[x]]$lake, "benthic", out[[x]]$uniq2ben)
-colnames(tmpBEN) <- c("lake", "sample_type", "species", "samples", "reads")
-tmpBEN
-out[[11]]
-for(x in 1:22) {#
-    print(x)#
-    tmpSURF <- cbind(out[[x]]$lake, "surface", out[[x]]$uniq2surf)#
-    colnames(tmpSURF) <- c("lake", "sample_type", "species", "samples", "reads")#
-    if(length(out[[x]]$sp_uniq2ben) > 0)) {#
-        tmpBEN <- cbind(out[[x]]$lake, "benthic", out[[x]]$uniq2ben)#
-        colnames(tmpBEN) <- c("lake", "sample_type", "species", "samples", "reads")#
-        tmpo <- rbind(tmpSURF, tmpBEN)#
-    }#
-#
-    if(x == 1) {#
-        big_out <- tmpo#
-    } else {#
-        big_out <- rbind(big_out, tmpo)#
-    }#
-    rm(tmpo, tmpSURF, tmpBEN)#
-}
-for(x in 1:22) {#
-    print(x)#
-    tmpSURF <- cbind(out[[x]]$lake, "surface", out[[x]]$uniq2surf)#
-    colnames(tmpSURF) <- c("lake", "sample_type", "species", "samples", "reads")#
-    if(length(out[[x]]$sp_uniq2ben) > 0) {#
-        tmpBEN <- cbind(out[[x]]$lake, "benthic", out[[x]]$uniq2ben)#
-        colnames(tmpBEN) <- c("lake", "sample_type", "species", "samples", "reads")#
-        tmpo <- rbind(tmpSURF, tmpBEN)#
-    }#
-#
-    if(x == 1) {#
-        big_out <- tmpo#
-    } else {#
-        big_out <- rbind(big_out, tmpo)#
-    }#
-    rm(tmpo, tmpSURF, tmpBEN)#
-}
-for(x in 1:22) {#
-    print(x)#
-    tmpSURF <- cbind(out[[x]]$lake, "surface", out[[x]]$uniq2surf)#
-    colnames(tmpSURF) <- c("lake", "sample_type", "species", "samples", "reads")#
-    if(length(out[[x]]$sp_uniq2ben) > 0) {#
-        tmpBEN <- cbind(out[[x]]$lake, "benthic", out[[x]]$uniq2ben)#
-        colnames(tmpBEN) <- c("lake", "sample_type", "species", "samples", "reads")#
-        tmpo <- rbind(tmpSURF, tmpBEN)#
-    } else {#
-        tmpo <- tmpSURF#
-    }#
-#
-    if(x == 1) {#
-        big_out <- tmpo#
-    } else {#
-        big_out <- rbind(big_out, tmpo)#
-    }#
-    rm(tmpo, tmpSURF, tmpBEN)#
-}
-for(x in 1:22) {#
-    print(x)#
-    tmpSURF <- cbind(out[[x]]$lake, "surface", out[[x]]$uniq2surf)#
-    colnames(tmpSURF) <- c("lake", "sample_type", "species", "samples", "reads")#
-    if(length(out[[x]]$sp_uniq2ben) > 0) {#
-        tmpBEN <- cbind(out[[x]]$lake, "benthic", out[[x]]$uniq2ben)#
-        colnames(tmpBEN) <- c("lake", "sample_type", "species", "samples", "reads")#
-        tmpo <- rbind(tmpSURF, tmpBEN)#
-        rm(tmpSURF, tmpBEN)#
-    } else {#
-        tmpo <- tmpSURF#
-        rm(tmpSURF)#
-    }#
-#
-    if(x == 1) {#
-        big_out <- tmpo#
-    } else {#
-        big_out <- rbind(big_out, tmpo)#
-    }#
-    rm(tmpo)#
-}
-big_out
-write.csv(big_out, row.names = FALSE, quote = FALSE, file = "SURFvsBEN.csv")
-table(big_out$species[big_out$sample_type == "surface"])
-table(big_out$species[big_out$sample_type == "benthic"])
-surflist <- big_out$species[big_outsample_type == "surface"]
-benlist <- big_out$species[big_out$sample_type == "benthic"]
-surflist <- big_out$species[big_out$sample_type == "surface"]
-benlist <- big_out$species[big_out$sample_type == "benthic"]
-benlist[!benlist %in% surflist]
-names(e16S)
-table(big_out$species[big_out$sample_type == "surface"])
-table(big_out$species[big_out$sample_type == "benthic"])
-surflist <- big_out$species[big_out$sample_type == "surface"]
-benlist <- big_out$species[big_out$sample_type == "benthic"]
-benlist[!benlist %in% surflist]
-all_surf <- e16S[e16S$sample_type == "surface",]
-all_surf <- all_surf[,-c(1:17)]
-all_surf <- all_surf[,colSums(all_surf) > 0]
-all_surf
-all_ben <- e16S[e16S$sample_type == "benthic",]
-all_ben <- all_ben[,-c(1:17)]
-all_ben <- all_ben[,colSums(all_ben) > 0]
-surf_spp <- colnames(all_surf)
-ben_spp <- colnames(all_ben)
-surf_spp
-ben_spp
-surf_spp[!surf_spp %in% ben_spp]
-ben_spp[!ben_spp %in% surf_spp]
-all_surf <- e16S[e16S$sample_type == "surface",]
-all_surf <- all_surf[,-c(1:17)]
-all_surf <- all_surf[,colSums(all_surf) > 0]
-all_ben <- e16S[e16S$sample_type == "benthic",]
-all_ben <- all_ben[,-c(1:17)]
-all_ben <- all_ben[,colSums(all_ben) > 0]
-surf_spp <- colnames(all_surf)
-ben_spp <- colnames(all_ben)
-surf_uniq <- surf_spp[!surf_spp %in% ben_spp]
-ben_uniq <- ben_spp[!ben_spp %in% surf_spp]
-surfonly <- data.frame(species = surf_uniq,
-samples = colSums(all_surf[,surf_uniq] > 0),
-reads = colSums(all_surf[,surf_uniq])
-benonly <- data.frame(species = ben_uniq,#
-                        samples = colSums(all_ben[,ben_uniq] > 0),#
-                        reads = colSums(all_ben[,ben_uniq]))
-all_surf <- e16S[e16S$sample_type == "surface",]
-all_surf <- all_surf[,-c(1:17)]
-all_surf <- all_surf[,colSums(all_surf) > 0]
-all_ben <- e16S[e16S$sample_type == "benthic",]
-all_ben <- all_ben[,-c(1:17)]
-all_ben <- all_ben[,colSums(all_ben) > 0]
-surf_spp <- colnames(all_surf)
-ben_spp <- colnames(all_ben)
-surf_uniq <- surf_spp[!surf_spp %in% ben_spp]
-ben_uniq <- ben_spp[!ben_spp %in% surf_spp]
-surfonly <- data.frame(species = surf_uniq,#
-                        samples = colSums(all_surf[,surf_uniq] > 0),#
-                        reads = colSums(all_surf[,surf_uniq]))
-benonly <- data.frame(species = ben_uniq,#
-                        samples = colSums(all_ben[,ben_uniq] > 0),#
-                        reads = colSums(all_ben[,ben_uniq]))
-surfonly
-benonly
-?save.image
-setwd("~/Desktop")
-e16S <- read.csv("16S_0diff_fish.condensed.cleaned.community.matrix_sampling_info_no_mock_sorted.csv", header = TRUE)
-sp_names <- colnames(e16S)
-sp_names <- sp_names[-c(1:17)]
-lake_names <- unique(e16S$lake_name)
-out <- vector("list", 22)
-for(lk in 1:length(lake_names)) {#
-    print(lk)#
-    tmp <- e16S[e16S$lake_name == lake_names[lk],]#
-    tmpSURF <- tmp[tmp$sample_type == "surface",]#
-    tmpBEN <- tmp[tmp$sample_type == "benthic",]#
-    out[[lk]]$lake <- lake_names[lk]#
-    out[[lk]]$SR <- length(which(colSums(tmp[,-c(1:17)] >0) > 0))#
-    out[[lk]]$surf <- names(tmpSURF[,-c(1:17)])[which(colSums(tmpSURF[,-c(1:17)] > 0) > 0)]#
-    out[[lk]]$ben <- names(tmpBEN[,-c(1:17)])[which(colSums(tmpBEN[,-c(1:17)] > 0) > 0)]#
-    out[[lk]]$surfSR <- length(out[[lk]]$surf)#
-    out[[lk]]$benSR <- length(out[[lk]]$ben)#
-    out[[lk]]$sp_uniq2surf <- out[[lk]]$surf[which(!out[[lk]]$surf %in% out[[lk]]$ben)]#
-    out[[lk]]$sp_uniq2ben <- out[[lk]]$ben[which(!out[[lk]]$ben %in% out[[lk]]$surf)]#
-    if(length(out[[lk]]$sp_uniq2surf) == 0) {#
-        out[[lk]]$uniq2surf <- "none"#
-    } else if(length(out[[lk]]$sp_uniq2surf) > 1) {#
-        out[[lk]]$uniq2surf <- data.frame(species = out[[lk]]$sp_uniq2surf, #
-                                        samples = colSums(tmpSURF[,out[[lk]]$sp_uniq2surf] > 0), #
-                                        tot_reads = colSums(tmpSURF[,out[[lk]]$sp_uniq2surf]))#
-    } else {#
-        out[[lk]]$uniq2surf <- data.frame(species = out[[lk]]$sp_uniq2surf, #
-                                        samples = sum(tmpSURF[,out[[lk]]$sp_uniq2surf] > 0), #
-                                        tot_reads = sum(tmpSURF[,out[[lk]]$sp_uniq2surf]))#
-    }#
-#
-    if(length(out[[lk]]$sp_uniq2ben) == 0) {#
-        out[[lk]]$uniq2ben <- "none"#
-    } else if(length(out[[lk]]$sp_uniq2ben) > 1) {#
-        out[[lk]]$uniq2ben <- data.frame(species = out[[lk]]$sp_uniq2ben, #
-                                        samples = colSums(tmpBEN[,out[[lk]]$sp_uniq2ben] > 0), #
-                                        tot_reads = colSums(tmpBEN[,out[[lk]]$sp_uniq2ben]))#
-    } else {#
-        out[[lk]]$uniq2ben <- data.frame(species = out[[lk]]$sp_uniq2ben, #
-                                        samples = sum(tmpBEN[,out[[lk]]$sp_uniq2ben] > 0), #
-                                        tot_reads = sum(tmpBEN[,out[[lk]]$sp_uniq2ben]))#
-    }#
-#
-    rm(tmp, tmpSURF, tmpBEN)#
-}
-save(out, file = "SURFvsBEN.rda")
-for(x in 1:22) {#
-    print(x)#
-    tmpSURF <- cbind(out[[x]]$lake, "surface", out[[x]]$uniq2surf)#
-    colnames(tmpSURF) <- c("lake", "sample_type", "species", "samples", "reads")#
-    if(length(out[[x]]$sp_uniq2ben) > 0) {#
-        tmpBEN <- cbind(out[[x]]$lake, "benthic", out[[x]]$uniq2ben)#
-        colnames(tmpBEN) <- c("lake", "sample_type", "species", "samples", "reads")#
-        tmpo <- rbind(tmpSURF, tmpBEN)#
-        rm(tmpSURF, tmpBEN)#
-    } else {#
-        tmpo <- tmpSURF#
-        rm(tmpSURF)#
-    }#
-#
-    if(x == 1) {#
-        big_out <- tmpo#
-    } else {#
-        big_out <- rbind(big_out, tmpo)#
-    }#
-    rm(tmpo)#
-}
-write.csv(big_out, row.names = FALSE, quote = FALSE, file = "SURFvsBEN.csv")
-table(big_out$species[big_out$sample_type == "surface"])
-table(big_out$species[big_out$sample_type == "benthic"])
-surflist <- big_out$species[big_out$sample_type == "surface"]
-benlist <- big_out$species[big_out$sample_type == "benthic"]
-benlist[!benlist %in% surflist]
-#Are these species NEVER detected in surface / benthic samples?
-all_surf <- e16S[e16S$sample_type == "surface",]
-all_surf <- all_surf[,-c(1:17)]
-all_surf <- all_surf[,colSums(all_surf) > 0]
-all_ben <- e16S[e16S$sample_type == "benthic",]
-all_ben <- all_ben[,-c(1:17)]
-all_ben <- all_ben[,colSums(all_ben) > 0]
-surf_spp <- colnames(all_surf)
-ben_spp <- colnames(all_ben)
-surf_uniq <- surf_spp[!surf_spp %in% ben_spp]
-ben_uniq <- ben_spp[!ben_spp %in% surf_spp]
-surfonly <- data.frame(species = surf_uniq,#
-                        samples = colSums(all_surf[,surf_uniq] > 0),#
-                        reads = colSums(all_surf[,surf_uniq]))
-benonly <- data.frame(species = ben_uniq,#
-                        samples = colSums(all_ben[,ben_uniq] > 0),#
-                        reads = colSums(all_ben[,ben_uniq]))
-surfonly
-benonly
-save.image("SURFvsBEN.Rws")
-15501+127532
-115900+27133
-143033-8008-110607-553
-6785-5263
-23865+1522
-25387*0.565
-25387+14343
-23865+1522
-39000-25387
+A = seq(1,1000,by=1)
+M=20
+C <- a0*((M*A)^a1)*exp(-a2/T)
+C
+A
+plot(x = C, y = A)
+C
+abund = exp(a0+(a1*(log(C)+log(V)))+(a2/T)-log(M))
+plot(x = C, y = abund)
+A
+abund
+plot(x = A, y = abund)
+CV=a0*((M*A)^a1)*exp(-a2/T)
+C=(0.1*((8.9*16)^0.2)*exp(-0.3/10.4))/21.3
+C
+A = exp(0.1+0.2*(log(C)+log(21.3))+0.3/10.4-log(8.9))
+A
+4739+2205
+6944*1.03
+install.packages("gProject")
+?options
+help(package = "LAGOSNE")
 23865+1522+14343
-1058*1.02
-987*1.02
-setwd("~/Desktop")
-?raster::extract
-setwd("~/Desktop")
-pts <- read.csv("year2sites_eDNA.csv", header = TRUE)
-pts
-coordinates(pts) = ~long+ lat
-help(package = "raster")
-help(package = "sp")
-library(sp)
-pts <- read.csv("year2sites_eDNA.csv", header = TRUE)
-coordinates(pts) = ~long+ lat
-pts
-class(pts)
-load("all_spp.rda")
+200*3.50
+200*3.15
+250*3.66
+200*3.66
+23*200
+200*2000
+23*200
+k = c(1,5,6)
+mean(k)
+(1*1/3)+(5*1/3)+(6*1/3)
+library(Bayesmix)
+library(bayesmix)
+?BMMmodel
+?BMMpriors
+1000/23
+500/43
+11*5000
+1000/0.25
+144584-1499
+96000*24
+2304000/143085
+143085/24
+50000*24
+1200000/143085
+25000/26
+20000*24
+50000*24
+182548-1500
+1100000/180000
+2300000/180000
+library(tidyverse)
+library(bayesmix)
+library(bmixture)
+library(mclust)
+library(wesanderson)
+df <- read.table("PIG_test_dataset.txt",header = T,sep = "\t",stringsAsFactors = F)
+df
+df1 <- df %>% #
+  mutate(ID2 = ID_indiv) %>% #
+  rename(ID=ID_indiv) %>% #
+  separate(ID2,into = c("spp","loc","num"),sep = "_") %>% #
+  select(ID,loc,everything()) %>% #
+  select(-spp,-num,-sample) %>% #
+  mutate(samp = paste(loc,year_collected,sep = "_"))
+df1
+samples <- unique(df1$samp)
+#Visualize data using a Histogram and Density Plot
+hist(df1$length, breaks = 100)
+plot(density(df1$length))
+df1
+hist(df1$length, breaks = 100)
+model <- BMMmodel(df1$length, k = 5, #
+                    priors = list(kind = "independence",#
+                                parameter = "priorsUncertain"))
+#Setup Jags MCMC control setting estimation variables and number of MCMC
+#Iterations (Can start with 20,000 to 50,000 iterations)
+control <- JAGScontrol(variables = c("mu", "tau", "eta", "S"),#
+                       burn.in = 100, n.iter = 500)
+#Run JAGS MCMC model using length
+z <- JAGSrun(df1$length, model = model, control = control)
+#View compiled variable estimates
+z
+eta.thresh <- 0.035
+#Eliminate all classifications with an eta <3.5% threshold
+post.k <- rowSums(z$results[,grep("eta", colnames(z$results))] > eta.thresh)
+#Calculate proportion of k estimates over the number of MCMC iterations
+post.k <- table(post.k)/sum(table(post.k))
+#View classification proportions
+post.k
+bmixnorm.model <- bmixnorm(df1$length, k = "unknown", iter = 500, burnin = 100, k.max = 5)
+#Model results subset to collect age classifications (kval) and weighted values
+bmix_vals <- data.frame(kval = bmixnorm.model$all_k, weight = bmixnorm.model$all_weights,stringsAsFactors = F)
+#Estimated k proportions calculated using # classifications over weighted values
+props <- bmix_vals %>% group_by(kval) %>% summarise(prop = sum(weight)/sum(bmix_vals$weight))
+#Setting test dataset location (Pigeon River 2020)
+locs <- "PIG_2020"
+props
+bmixnorm.model
+mBIC <- mclustBIC(tmpmodel, G=1:5, modelNames = "VVV")
+tmpmodel <- cbind(tmp$length,tmp$weight)
+tmp <- df1[order(df1$length),]
+#Collecting length and weight data. Mclust will only read datasets that
+#contain only length and weight
+tmpmodel <- cbind(tmp$length,tmp$weight)
+#Estimating age classifications using length and weight data from k = 1 to k = 5 using the "VVV" model. This
+#Will output BIC values for each K. The BIC number closest to 0 is the "best fit"
+mBIC <- mclustBIC(tmpmodel, G=1:5, modelNames = "VVV")
+mBIC
+#loading libraries#
+library(tidyverse)#
+library(bayesmix)#
+library(bmixture)#
+library(mclust)#
+library(wesanderson)#
+#
+#load in length and weight data#
+df <- read.table("PIG_test_dataset.txt",header = T,sep = "\t",stringsAsFactors = F)#
+#
+#Format and cleanup the data frame#
+df1 <- df %>% #
+  mutate(ID2 = ID_indiv) %>% #
+  rename(ID=ID_indiv) %>% #
+  separate(ID2,into = c("spp","loc","num"),sep = "_") %>% #
+  select(ID,loc,everything()) %>% #
+  select(-spp,-num,-sample) %>% #
+  mutate(samp = paste(loc,year_collected,sep = "_"))#
+#
+#Set sample locations in Alphabetical order#
+samples <- unique(df1$samp)#
+#
+#Visualize data using a Histogram and Density Plot #
+hist(df1$length, breaks = 100)#
+plot(density(df1$length))#
+#
+#Use Bayesmix to estimate first set of age classes (k)#
+#
+#Configure model to estimate k with a large starting k value to converge upon "true" k estimate#
+#using the R&M method#
+#
+  model <- BMMmodel(df1$length, k = 5, #
+                    priors = list(kind = "independence",#
+                                parameter = "priorsUncertain"))#
+#Setup Jags MCMC control setting estimation variables and number of MCMC #
+#Iterations (Can start with 20,000 to 50,000 iterations)#
+  control <- JAGScontrol(variables = c("mu", "tau", "eta", "S"),#
+                       burn.in = 100, n.iter = 500)#
+#Run JAGS MCMC model using length #
+  z <- JAGSrun(df1$length, model = model, control = control)#
+#View compiled variable estimates#
+  z#
+#
+#Set eta cutoff for each iteration and only keep values greater than 3.5%#
+#Originally simulated by R&M method#
+eta.thresh <- 0.035#
+#
+#Eliminate all classifications with an eta <3.5% threshold#
+post.k <- rowSums(z$results[,grep("eta", colnames(z$results))] > eta.thresh)#
+#
+#Calculate proportion of k estimates over the number of MCMC iterations#
+post.k <- table(post.k)/sum(table(post.k))#
+#
+#View classification proportions#
+post.k#
+#
+#Use Bmixture to estimate Second set of age classes (k)#
+#
+#Use bmixnorm to estimate k using length measurements when k is unknown. Iterations#
+#can be set between 20,000 to 50,000 and maximum k is set to a max of 5 age classes #
+#using Birth/Death MCMC#
+#
+#IMPORTANT#
+#Bmixnorm likes to crash out. This is normal. If the model crashes just restart the code. It will eventually work#
+#It is a bigger problem when trying to increase your number of iterations.#
+#
+  bmixnorm.model <- bmixnorm(df1$length, k = "unknown", iter = 500, burnin = 100, k.max = 5)
+bmixnorm.model <- bmixnorm(df1$length, k = "unknown", iter = 500, burnin = 100, k.max = 5)
+summary(bmixnorm.model)
+bmixnorm.model
+?bmixnorm
+library(LAGOSNE)
+help(package="LAGOSNE")
+34407752/300
+34407752/150
+34407752/74730
+paste0(“ENM_”,c(1:24))
+paste0("ENM_",c(1:24))
+library(strataG)
+?heterozygosity
+data(msats.g)#
+#
+# Expected heterozygosity#
+heterozygosity(msats.g, type = "expected")
+heterozygosity
+?allelicrichness
+?allelicRichness
+1.9e9/74000
+74000/18
+69.3*45.7
+147+98+34+34
+251906-1500
+250406/24
+350000/24
+6000*24
+20*30
+log(1000)
+log(600000)
+exp(13.30468)
+tmp <- runif(100, 6.9, 13.3)
+tmp2 <- exp(tmp)
+tmp2
+hist(tmp2)
+sum(tmp2 < 10000)
+sum(tmp2 > 60000)
+tmp <- runif(10000, 6.9, 13.3)
+tmpo <- list()
+tmpo
+tmpo[[1]] <- runif(1000)
+tmpo
+tmpo[[1]]
+names(tmpo)[[1]] <- "jojo"
+tmpo[["jojo"]]
+tmpo$jojo
+tmplist <- list()
+tmplist[["jojo"]] <- runif(1000)
+tmplist$jojo
 ls()
-?extract
-?raster::extract
-extract(all_spp, pts)
-library(raster)
-extract(all_spp, pts)
-SR4pts <- extract(all_spp, pts)
-hist(SR4pts, xlab = "Predicted Species Richness (0.5 threshold)", ylab = "Count")
-library(raster)
-library(sp)
-setwd("~/Desktop")
-pts <- read.csv("year2sites_eDNA.csv", header = TRUE)
-coordinates(pts) = ~long+ lat
-load("all_spp.rda")
-SR4pts <- extract(all_spp, pts)
-hist(SR4pts, xlab = "Predicted Species Richness (0.5 threshold)", ylab = "Count", xlim = c(0,12))
-hist(SR4pts, xlab = "Number of Species", ylab = "Count", xlim = c(0,12), main = "Distribution of Predicated Species Richness across Yr 2 Sites (0.5 threshold)")
-hist(SR4pts, xlab = "Number of Species", ylab = "Count", xlim = c(0,12), main = "Predicated Species Richness at Yr 2 Sites")
-SR4pts
-sum(SR4pts >= 10)
-table(SR4pts)
-length(SR4pts)
-dat <- matrix(data = runif(81),nrow = 9, ncol = 9)
-dat
-label <- c(rep("one",4), rep("two",5))
-boxplot(dat~label)
+names(tmplist)
+tmplist[[ "test" ]] <- runif(2000)
+tmplist$test
+fileH <- noquote("tmplist$jojo")
+fileH
+expr(tmplist$jojo)
+eval(tmplist$jojo)
+ls()
+class(fileH)
+?eval
+tmp <- list()
+tmp[["one"]] <- runif(1000)
+listname <- paste0("tmp$","one")
+eval(listname)
+eval(noquote(listname))
+tmp$one
+eval(noquote(listname))
+eval(tmp$one)
+eval(listname)
+eval(expr(listname))
+eval(parse(listname))
+eval(parse(noquote(listname)))
+eval(noquote(listname))
+tmplist <- list()
+tmplist[["jojo"]] <- runif(1000)
+fileH <- noquote("tmplist$jojo")
+eval(fileH)
+eval(tmplist$jojo)
+eval(fileH)
+fileH <- noquote("tmplist$jojo")
+eval(fileH)
+get(fileH)
+tmplist$jojo
+mget(fileH)
+eval(jojo, envir=tmplist)
+tmplist
+names(tmplist)
+eval(quote(fileH))
+get(fileH)
+fileH <- "tmplist"
+get(fileH)
+get(fileH)[["jojo"]]
+get(tmplist)[[paste0("jo","jo")]]
+tmplist
+get(tmplist)
+get(tmplist)[[paste0("jo","jo")]]
+get(tmplist)["jojo"]
+get(tmplist)[jojo]
+names(tmplist)
+get(tmplist)["jojo"]
+get(tmplist)[["jojo"]
+]
+tmplist[["jojo"]]
+271210-1500
+269710/24
+help(package = "mclust")
+16000*24
+0.6*15
+9/15
+27*26
+702/2
+system("ls")
+system("ls -lh")
+108.64*2
+205.96/2
+305311-1500
+args <- commandArgs(TRUE)
+i <- as.numeric(args[1])
+nreps <- as.numeric(args[2])
+who <- as.character(args[3])
+label <- as.character(args[4])
+#simdir <- as.character(args[5])
+outdir <- as.character(args[5])
+if (TRUE) #TRUE means production
+{#
+        simdir <- system("echo $SCRATCH", intern = TRUE)#
+    } else {#
+        simdir <- "."#
+    }
+simdir
+simdir <- "~/Desktop/hSC_testing/simdir"
+if(length(args) == 0) {#
+  i <- 1#
+  nreps <- 2#
+  who <- "JDR"#
+  label <- "Ashpaper_test"#
+  outdir <- "~/Desktop/hSC_testing/outdir"#
+  #simdir <- "~/Desktop/hSC_testing/simdir"#
+}
+if ((is.na(simdir))|(is.na(outdir))) {stop("need to specify a correct simdir and/or outdir")}
+cat(paste("Run Details:\ni=",i,"nreps =",nreps,"who=",who,"\nlabel=",label,"\nsimdir=",simdir,"\noutdir=",outdir,"\n"))
+tmp = .libPaths()
+.libPaths(tmp[!grepl("home",tmp)])  ##remove any paths that have "home" in them, like: /home/f0007250
+library(holoSimCell)
 setwd("~/Desktop/GitHub/holoSimCell")
 devtools::load_all()
-maj_min_fix()
-devtools::document()
-devtools::document()
+parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))
+modchoice <- 1
+load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[modchoice]]$file))
+refpops <- pollenPulls[[modchoice]]$refs
+avgCellsz <- mean(c(res(landscape$sumrast)))
+ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,#
+                        hab_suit=landscape,#
+                        refs=refpops,   #
+                        refsz=parms$ref_Ne,#
+                        lambda=parms$lambda,#
+                        mix=parms$mix,  #
+                        shortscale=parms$shortscale*avgCellsz,  #
+                        shortshape=parms$shortshape, #
+                        longmean=parms$longmean*avgCellsz,  #
+                        ysz=res(landscape$sumrast)[2], #
+                        xsz=res(landscape$sumrast)[1], #
+                        K = parms$Ne)
+gmap=make.gmap(ph$pophist,#
+                xnum=2, #number of cells to aggregate in x-direction#
+                ynum=2) #number of aggregate in the y-direction
+ph2 <- pophist.aggregate(ph,gmap=gmap)
+loc_parms <- data.frame(marker = "snp",#
+                         nloci = parms$nloci,           #
+                         seq_length = parms$seq_length,#
+                         mu = parms$mu)
+preLGMparms <- data.frame(preLGM_t = parms$preLGM_t/parms$G,   #
+                           preLGM_Ne = parms$preLGM_Ne,#
+                          ref_Ne = parms$ref_Ne)
+out <- runFSC_step_agg3(ph = ph2,#
+                         l = landscape,#
+                         sample_n = 14,#
+                         preLGMparms = preLGMparms,#
+                         label = "test",#
+                         delete_files = TRUE,#
+                         num_cores = 1,#
+                         exec = "fsc26",#
+                         loc_parms = loc_parms,#
+                         found_Ne = parms$found_Ne,#
+                         gmap = gmap,#
+                         MAF = 0.01,#
+                         maxloc = 50000)
+popDF <- makePopdf(landscape,"cell")
+stats <- holoStats(out, popDF, cores = 1)
+stats
