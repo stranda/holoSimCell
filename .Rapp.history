@@ -1,369 +1,330 @@
-A = seq(1,1000,by=1)
-M=20
-C <- a0*((M*A)^a1)*exp(-a2/T)
-C
-A
-plot(x = C, y = A)
-C
-abund = exp(a0+(a1*(log(C)+log(V)))+(a2/T)-log(M))
-plot(x = C, y = abund)
-A
-abund
-plot(x = A, y = abund)
-CV=a0*((M*A)^a1)*exp(-a2/T)
-C=(0.1*((8.9*16)^0.2)*exp(-0.3/10.4))/21.3
-C
-A = exp(0.1+0.2*(log(C)+log(21.3))+0.3/10.4-log(8.9))
-A
-4739+2205
-6944*1.03
-install.packages("gProject")
-?options
-help(package = "LAGOSNE")
-23865+1522+14343
-200*3.50
-200*3.15
-250*3.66
-200*3.66
-23*200
-200*2000
-23*200
-k = c(1,5,6)
-mean(k)
-(1*1/3)+(5*1/3)+(6*1/3)
-library(Bayesmix)
-library(bayesmix)
-?BMMmodel
-?BMMpriors
-1000/23
-500/43
-11*5000
-1000/0.25
-144584-1499
-96000*24
-2304000/143085
-143085/24
-50000*24
-1200000/143085
-25000/26
-20000*24
-50000*24
-182548-1500
-1100000/180000
-2300000/180000
-library(tidyverse)
-library(bayesmix)
-library(bmixture)
-library(mclust)
-library(wesanderson)
-df <- read.table("PIG_test_dataset.txt",header = T,sep = "\t",stringsAsFactors = F)
-df
-df1 <- df %>% #
-  mutate(ID2 = ID_indiv) %>% #
-  rename(ID=ID_indiv) %>% #
-  separate(ID2,into = c("spp","loc","num"),sep = "_") %>% #
-  select(ID,loc,everything()) %>% #
-  select(-spp,-num,-sample) %>% #
-  mutate(samp = paste(loc,year_collected,sep = "_"))
-df1
-samples <- unique(df1$samp)
-#Visualize data using a Histogram and Density Plot
-hist(df1$length, breaks = 100)
-plot(density(df1$length))
-df1
-hist(df1$length, breaks = 100)
-model <- BMMmodel(df1$length, k = 5, #
-                    priors = list(kind = "independence",#
-                                parameter = "priorsUncertain"))
-#Setup Jags MCMC control setting estimation variables and number of MCMC
-#Iterations (Can start with 20,000 to 50,000 iterations)
-control <- JAGScontrol(variables = c("mu", "tau", "eta", "S"),#
-                       burn.in = 100, n.iter = 500)
-#Run JAGS MCMC model using length
-z <- JAGSrun(df1$length, model = model, control = control)
-#View compiled variable estimates
-z
-eta.thresh <- 0.035
-#Eliminate all classifications with an eta <3.5% threshold
-post.k <- rowSums(z$results[,grep("eta", colnames(z$results))] > eta.thresh)
-#Calculate proportion of k estimates over the number of MCMC iterations
-post.k <- table(post.k)/sum(table(post.k))
-#View classification proportions
-post.k
-bmixnorm.model <- bmixnorm(df1$length, k = "unknown", iter = 500, burnin = 100, k.max = 5)
-#Model results subset to collect age classifications (kval) and weighted values
-bmix_vals <- data.frame(kval = bmixnorm.model$all_k, weight = bmixnorm.model$all_weights,stringsAsFactors = F)
-#Estimated k proportions calculated using # classifications over weighted values
-props <- bmix_vals %>% group_by(kval) %>% summarise(prop = sum(weight)/sum(bmix_vals$weight))
-#Setting test dataset location (Pigeon River 2020)
-locs <- "PIG_2020"
-props
-bmixnorm.model
-mBIC <- mclustBIC(tmpmodel, G=1:5, modelNames = "VVV")
-tmpmodel <- cbind(tmp$length,tmp$weight)
-tmp <- df1[order(df1$length),]
-#Collecting length and weight data. Mclust will only read datasets that
-#contain only length and weight
-tmpmodel <- cbind(tmp$length,tmp$weight)
-#Estimating age classifications using length and weight data from k = 1 to k = 5 using the "VVV" model. This
-#Will output BIC values for each K. The BIC number closest to 0 is the "best fit"
-mBIC <- mclustBIC(tmpmodel, G=1:5, modelNames = "VVV")
-mBIC
-#loading libraries#
-library(tidyverse)#
-library(bayesmix)#
-library(bmixture)#
-library(mclust)#
-library(wesanderson)#
-#
-#load in length and weight data#
-df <- read.table("PIG_test_dataset.txt",header = T,sep = "\t",stringsAsFactors = F)#
-#
-#Format and cleanup the data frame#
-df1 <- df %>% #
-  mutate(ID2 = ID_indiv) %>% #
-  rename(ID=ID_indiv) %>% #
-  separate(ID2,into = c("spp","loc","num"),sep = "_") %>% #
-  select(ID,loc,everything()) %>% #
-  select(-spp,-num,-sample) %>% #
-  mutate(samp = paste(loc,year_collected,sep = "_"))#
-#
-#Set sample locations in Alphabetical order#
-samples <- unique(df1$samp)#
-#
-#Visualize data using a Histogram and Density Plot #
-hist(df1$length, breaks = 100)#
-plot(density(df1$length))#
-#
-#Use Bayesmix to estimate first set of age classes (k)#
-#
-#Configure model to estimate k with a large starting k value to converge upon "true" k estimate#
-#using the R&M method#
-#
-  model <- BMMmodel(df1$length, k = 5, #
-                    priors = list(kind = "independence",#
-                                parameter = "priorsUncertain"))#
-#Setup Jags MCMC control setting estimation variables and number of MCMC #
-#Iterations (Can start with 20,000 to 50,000 iterations)#
-  control <- JAGScontrol(variables = c("mu", "tau", "eta", "S"),#
-                       burn.in = 100, n.iter = 500)#
-#Run JAGS MCMC model using length #
-  z <- JAGSrun(df1$length, model = model, control = control)#
-#View compiled variable estimates#
-  z#
-#
-#Set eta cutoff for each iteration and only keep values greater than 3.5%#
-#Originally simulated by R&M method#
-eta.thresh <- 0.035#
-#
-#Eliminate all classifications with an eta <3.5% threshold#
-post.k <- rowSums(z$results[,grep("eta", colnames(z$results))] > eta.thresh)#
-#
-#Calculate proportion of k estimates over the number of MCMC iterations#
-post.k <- table(post.k)/sum(table(post.k))#
-#
-#View classification proportions#
-post.k#
-#
-#Use Bmixture to estimate Second set of age classes (k)#
-#
-#Use bmixnorm to estimate k using length measurements when k is unknown. Iterations#
-#can be set between 20,000 to 50,000 and maximum k is set to a max of 5 age classes #
-#using Birth/Death MCMC#
-#
-#IMPORTANT#
-#Bmixnorm likes to crash out. This is normal. If the model crashes just restart the code. It will eventually work#
-#It is a bigger problem when trying to increase your number of iterations.#
-#
-  bmixnorm.model <- bmixnorm(df1$length, k = "unknown", iter = 500, burnin = 100, k.max = 5)
-bmixnorm.model <- bmixnorm(df1$length, k = "unknown", iter = 500, burnin = 100, k.max = 5)
-summary(bmixnorm.model)
-bmixnorm.model
-?bmixnorm
-library(LAGOSNE)
-help(package="LAGOSNE")
-34407752/300
-34407752/150
-34407752/74730
-paste0(“ENM_”,c(1:24))
-paste0("ENM_",c(1:24))
-library(strataG)
-?heterozygosity
-data(msats.g)#
-#
-# Expected heterozygosity#
-heterozygosity(msats.g, type = "expected")
-heterozygosity
-?allelicrichness
-?allelicRichness
-1.9e9/74000
-74000/18
-69.3*45.7
-147+98+34+34
-251906-1500
-250406/24
-350000/24
-6000*24
-20*30
-log(1000)
-log(600000)
-exp(13.30468)
-tmp <- runif(100, 6.9, 13.3)
-tmp2 <- exp(tmp)
-tmp2
-hist(tmp2)
-sum(tmp2 < 10000)
-sum(tmp2 > 60000)
-tmp <- runif(10000, 6.9, 13.3)
-tmpo <- list()
-tmpo
-tmpo[[1]] <- runif(1000)
-tmpo
-tmpo[[1]]
-names(tmpo)[[1]] <- "jojo"
-tmpo[["jojo"]]
-tmpo$jojo
-tmplist <- list()
-tmplist[["jojo"]] <- runif(1000)
-tmplist$jojo
-ls()
-names(tmplist)
-tmplist[[ "test" ]] <- runif(2000)
-tmplist$test
-fileH <- noquote("tmplist$jojo")
-fileH
-expr(tmplist$jojo)
-eval(tmplist$jojo)
-ls()
-class(fileH)
-?eval
-tmp <- list()
-tmp[["one"]] <- runif(1000)
-listname <- paste0("tmp$","one")
-eval(listname)
-eval(noquote(listname))
-tmp$one
-eval(noquote(listname))
-eval(tmp$one)
-eval(listname)
-eval(expr(listname))
-eval(parse(listname))
-eval(parse(noquote(listname)))
-eval(noquote(listname))
-tmplist <- list()
-tmplist[["jojo"]] <- runif(1000)
-fileH <- noquote("tmplist$jojo")
-eval(fileH)
-eval(tmplist$jojo)
-eval(fileH)
-fileH <- noquote("tmplist$jojo")
-eval(fileH)
-get(fileH)
-tmplist$jojo
-mget(fileH)
-eval(jojo, envir=tmplist)
-tmplist
-names(tmplist)
-eval(quote(fileH))
-get(fileH)
-fileH <- "tmplist"
-get(fileH)
-get(fileH)[["jojo"]]
-get(tmplist)[[paste0("jo","jo")]]
-tmplist
-get(tmplist)
-get(tmplist)[[paste0("jo","jo")]]
-get(tmplist)["jojo"]
-get(tmplist)[jojo]
-names(tmplist)
-get(tmplist)["jojo"]
-get(tmplist)[["jojo"]
-]
-tmplist[["jojo"]]
-271210-1500
-269710/24
-help(package = "mclust")
-16000*24
-0.6*15
-9/15
-27*26
-702/2
-system("ls")
-system("ls -lh")
-108.64*2
-205.96/2
-305311-1500
-args <- commandArgs(TRUE)
-i <- as.numeric(args[1])
-nreps <- as.numeric(args[2])
-who <- as.character(args[3])
-label <- as.character(args[4])
-#simdir <- as.character(args[5])
-outdir <- as.character(args[5])
-if (TRUE) #TRUE means production
-{#
-        simdir <- system("echo $SCRATCH", intern = TRUE)#
-    } else {#
-        simdir <- "."#
-    }
-simdir
-simdir <- "~/Desktop/hSC_testing/simdir"
-if(length(args) == 0) {#
-  i <- 1#
-  nreps <- 2#
-  who <- "JDR"#
-  label <- "Ashpaper_test"#
-  outdir <- "~/Desktop/hSC_testing/outdir"#
-  #simdir <- "~/Desktop/hSC_testing/simdir"#
+res
+HStable <- data.frame(HSid = unique(res$ClusterIndex), n.ind = NA, n.pops = NA, details = NA)
+FStable <- data.frame(FSid = unique(res$FSIndex), n.ind = NA, n.pops = NA, details = NA)
+id <- 1
+tmp <- HStable[HStable$HSid == id,]
+HStable$n.ind[HStable$HSid == id] <- length(tmp[,1])
+HStable$n.pops[HStable$HSid == id] <- length(unique(tmp$SubStream))
+HStable
+names(tmp)
+tmp <- res[res$ClusterIndex == id,]
+HStable$n.ind[HStable$HSid == id] <- length(tmp[,1])
+HStable$n.pops[HStable$HSid == id] <- length(unique(tmp$SubStream))
+HStable
+HStable$details = paste(unique(tmp$SubStream), table(tmp$Substream))
+HStable
+HStable$details = paste(unique(tmp$SubStream), table(tmp$Substream), collapse = "-")
+HStable$details[HStable$HSid == id] = paste(unique(tmp$SubStream), table(tmp$Substream), collapse = "-")
+HStable
+table(tmp$Substream)
+tmp
+table(tmp$SubStream)
+HStable$details[HStable$HSid == id] = paste(colnames(tmptab), tmptab)
+tmptab <- table(tmp$SubStream)
+HStable$details[HStable$HSid == id] = paste(colnames(tmptab), tmptab)
+tmptab <- table(tmp$SubStream)
+HStable$details[HStable$HSid == id] = paste(names(tmptab), tmptab)
+HStable
+setwd("~/Desktop")
+res <- read.csv("CKMR_allsites.csv", header = TRUE)
+#Add a column for Full Sib Index, pasting together mother and father IDs
+res$FSIndex <- paste0(res$FatherID, "x", res$MotherID)
+#Build tables to fill with data
+#One row per ClusterIndex or FSindex
+HStable <- data.frame(HSid = unique(res$ClusterIndex), n.ind = NA, n.pops = NA, details = NA)
+FStable <- data.frame(FSid = unique(res$FSIndex), n.ind = NA, n.pops = NA, details = NA)
+#Loop for HS
+for(id in HStable$HSid){#
+    tmp <- res[res$ClusterIndex == id,]#
+    HStable$n.ind[HStable$HSid == id] <- length(tmp[,1])#
+    HStable$n.pops[HStable$HSid == id] <- length(unique(tmp$SubStream))#
+    tmptab <- table(tmp$SubStream)#
+    HStable$details[HStable$HSid == id] = paste(names(tmptab), tmptab)#
+    rm(tmp)#
 }
-if ((is.na(simdir))|(is.na(outdir))) {stop("need to specify a correct simdir and/or outdir")}
-cat(paste("Run Details:\ni=",i,"nreps =",nreps,"who=",who,"\nlabel=",label,"\nsimdir=",simdir,"\noutdir=",outdir,"\n"))
-tmp = .libPaths()
-.libPaths(tmp[!grepl("home",tmp)])  ##remove any paths that have "home" in them, like: /home/f0007250
+HStable
+HStable <- data.frame(HSid = unique(res$ClusterIndex), n.ind = NA, n.pops = NA, details = NA)
+FStable <- data.frame(FSid = unique(res$FSIndex), n.ind = NA, n.pops = NA, details = NA)
+#Loop for HS
+for(id in HStable$HSid){#
+    tmp <- res[res$ClusterIndex == id,]#
+    HStable$n.ind[HStable$HSid == id] <- length(tmp[,1])#
+    HStable$n.pops[HStable$HSid == id] <- length(unique(tmp$SubStream))#
+    tmptab <- table(tmp$SubStream)#
+    HStable$details[HStable$HSid == id] = paste(names(tmptab), tmptab, collapse = "...")#
+    rm(tmp)#
+}
+HStable
+setwd("~/Desktop")
+res <- read.csv("CKMR_allsites.csv", header = TRUE)
+#Add a column for Full Sib Index, pasting together mother and father IDs
+res$FSIndex <- paste0(res$FatherID, "x", res$MotherID)
+#Colony clusters
+#Build table to fill with data, one row per ClusterIndex
+CCtable <- data.frame(CCid = unique(res$ClusterIndex), n.ind = NA, n.pops = NA, details = NA)
+#Loop for CC
+for(id in CCtable$CCid){#
+    tmp <- res[res$ClusterIndex == id,]#
+    CCtable$n.ind[CCtable$CCid == id] <- length(tmp[,1])#
+    CCtable$n.pops[CCtable$CCid == id] <- length(unique(tmp$SubStream))#
+    tmptab <- table(tmp$SubStream)#
+    CCtable$details[CCtable$CCid == id] = paste(names(tmptab), tmptab, collapse = "_")#
+    rm(tmp)#
+}
+#Look at the results
+CCtable
+#Write table to a file
+write.csv(CCtable, "ColClusterSummary_allsites.csv", quote = FALSE, row.names = FALSE)
+#Full-Sibs
+#Build table to fill with data, one row per Full Sib Index
+FStable <- data.frame(FSid = unique(res$FSIndex), n.ind = NA, n.pops = NA, details = NA)
+#Loop for FS
+for(id in FStable$FSid){#
+    tmp <- FStable[FStable$FSid == id,]#
+    FStable$n.ind[FStable$FSid == id] <- length(tmp[,1])#
+    FStable$n.pops[FStable$FSid == id] <- length(unique(tmp$SubStream))#
+    tmptab <- table(tmp$SubStream)#
+    FStable$details[FStable$FSid == id] = paste(names(tmptab), tmptab, collapse = "_")#
+    rm(tmp)#
+}
+#Look at the results
+FStable
+FStable <- data.frame(FSid = unique(res$FSIndex), n.ind = NA, n.pops = NA, details = NA)
+#Loop for FS
+for(id in FStable$FSid){#
+    tmp <- res[res$FSid == id,]#
+    FStable$n.ind[FStable$FSid == id] <- length(tmp[,1])#
+    FStable$n.pops[FStable$FSid == id] <- length(unique(tmp$SubStream))#
+    tmptab <- table(tmp$SubStream)#
+    FStable$details[FStable$FSid == id] = paste(names(tmptab), tmptab, collapse = "_")#
+    rm(tmp)#
+}
+FStable
+res
+FStable <- data.frame(FSid = unique(res$FSIndex), n.ind = NA, n.pops = NA, details = NA)
+#Loop for FS
+for(id in FStable$FSid){#
+    tmp <- res[res$FSIndex == id,]#
+    FStable$n.ind[FStable$FSid == id] <- length(tmp[,1])#
+    FStable$n.pops[FStable$FSid == id] <- length(unique(tmp$SubStream))#
+    tmptab <- table(tmp$SubStream)#
+    FStable$details[FStable$FSid == id] = paste(names(tmptab), tmptab, collapse = "_")#
+    rm(tmp)#
+}
+#Look at the results
+FStable
+setwd("~/Desktop")
+res <- read.csv("CKMR_allsites.csv", header = TRUE)
+#Add a column for Full Sib Index, pasting together mother and father IDs
+res$FSIndex <- paste0(res$FatherID, "x", res$MotherID)
+#Colony clusters
+#Build table to fill with data, one row per ClusterIndex
+CCtable <- data.frame(CCid = unique(res$ClusterIndex), n.ind = NA, n.pops = NA, details = NA)
+#Loop for CC
+for(id in CCtable$CCid){#
+    tmp <- res[res$ClusterIndex == id,]#
+    CCtable$n.ind[CCtable$CCid == id] <- length(tmp[,1])#
+    CCtable$n.pops[CCtable$CCid == id] <- length(unique(tmp$SubStream))#
+    tmptab <- table(tmp$SubStream)#
+    CCtable$details[CCtable$CCid == id] = paste(names(tmptab), tmptab, collapse = "_")#
+    rm(tmp)#
+}
+#Look at the results
+CCtable
+#Write table to a file
+write.csv(CCtable, "ColClusterSummary_allsites.csv", quote = FALSE, row.names = FALSE)
+#Full-Sibs
+#Build table to fill with data, one row per Full Sib Index
+FStable <- data.frame(FSid = unique(res$FSIndex), n.ind = NA, n.pops = NA, details = NA)
+#Loop for FS
+for(id in FStable$FSid){#
+    tmp <- res[res$FSIndex == id,]#
+    FStable$n.ind[FStable$FSid == id] <- length(tmp[,1])#
+    FStable$n.pops[FStable$FSid == id] <- length(unique(tmp$SubStream))#
+    tmptab <- table(tmp$SubStream)#
+    FStable$details[FStable$FSid == id] = paste(names(tmptab), tmptab, collapse = "_")#
+    rm(tmp)#
+}
+#Look at the results
+FStable
+#Write table to a file
+write.csv(FStable, "FullSibSummary_allsites.csv", quote = FALSE, row.names = FALSE)
+setwd("~/Desktop")
+res <- read.csv("CKMR_allsites.csv", header = TRUE)
+#Add a column for Full Sib Index, pasting together mother and father IDs
+res$FSIndex <- paste0(res$FatherID, "x", res$MotherID)
+#Colony clusters
+#Build table to fill with data, one row per ClusterIndex
+CCtable <- data.frame(CCid = unique(res$ClusterIndex), n.ind = NA, n.pops = NA, details = NA)
+#Loop for CC
+for(id in CCtable$CCid){#
+    #Make a temporary object with only individuals from a single ClusterIndex (id in the loop)#
+    tmp <- res[res$ClusterIndex == id,]#
+    #How many individuals are in that cluster total?#
+    CCtable$n.ind[CCtable$CCid == id] <- length(tmp[,1])#
+    #How many populations are represented in that cluster?#
+    CCtable$n.pops[CCtable$CCid == id] <- length(unique(tmp$SubStream))#
+    #Make a table showing the number of individuals per stream#
+    tmptab <- table(tmp$SubStream)#
+    #Paste the output of tmptab together to show number of individuals per stream#
+    CCtable$details[CCtable$CCid == id] = paste(names(tmptab), tmptab, collapse = "_")#
+    rm(tmp, tmptab)#
+}
+#Look at the results
+CCtable
+#Write table to a file
+write.csv(CCtable, "ColClusterSummary_allsites.csv", quote = FALSE, row.names = FALSE)
+#Full-Sibs
+#Build table to fill with data, one row per Full Sib Index
+FStable <- data.frame(FSid = unique(res$FSIndex), n.ind = NA, n.pops = NA, details = NA)
+#Loop for FS
+for(id in FStable$FSid){#
+    tmp <- res[res$FSIndex == id,]#
+    FStable$n.ind[FStable$FSid == id] <- length(tmp[,1])#
+    FStable$n.pops[FStable$FSid == id] <- length(unique(tmp$SubStream))#
+    tmptab <- table(tmp$SubStream)#
+    FStable$details[FStable$FSid == id] = paste(names(tmptab), tmptab, collapse = "_")#
+    rm(tmp, tmptab)#
+}
+#Look at the results
+FStable
+#Write table to a file
+write.csv(FStable, "FullSibSummary_allsites.csv", quote = FALSE, row.names = FALSE)
+setwd("~/Desktop")
+ss <- read.csv("ss100.csv", header = TRUE, nrow = 100000)
+sum(apply(ss,2,is.numeric))
+apply(ss,2,is.numeric)
+ss[1:100,]
+is.numeric(ss)
+is.numeric(ss[1:100,])
+class(ss[,1])
+is.numeric(ss[,1])
+is.numeric(ss[,2])
+is.numeric(ss[,3])
+is.numeric(ss[,4])
+apply(ss,2,is.numeric)
+is.numeric(ss[,1])
+is.numeric(ss[,2])
+is.numeric(ss[,1:2])
+isnum <- c()#
+for(x in 1:100){#
+	isnum[x] <- is.numeric(ss[,x])#
+}
+isnum
+which(isnum == FALSE)
+ss[,76]
+tmp <- read.csv("ss100.csv", header = TRUE, skip = 80000, nrow = 5000)
+tmp
+is.numeric(tmp[1,])
+tmp[1,]
+tmp <- read.csv("ss100.csv", header = FALSE, skip = 80000, nrow = 5000)
+tmp[1,]
+is.numeric(tmp[1,])
+as.numeric(tmp[1,])
+is.numeric(as.numeric(tmp[1,]))
+is.numeric(as.numeric(tmp[3367,]))
+is.numeric(as.numeric(tmp[3368,]))
+tmp[3368,]
+as.numeric(tmp[3368,])
+tmp2 <- read.csv("ss200.csv", header = FALSE, skip = 555000, nrow = 1000)
+tmp2
+as.numeric(tmp2)
+as.numeric(tmp2[545,])
+as.numeric(tmp2[544,])
+as.numeric(tmp2[543,])
+as.numeric(tmp2[542,])
+as.numeric(tmp2[540:545,])
+grep("ENM",tmp2)
+tmp2
+tmp
+as.numeric(tmp)
+?as.numeric
+apply(tmp, 1, as.numeric)
+rowSums(is.na(apply(tmp, 1, as.numeric)))
+tmp
+dim(tmp)
+tmp <- tmp[rowSums(is.na(apply(tmp[,c(28:length(tmp[1,]))], 1, as.numeric))) == 0,]
+dim(tmp)
+rowSums(is.na(apply(tmp,1,as.numeric)))
+rowSums(is.na(apply(tmp,2,as.numeric)))
+?apply
+tmp[1,]
+tmp
+apply(tmp,1,as.numeric)
+rowSums(is.na(apply(tmp,1,as.numeric)))
+colSums(is.na(apply(tmp,1,as.numeric)))
+tmp2 <- tmp[colSums(is.na(apply(tmp[,c(28:length(tmp[1,]))], 1, as.numeric))) == 0,]
+dim(tmp2)
+tmp2
+dim(tmp)
+ls()
+rm(tmp2)
+tmp <- read.csv("ss100.csv", header = FALSE, skip = 80000, nrow = 5000)
+tmp[3368,]
+?rowSums
+tmp2 <- tmp[colSums(is.na(apply(tmp, 1, as.numeric))) == 0,]
+dim(tmp2)
+tmp2[3360:3370,76]
+tmp[3360:3370,76]
+tmp2 <- tmp[rowSums(is.na(apply(tmp, 1, as.numeric))) == 0,]
+dim(tmp2)
+rowSums(is.na(apply(tmp, 1, as.numeric)))
+colSums(is.na(apply(tmp, 1, as.numeric)))
+dat <- matrix(c(1:9), nrow = 3, byrow = TRUE)
+dat
+colSums(dat)
+rowSums(dat)
+rowSums(is.na(apply(tmp, 1, as.numeric)))
+tmp_cs <- tmp[which(colSums(is.na(apply(tmp, 1, as.numeric))) == 0),]#
+tmp_rs <- tmp[which(rowSums(is.na(apply(tmp, 1, as.numeric))) == 0),]
+dim(tmp_cs)
+dim(tmp_rs)
+colSums(is.na(apply(tmp,1,as.numeric)))
+colSums(is.na(apply(tmp[,1:2],1,as.numeric)))
+colSums(is.na(apply(tmp[1:2,],1,as.numeric)))
+colSums(dat)
+dat
+dim(apply(tmp,1,as.numeric))
+apply(tmp,1,as.numeric)
+dim(tmp)
+?apply
+tapply(tmp, as.numeric)
+tapply(tmp, FUN=as.numeric)
+tmp_cs <- tmp[which(colSums(is.na(t(apply(tmp, 1, as.numeric)))) == 0),]#
+tmp_rs <- tmp[which(rowSums(is.na(t(apply(tmp, 1, as.numeric)))) == 0),]
+dim(tmp_cs)
+dim(tmp_rs)
+tmp <- tmp[which(rowSums(is.na(t(apply(tmp[,c(28:length(tmp[1,]))], 1, as.numeric)))) == 0),]
+dim(tmp)
+500/6
+83/6.23
 library(holoSimCell)
-setwd("~/Desktop/GitHub/holoSimCell")
-devtools::load_all()
-parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))
-modchoice <- 1
-load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[modchoice]]$file))
-refpops <- pollenPulls[[modchoice]]$refs
-avgCellsz <- mean(c(res(landscape$sumrast)))
-ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,#
-                        hab_suit=landscape,#
-                        refs=refpops,   #
-                        refsz=parms$ref_Ne,#
-                        lambda=parms$lambda,#
-                        mix=parms$mix,  #
-                        shortscale=parms$shortscale*avgCellsz,  #
-                        shortshape=parms$shortshape, #
-                        longmean=parms$longmean*avgCellsz,  #
-                        ysz=res(landscape$sumrast)[2], #
-                        xsz=res(landscape$sumrast)[1], #
-                        K = parms$Ne)
-gmap=make.gmap(ph$pophist,#
-                xnum=2, #number of cells to aggregate in x-direction#
-                ynum=2) #number of aggregate in the y-direction
-ph2 <- pophist.aggregate(ph,gmap=gmap)
-loc_parms <- data.frame(marker = "snp",#
-                         nloci = parms$nloci,           #
-                         seq_length = parms$seq_length,#
-                         mu = parms$mu)
-preLGMparms <- data.frame(preLGM_t = parms$preLGM_t/parms$G,   #
-                           preLGM_Ne = parms$preLGM_Ne,#
-                          ref_Ne = parms$ref_Ne)
-out <- runFSC_step_agg3(ph = ph2,#
-                         l = landscape,#
-                         sample_n = 14,#
-                         preLGMparms = preLGMparms,#
-                         label = "test",#
-                         delete_files = TRUE,#
-                         num_cores = 1,#
-                         exec = "fsc26",#
-                         loc_parms = loc_parms,#
-                         found_Ne = parms$found_Ne,#
-                         gmap = gmap,#
-                         MAF = 0.01,#
-                         maxloc = 50000)
-popDF <- makePopdf(landscape,"cell")
-stats <- holoStats(out, popDF, cores = 1)
-stats
+enmScenarios
+enmScenarios$enms
+library(rgdal)
+?CRS
+493.8*2
+987*0.58
+library(bmixture)
+?bmixt
+226/365
+100*0.62+50*0.38
+4*0.81
+6*0.81
+3*0.81
+3*2*1058+12*2*1058*1.03+12*2*1058*1.03*1.03
+59440+29000+7000
+setwd("GitHub/holoSimCell")
+devtools::document()
+devtools::document()
+devtools::document()
+devtools::document()
+?distancePDF
+devtools::document()
+devtools::document()
+?getpophist2.cells
+?getpophist2.cells
+devtools::document()
+?getpophist2.cells
+devtools::document()
+?getpophist2.cells

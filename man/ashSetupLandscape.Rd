@@ -2,7 +2,7 @@
 % Please edit documentation in R/utilities.R
 \name{ashSetupLandscape}
 \alias{ashSetupLandscape}
-\title{Setup a landscape for Ash for our simulations. everything but the surface is baked into holoSimCell}
+\title{Establish simulation landscape}
 \usage{
 ashSetupLandscape(
   brickname = paste0(system.file("extdata", "rasters", package = "holoSimCell"), "/",
@@ -17,7 +17,43 @@ ashSetupLandscape(
 }
 \arguments{
 \item{brickname}{name of a file of a geotiff object.  layers correspond to time clicks in simulations}
+
+\item{equalsuit}{logical (TRUE / FALSE) indicating whether suitability is assumed to be equal in all cells across the landscape}
+
+\item{partialsuit}{logical (TRUE / FALSE) indicating whether fractional habitat suitabilities should be used}
+
+\item{cellreduce}{scalar specifying the proportional reduction in landscape dimensions from the input geotiff file (new dimensions = cellreduce x original dimensions)}
+
+\item{xlim}{optionally used to define the longitudinal dimension of the output landscape}
+
+\item{ylim}{optionally used to define the latitudinal dimension of the output landscape}
+
+\item{timesteps}{specifies the temporal dimension (number of time steps) of the output landscape}
+}
+\value{
+Returns a landscape object with the following components:
+#' \itemize{
+\item{\code{details}} {Data frame with the spatial extent of the landscape grid}
+\item{\code{occupied}} {Integer indicating the number of occupied cells in the landscape grid}
+\item{\code{empty}} {Integer indicating the number of empty cells in the landscape grid}
+\item{\code{sampled}} {Integer indicating the spatial location (i.e., cells) of the sampled populations in the landscape grid}
+\item{\code{hab_suit}} {Matrix with species habitat suitability (ranging from zero to one) through time.}
+\item{\code{sumrast}} {Raster that illustrates the summed habitat suitability in each cell across all time steps}
+\item{\code{samplocsrast}} {Raster showing the locations of cells that correspond to sampled populations}
+\item{\code{samplocs}} {Simple feature encoding spatial vector data related to the sampling populations and a data frame with metadata of the sampling populations (population id, number of individuals, type of spatial data and coordinates)}
+\item{\code{sampdf}} {Data frame with the spatial location of the sampling populations in the landscape grid}
+\item{\code{NAmask}} {A matrix used to mask cells that are unsuitable (e.g., covered by glaciers, out of the study region, in large lakes or oceans)}
+}
 }
 \description{
 Setup a landscape for Ash for our simulations. everything but the surface is baked into holoSimCell
+}
+\details{
+This function reads in a geotiff raster brick and converts the individual rasters into matrices of habitat suitability. Returns a landscape object to be used in forward demographic simulations.
+}
+\examples{
+library(holoSimCell)
+m <- 1
+landscape <- ashSetupLandscape(brickname=paste0("../rasters/",enmScenarios$enms$rasterStackName[[m]],".tif"),cellreduce=0.45,partialsuit=T)
+
 }

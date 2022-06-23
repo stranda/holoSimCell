@@ -28,19 +28,16 @@ data_reformat <- function(raw_data){
 
 #Calculate GSSA and raggedness index (Alvarado-Serrano & Hickerson 2018)
 gssa_raggedness <- function(data=NULL,dist_mat=NULL){
-  ##working with the gtypes object to get in into the correct format
   split <- vector("list", length(unique(data$st)))
   for(p in 1:length(unique(data$st))) {
     split[[p]] <- data[data$st == unique(data$st)[p],]
     names(split)[p] <- unique(split[[p]]$st)
   }
-  #First, need to ID the minor alleles for each locus
   maID <- function(x) {
     as.numeric(names(which(table(x) == min(table(x)))))[1]
   }
   ma_vec <- apply(data[,-c(1,2)], 2, maID)
   
-  #Next make a table with npops columns and nloci rows to give MAFs per pop and locus
   getMAFreq <- function(x=NULL, ma=NULL) {
     length(which(x == ma))
   }
@@ -50,17 +47,12 @@ gssa_raggedness <- function(data=NULL,dist_mat=NULL){
     ma_freq_mat[,pop] = mapply(getMAFreq, split[[pop]][,-c(1,2)], ma_vec)
   }
   
-  #create an empty list of vectors to fill later
   gssa_vecs = vector("list",length(split))
   
-  #filling gssa_vecs with the distances for each allele
   for(pop in 1:length(split)) {    
-    #First add the 0's for all minor alleles with freq > 1 in the focal population
-    #For each of these there are (n(n-1))/2 0's added to the GSSA vector
     tmp = rep(0, sum(sapply(ma_freq_mat[ma_freq_mat[,pop] > 1,pop],choose,k=2)))
     gssa_vecs[[pop]] = append(gssa_vecs[[pop]],tmp)
     
-    #Then loop through each of the OTHER pops and add to the GSSA vector
     other = c(1:length(gssa_vecs))
     other = other[-pop]
     for(op in other) {
@@ -70,32 +62,24 @@ gssa_raggedness <- function(data=NULL,dist_mat=NULL){
     }
   }
   
-  #calculate the number of bins for the population
   breakpts = seq(range(dist_mat)[1],range(dist_mat)[2],length=nclass.Sturges(dist_mat))
 
  
   
-  ##loop to make a histogram and calculate raggedness index for each population
-  ##also calculates mean, variance, skew and kurtosis
   index <- as.data.frame(rep(0,nrow(dist_mat)))
   colnames(index) <- "HRi"  
   index$gssa_mean <- NA
   index$gssa_var <- NA 
   i <- 1
   for(i in 1:nrow(dist_mat)){
-    #make a histogram with the binning scheme
     hist_snps <- hist(gssa_vecs[[i]],breaks = breakpts,plot = FALSE)
     snps_bins <- hist_snps$counts
-    #bin the distance matrix to determine a null distribution
     dist_mat_i <- dist_mat[i,]
     hist_dist <- hist(dist_mat_i,breaks = breakpts,plot = FALSE)
     dist_bins <- hist_dist$counts
     
-    #bias correction using distance binn scheme
-    #takes a linear regression of the snp bin scheme compared to the distance binning scheme
     gen_bin_corr <- abs(lm(as.numeric(snps_bins)~as.numeric(dist_bins))$residuals)
     
-    #actually calculate the raggedness index for one population
     non_zero_bins <- as.numeric(which(dist_bins!=0.0))
     snps_bin1 <- gen_bin_corr[non_zero_bins]
     snps_bin1 <- snps_bin1/sum(snps_bin1)    
@@ -106,7 +90,6 @@ gssa_raggedness <- function(data=NULL,dist_mat=NULL){
     ragged <- sum(diffs2)
     index$HRi[i] <- ragged
     
-    #Adding calculations of moments off the vector of distances over which alleles are shared
     index$gssa_mean[i] <- mean(gssa_vecs[[i]])
     index$gssa_var[i] <- var(gssa_vecs[[i]])
   }
