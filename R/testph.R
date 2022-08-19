@@ -1,7 +1,7 @@
 ##
 ## function to take a landscape and make sure that all sampled sites are in unique cells
 ##
-#' @export
+
 uniqueSampled <- function(landscape)
 {
     ok <-  TRUE

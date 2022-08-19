@@ -2,17 +2,16 @@
 ## calculate a "more correct" dispersal rate into rectangular landscape 
 ##
 
-#' calc dispersal into a cell
-#'
-#' calculates the amount of dispersal into a cell based on the popsize and distance of other cells
-#'
-#' returns a matrix with the centermost value corresponding to the source and the surrounding cells represent
-#' the probability of dispersal into those cells.  Essentially this produces the dispersal kernel for a single
-#' source population.  The migration matrix could be created by moving the center of this functions output to 
-#' each population to determine dispersal into the others.  The approx parameter is a factor >=1 that determines how many
-#' times to subset the grid squares to better approximate the polar-cartesian conversion
-#' 
-#' @export
+##' calc dispersal into a cell
+##'
+##' calculates the amount of dispersal into a cell based on the popsize and distance of other cells
+##'
+##' returns a matrix with the centermost value corresponding to the source and the surrounding cells represent
+##' the probability of dispersal into those cells.  Essentially this produces the dispersal kernel for a single
+##' source population.  The migration matrix could be created by moving the center of this functions output to 
+##' each population to determine dispersal into the others.  The approx parameter is a factor >=1 that determines how many
+##' times to subset the grid squares to better approximate the polar-cartesian conversion
+##' 
 integratedDispMat <- function(xnum=4,ynum=4,xsz=100,ysz=100,sshp=1,ssc=10,mix=0.1,nmean=100,nvar=(nmean),approx=5)
 {
 
@@ -98,16 +97,16 @@ integratedDispMat <- function(xnum=4,ynum=4,xsz=100,ysz=100,sshp=1,ssc=10,mix=0.
 ## calculate a "more correct" dispersal rate into rectangular landscape 
 ##
 
-#' calc dispersal into a cell
-#'
-#' calculates the amount of dispersal into a cell based on the popsize and distance of other cells
-#'
-#' returns a matrix with the centermost value corresponding to the source and the surrounding cells represent
-#' the probability of dispersal into those cells.  Essentially this produces the dispersal kernel for a single
-#' source population.  The migration matrix could be created by moving the center of this functions output to 
-#' each population to determine dispersal into the others.
-#' 
-#' @export
+##' calc dispersal into a cell
+##'
+##' calculates the amount of dispersal into a cell based on the popsize and distance of other cells
+##'
+##' returns a matrix with the centermost value corresponding to the source and the surrounding cells represent
+##' the probability of dispersal into those cells.  Essentially this produces the dispersal kernel for a single
+##' source population.  The migration matrix could be created by moving the center of this functions output to 
+##' each population to determine dispersal into the others.
+##' 
+
 integratedMigMat <- function(landx=15,landy=15,xnum=4,ynum=4,xsz=100,ysz=100,sshp,ssc,mix,nmean,nvar)
 {
     if (FALSE)

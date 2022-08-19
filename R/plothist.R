@@ -2,7 +2,7 @@
 #'
 #' Plots the history of colonization events from a spatially-explicit forward simulation of population expansion.
 #'
-#' @param ph population history object (direct output from gepophist.cells)
+#' @param ph population history object (direct output from gepophist2.cells)
 #' @param maxtime the maximum number of generations to plot, sets the end of the period where colonization history is plotted (i.e., maxtime=100 plots the first 100 generations of the forward simulation).
 #'
 #' @details 
@@ -18,7 +18,7 @@
 #' }
 #'
 #' @return
-#' Returns a multi-panel plot illustrating the history of colonization of cells on the landscape (colored arrows, red arrows are associated iwth older events, yellow and white with more recent colonization), histogram illustrating the distribution of colonization times, and a simplified plot of biotic velocity (WHAT METRIC??) through time.
+#' Returns a multi-panel plot illustrating the history of colonization of cells on the landscape (colored arrows, red arrows are associated with older events, yellow and white with more recent colonization), histogram illustrating the distribution of colonization times, and a simplified plot of centroid biotic velocity through time (generation-by-generation).
 #'
 #' @examples
 #' library(holoSimCell)
@@ -43,7 +43,7 @@
 #'
 #' plothist(ph)
 #'
-#' @seealso \code{\link{getpophist2.cells}}
+#' @seealso \code{\link{getpophist2.cells}}, \code{\link{plotHistSlice}}
 #'
 #' @export
 #'

@@ -1,6 +1,6 @@
 ##' Subset built-in ash data based on populations
 ##' @param pops a vector of population names
-##' @export
+
 ashRemoveGeneticPops <- function(popmap,pops)
 {
     imputed.pruned=imputed

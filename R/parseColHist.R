@@ -1,8 +1,8 @@
-#' parse the colhist object that comes out of getpophist.cells into coal history
-#' 
-#' @param ch colhist object
-#'
-#' @export
+##' parse the colhist object that comes out of getpophist.cells into coal history
+##' 
+##' @param ch colhist object
+##'
+
 
 parseColhist <- function(ch)
 {

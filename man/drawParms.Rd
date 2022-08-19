@@ -27,8 +27,8 @@ The control file includes five required columns:
 
 \itemize{
 The control file includes the following required parameters as rows: 
-\item{\code{shortscale}} {the scale parameter for the distribution of short-distance dispersal events.  \emph{HELP HERE!!}}
-\item{\code{shortshape}} {the shape parameter for the distribution of short-distance dispersal events.  \emph{HELP HERE!!}}
+\item{\code{shortscale}} {the scale parameter for the distribution of short-distance dispersal events (k parameter of Weibull distribution).}  
+\item{\code{shortshape}} {the shape parameter for the distribution of short-distance dispersal events (lambda parameter of Weibull distribution).}  
 \item{\code{sz}} {the cell size in arbitrary units.  \emph{HELP HERE!!}}
 \item{\code{nloci}} {the number of genetic marker loci included in the observed dataset.}
 \item{\code{seq_length}} {the sequence length of the marker, used along with mu below in the fastsimcoal DNA model.}

@@ -82,11 +82,11 @@ def_grid_pred2 = function(pred=NULL,
     sampstruct
 }
 
-#' transform samppts to raster projection.
-#' @param samppts a dataframe with 5 cols: pop, abbrev, lat, long, and N
-#' @param range.epsg epsg number for the projection in which the points are encoded (default 4326 -> wgs84)
-#' @param raster.proj proj4 string for the underlying raster
-#' @export
+##' transform samppts to raster projection.
+##' @param samppts a dataframe with 5 cols: pop, abbrev, lat, long, and N
+##' @param range.epsg epsg number for the projection in which the points are encoded (default 4326 -> wgs84)
+##' @param raster.proj proj4 string for the underlying raster
+
 transSampLoc <- function(samppts=NULL,
                          range.epsg=4326,
                          raster.proj='+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs')
@@ -102,12 +102,12 @@ transSampLoc <- function(samppts=NULL,
 
 #### resample to lower resolution
 #### Adam may have a function for this
-#' resample the landscape to new dimensions given by continuous scaling number 'fac'
-#' @param rs a raster brick object to resample
-#' @param fac is a number that is multiplied times the number of cols to calculate new dims
-#' @description This function depends on enmSdm's 'rastWithSquareCells()' function to do the resampling to
-#' a square-celled landscape of a particular resolution.  IOW the output raster has square cells.  Or at least close to square cells.
-#' @export
+##' resample the landscape to new dimensions given by continuous scaling number 'fac'
+##' @param rs a raster brick object to resample
+##' @param fac is a number that is multiplied times the number of cols to calculate new dims
+##' @description This function depends on enmSdm's 'rastWithSquareCells()' function to do the resampling to
+##' a square-celled landscape of a particular resolution.  IOW the output raster has square cells.  Or at least close to square cells.
+
 newLandscapeDim <- function(rs, fac=1.0)
 {
     asp = dim(rs)[1]/dim(rs)[2]
