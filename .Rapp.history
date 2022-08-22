@@ -1,17 +1,3 @@
-text(x = 55.5, y = 0.7, labels = "CCSM", cex = 1.5, font = 2)
-text(x = 65.5, y = 0.7, labels = "ECBilt", cex = 1.5, font = 2)
-rect(100, 0.7, 103, 0.75, col = ora[1])
-rect(100, 0.65, 103, 0.7, col = ora[2])
-rect(100, 0.6, 103, 0.65, col = ora[3])
-rect(104, 0.7, 107, 0.75, col = gre[1])
-rect(104, 0.65, 107, 0.7, col = gre[2])
-rect(104, 0.6, 107, 0.65, col = gre[3])
-rect(108, 0.7, 111, 0.75, col = blu[1])
-rect(108, 0.65, 111, 0.7, col = blu[2])
-rect(108, 0.6, 111, 0.65, col = blu[3])
-rect(112, 0.7, 115, 0.75, col = purp[1])
-rect(112, 0.65, 115, 0.7, col = purp[2])
-rect(112, 0.6, 115, 0.65, col = purp[3])
 text(x = 101.5, y = 0.765, label = "BRT")
 text(x = 105.5, y = 0.765, label = "GLM")
 text(x = 109.5, y = 0.765, label = "Maxent")
@@ -447,9 +433,14 @@ modchoice <- 1
 load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[modchoice]]$file))
 refpops <- pollenPulls[[modchoice]]$refs
 plotCellsOnSuit(refpops, landscape, timeslice = 1)
-setwd("~/Desktop/GitHub/holoSimCell")
-devtools::document()
-?plotCellsOnSuit
+devtools::install_github('stranda/holoSimCell')
+Sys.unsetenv(GITHUB_PAT)
+Sys.unsetenv("GITHUB_PAT")
+Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS=TRUE)
+devtools::install_github('stranda/holoSimCell')
+library(holoSimCell)
+?drawParms
+?plotHistSlice
 parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))
 modchoice <- 1
 load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[modchoice]]$file))
@@ -467,9 +458,37 @@ ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.
                        ysz=res(landscape$sumrast)[2], #
                        xsz=res(landscape$sumrast)[1], #
                        K = parms$Ne)
-plotHistSlice(timeslice = 200, ph = ph, landscape = landscape, window = c(150,200))
-plotCellsOnSuit(refpops, landscape, timeslice =200)
-devtools::document()
-devtools::document()
-devtools::document()
-?drawParms
+gmap=make.gmap(ph$pophist,#
+               xnum=2, #number of cells to aggregate in x-direction#
+               ynum=2) #number of aggregate in the y-direction
+ph2 <- pophist.aggregate(ph,gmap=gmap)
+loc_parms <- data.frame(marker = "snp",#
+                        nloci = parms$nloci,           #
+                        seq_length = parms$seq_length,#
+                        mu = parms$mu)
+preLGMparms <- data.frame(preLGM_t = parms$preLGM_t/parms$G,   #
+                          preLGM_Ne = parms$preLGM_Ne,#
+                         ref_Ne = parms$ref_Ne)
+out <- runFSC_step_agg3(ph = ph2,#
+                        l = landscape,#
+                        sample_n = 14,#
+                        preLGMparms = preLGMparms,#
+                        label = "test",#
+                        delete_files = TRUE,#
+                        num_cores = 1,#
+                        exec = "fsc26",#
+                        loc_parms = loc_parms,#
+                        found_Ne = parms$found_Ne,#
+                        gmap = gmap,#
+                        MAF = 0.01,#
+                        maxloc = 50000)
+popDF <- makePopdf(landscape,"cell")
+stats <- holoStats(out, popDF, cores = 1)
+stats
+library(holoSimCell)
+?transSampLoc
+transSampLoc
+?newLandscapeDim
+ls("package:holoSimCell")
+setwd("~/Desktop/GitHub/holoSimCell")
+devtools::load_all()

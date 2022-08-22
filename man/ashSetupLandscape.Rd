@@ -32,7 +32,7 @@ ashSetupLandscape(
 }
 \value{
 Returns a landscape object with the following components:
-#' \itemize{
+\itemize{
 \item{\code{details}} {Data frame with the spatial extent of the landscape grid}
 \item{\code{occupied}} {Integer indicating the number of occupied cells in the landscape grid}
 \item{\code{empty}} {Integer indicating the number of empty cells in the landscape grid}
