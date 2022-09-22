@@ -1,494 +1,325 @@
-text(x = 98, y = 0.725, label = "80km")
-text(x = 98, y = 0.675, label = "160km")
-text(x = 98, y = 0.625, label = "320km")
-par(mar = c(4,6,2,2))#
-barplot(height= t(ms)[,reord], beside = TRUE, col = reordcolpal, xlab = "SDM", ylab = "Posterior Probability", cex.axis = 1.5, cex.lab = 2)#
+mu <- 3.6e-9  #Mutation rate (nuisance parameter - fix or specify a range, but don't worry about estimating)
+sample_size <- rep(10,9)
+sample_size[2] <- 0 # unsampled UNK pop
+popids <- c("LA","UNK", "FC1", "FC2", "SHD", "MB", "FAR", "ROW", "ST")
+indexids <- rbind(popids, indexids=c(0:8))
+## Create population info (demelist)
+N.LA = round(runif(1,1000,20000))   #Ne Louisana pop
+N.UNK = round(runif(1,1000,10000))    #Ne Unsampled native pop
+N.FC1 = round(runif(1,1000,10000))    #Ne Fox Creek group 1
+N.FC2 = round(runif(1,1000,10000))    #Ne Fox Creek group 2
+N.SHD = round(runif(1,1000,10000))    #Ne Sheraton (+TB+HO) group
+N.MB = round(runif(1,1000,10000))   #Ne Meadowbrook (+AUB) group
+N.FAR = round(runif(1,1000,10000))    #Ne Farmington Rd (+PR) group
+N.ROW = round(runif(1,1000,10000))    #Ne River Oaks (+SC+BB) group
+N.ST = round(runif(1,1000,10000))   #Ne Newland Drain group
+pop_size <- c(N.LA, N.UNK, N.FC1, N.FC2, N.SHD, N.MB, N.FAR, N.ROW, N.ST)
+demelist <- vector("list",length(sample_size))
+for(p in 1:length(sample_size)) {#
+    demelist[[p]] <- fscDeme(deme.size = pop_size[p], sample.size = sample_size[p], sample.time = 0, inbreeding = 0, growth = 0)#
+  }
+names(demelist) <- popids
+demes <- do.call(fscSettingsDemes, c(demelist, ploidy = 2))
+## Genetic markers
+seq_length <- 150
+num_markers_sim <- 1165 #930*1.25
+genetics <- fscSettingsGenetics(fscBlock_snp(sequence.length = seq_length, mut.rate = mu), num.chrom = num_markers_sim)
+## Migration matrix
+migmat <- matrix(data = 0, nrow = 9, ncol = 9)
+# migration between Louisiana and Unsampled (within native range)
+m.NA <-runif(1, 0.001, 0.04) # high m rate
+# migration between FC1 and FC2 (within all of Fox Creek)
+m.FC <- runif(1, 0.001, 0.01) # med m rate
+# migration between SHD group and MB group
+m.SHD <- runif(1, 0.0001, 0.001) # lower m rate
+migmat[1,2] <- m.NA
+migmat[2,1] <- m.NA
+migmat[3,4] <- m.FC
+migmat[4,3] <- m.FC
+migmat[5,6] <- m.SHD
+migmat[6,5] <- m.SHD
+migration <- fscSettingsMigration(migmat)
+## Historical events
+## Event times (coalescence and bottlenecks)
+T.LA = round(runif(1,1000,5000))
+T.UNK = round(runif(1,50, T.LA))  #Time of coalescence to LA pop
+T.FC1 = round(runif(1,10, T.UNK)) #Time of coalescence for Fox Creek group 1 to UNK
+T.FC2 = round(runif(1,10, T.FC1))   #Time of coalescence for Fox Creek group 2, constrained by R.FC1
+T.SHD = round(runif(1,10, T.FC1))   #Time of coalescence for Sheraton (+TB+HO) group
+T.FAR = round(runif(1,10, T.FC1)) #Time of coalescence for Farmington Rd (+PR) group
+T.MB = round(runif(1,5, T.SHD)) #Time of coalescence for Meadowbrook (+AUB) group, constrained by T.SHD
+T.ROW = round(runif(1,10, T.FC1)) #Time of coalescence for River Oaks (+SC+BB) group
+T.ST = round(runif(1,5, T.ROW)) #Time of coalescence for Newland Drain group, constrained by T.ROW
+T.UNK_1 = T.UNK-1 #Time of bottleneck for UNK
+T.FC1_1 = T.FC1-1 #Time of bottleneck for Fox Creek group 1
+T.FC2_1 = T.FC2-1 #Time of bottleneck for FC2 into FC1
+T.SHD_1 = T.SHD-1 #Time of bottleneck for SHD into FC1
+T.FAR_1 = T.FAR-1 #Time of bottleneck for FAR into FC1
+T.MB_1 = T.MB-1 #Time of bottleneck for MB1 into SHD
+T.ROW_1 = T.ROW-1 #Time of bottleneck for ROW into UNK
+T.ST_1 = T.ST-1 #Time of bottleneck for ST into ROW
+bott.sev <- round(runif(1,0,0.25), 3)
+# build dataframe for historical event info
+time.names <- c("T.UNK", "T.FC1", "T.FC2", "T.SHD", "T.FAR", "T.MB", "T.ROW", "T.ST", "T.UNK_1", "T.FC1_1", "T.FC2_1", "T.SHD_1", "T.FAR_1", "T.MB_1", "T.ROW_1", "T.ST_1")
+E.times <-  c(T.UNK, T.FC1, T.FC2, T.SHD, T.FAR, T.MB, T.ROW, T.ST, T.UNK_1, T.FC1_1, T.FC2_1, T.SHD_1, T.FAR_1, T.MB_1, T.ROW_1, T.ST_1)
+source <- c(1,2,3,4,6,5,7,8,1,2,3,4,6,5,7,8)
+sink <- c(0,1,2,2,2,4,1,7,1,2,3,4,6,5,7,8)
+prop.migrants <- c(rep(1,8), rep(0,8))
+new.size <- c(rep(1,8), rep(bott.sev,8))
+event.df <- as.data.frame(cbind(time.names, E.times, source, sink, prop.migrants, new.size, new.growth=rep(0,16), migr.mat=rep(0,16)))
+event.df[,2:(length(event.df))] <- sapply(event.df[,2:(length(event.df))], as.numeric)
+# build list for historical event info
+eventlist <- list()
+for(ev in 1:nrow(event.df)) {#
+    eventlist[[ev]] <- fscEvent(event.time = event.df$E.times[ev], source = event.df$source[ev], sink = event.df$sink[ev], prop.migrants = event.df$prop.migrants[ev], new.size = event.df$new.size[ev], new.growth = event.df$new.growth[ev], migr.mat = event.df$migr.mat[ev])#
+  }
+# create events obj for fsc
+events <- do.call(fscSettingsEvents, eventlist)
+# Add event times to kill ea deme (needed for fsc27)
+kill.df <- events[events$source == events$sink,]
+kill.df$event.time <- kill.df$event.time+1
+kill.df$new.size <- 0
+events <- rbind(events, kill.df)
+# order events newest to oldest
+events <- events[order(events$event.time),]
+#setwd("~/RSC/ABC")
+#Define functions needed below
+source("~/Desktop/GitHub/holoSimCell/R/helper-functions.R")
+source("~/Desktop/GitHub/holoSimCell/R/additional_stats_functions.R")
+MAF= 0.05  #MAF - minor allele frequency filter... loci with minor allele frequencies below this value are excluded from output
+nloci = 900
+maxloc = 200000       #max number of marker loci to attempt in fastsimcoal
+varSNPs <- 0
+while(varSNPs < nloci) {#
+ # p <- fscWrite(demes = demes, genetics = genetics, events = events, migration = migration, label = paste0(label, "-", nreps), use.wd = TRUE)#
+  p <- fscWrite(demes = demes, genetics = genetics, events = events, migration = migration, label = paste0(label, "-", node), use.wd = TRUE)#
+  p <- fscRun(p, all.sites = FALSE, inf.sites = FALSE, dna.to.snp = TRUE, quiet = FALSE, num.cores = num_cores, exec = exec)#
+  out <- fscReadArp(p)#
+    print(date())#
+    #print(paste("cleaning up fsc files:",label, "-", nreps))#
+    #fscCleanup(paste0(label, "-", nreps))#
+    print(paste("cleaning up fsc files:",label, "-", node))#
+    fscCleanup(paste0(label, "-", node))#
+  message(paste("Coalescent simulation with",attr(genetics,"num.chrom"), "loci resulted in", (ncol(out)-2)/2, "polymorphic sites"), appendLF=TRUE)#
+  fscout <- sampleOnePerLocus(mat = out, MAF = MAF)#
+  tmp_gtype <- df2gtypes(fscout, ploidy = 2)#
+  varSNPs <- sum(numAlleles(tmp_gtype)$num.alleles == 2)#
+  message(paste("Subsampling to one SNP per locus...", varSNPs, "loci have at least one polymorphic sites with MAF >", MAF), appendLF=TRUE)#
+  if(varSNPs < nloci) {#
+    if(attr(genetics, "num.chrom") == maxloc) {#
+      stop("Too few SNPs pass the MAF!  Redrawing parameter values for this replicate!  Setting maxSNPstried to a larger value will lead to longer simulations")#
+    }#
+    scaleSNP <- 1.1*(attr(genetics, "num.chrom")/varSNPs)#
+    newSNPnum <- round(scaleSNP*attr(genetics, "num.chrom"),0)#
+    if(newSNPnum > maxloc) {#
+      newSNPnum <- maxloc#
+      message(paste("Coalescent simulation with", attr(genetics, "num.chrom"), "loci resulted in", varSNPs, "variable markers. Trying again with the maximum number of loci allowable -",newSNPnum, "!"), appendLF=TRUE)#
+    } else {#
+      message(paste("Coalescent simulation with", attr(genetics, "num.chrom"), "loci resulted in", varSNPs, "variable markers. Trying again with",newSNPnum, "loci!"), appendLF=TRUE)#
+    }#
+    attr(genetics, "num.chrom") <- newSNPnum#
+    rm(scaleSNP, newSNPnum)#
+  } else if(varSNPs > nloci) {#
+    nalleles <- numAlleles(tmp_gtype)#
+    varchromnames <-  nalleles$locus[nalleles$num.alleles == 2]#
+    keep.loci <- sample(varchromnames, nloci, replace = FALSE)#
+    keep.columns <- c(1,2)#
+    for(locus in keep.loci) {#
+      keep.columns <- c(keep.columns, grep(locus, colnames(fscout)))#
+    }#
+    fscout <- fscout[,keep.columns]#
+  }#
+}
+params <- data.frame(Model= label, date = date(), node=node, runBy=runBy,#
+                     GenTime=G, mu=format(mu, scientific = T), MAF=MAF, seqLength=seq_length,#
+                     N.LA=N.LA, N.UNK=N.UNK, N.FC1=N.FC1, N.FC2=N.FC2, N.SHD=N.SHD, N.MB=N.MB, N.FAR=N.FAR, N.ROW=N.ROW, N.ST=N.ST,#
+                     migNat=round(m.NA,4), migFC=round(m.FC, 4), migSHD=round(m.SHD,4), bottleneckSeverity=bott.sev,#
+                     T.UNK=T.UNK, T.FC1=T.FC1, T.FC2=T.FC2, T.SHD=T.SHD, T.FAR=T.FAR, T.MB=T.MB, T.ROW=T.ROW, T.ST=T.ST, #
+                     T.UNK_1=T.UNK_1, T.FC1_1=T.FC1_1, T.FC2_1=T.FC2_1, T.SHD_1=T.SHD_1, T.FAR_1=T.FAR_1, T.MB_1=T.MB_1, T.ROW_1=T.ROW_1, T.ST_1=T.ST_1)
+# Calculate summary statistics from simulated SNP data
+# from https://github.com/EricArcher/strataG/blob/master/vignettes/summaries.R
+# also see functions from strataG: https://github.com/EricArcher/strataG/blob/master/vignettes/summaries.R
+popid <- unique(fscout$deme)
+# Statistics measuring levels of genetic diversity within populations:
+allMAF <- mafreq(fscout)
+totalHe <- 2*allMAF*(1-allMAF)
+SNPs <- sum(allMAF<1)
+names(SNPs) <- "tot_SNPs"
+split_out <- vector("list", length(unique(fscout$deme)))
+for(p in 1:length(unique(fscout$deme))) {#
+  split_out[[p]] <- fscout[fscout$deme == unique(fscout$deme)[p],]#
+  names(split_out)[p] <- unique(split_out[[p]]$deme)#
+}
+split_out
+names(split_out)
+popid
+fscout$deme
+demes
+names(out)
+colnames(out)
+colnames(out)[1:10]
+out$deme
+minor <- sapply(names(allMAF), FUN=function(x){strsplit(x, split = "[.]")[[1]][2]})
+locMAF <- loc.mafreq(split_out, minor)
+DW <- colSums(locMAF/allMAF)
+names(DW) <- paste0("DW_",names(DW))
+locHe <- colMeans(2*locMAF*(1-locMAF))
+varlocHe <- apply(2*locMAF*(1-locMAF),2,var)
+locN <- sapply(split_out,function(o){nrow(o)})
+localSNP <- apply(locMAF,2,function(x){sum(x<1 & x>0)})
+names(localSNP) <- paste0("S.", names(localSNP))
+richnessSNP <- allelicRichness(df2gtypes(fscout, ploidy = 2), by.strata=TRUE)
+richnessSNP <- richnessSNP %>% group_by(stratum) %>% summarize(mean=mean(allelic.richness))
+richnessSNP <- as.data.frame(t(richnessSNP))
+names(richnessSNP) <- paste0("rS.", richnessSNP[1,])
+richnessSNP <- richnessSNP[-1,]
+privateSNP <- colSums(privateAlleles(df2gtypes(fscout, ploidy = 2)))
+privateSNP <- privateSNP[match(unique(fscout$deme), names(privateSNP))]
+names(privateSNP) <- paste0("pS.", names(privateSNP))
+total_priv = sum(privateSNP)
+names(total_priv) <- "tot_priv"
+# Statistics measuring levels of genetic differentiation between populations:
+cores=1
+pwhet <- pwise.het(locMAF,locN,cores)
+FstMat.loc <- as.dist(pwise.fst.loc(locMAF,allMAF,locN,pwhet))
+neimat <- pwise.nei(locMAF,cores)
+pairnei <- as.vector(neimat)
+neinames <- c()
+neimat_names <- attr(neimat, "Labels")
+for(pid in 1:(length(neimat_names)-1)) {#
+  neinames <- c(neinames, paste0("Nei_", neimat_names[pid],".", neimat_names[(pid+1):length(neimat_names)]))#
+}
+names(pairnei) = neinames
+attr(FstMat.loc,"Labels") <- attr(neimat,"Labels")
+FstMat_names <- attr(FstMat.loc,"Labels")
+pairFst.loc = as.vector(FstMat.loc)
+Fstnames.loc = c()
+for(pid in 1:(length(FstMat_names)-1)) {#
+  Fstnames.loc = c(Fstnames.loc, paste0("Fst_", FstMat_names[pid],".", FstMat_names[(pid+1):length(FstMat_names)]))#
+}
+names(pairFst.loc) = Fstnames.loc
+# directionality index
+psi<- psiCalc(locMAF, samplen=nsamples)
+# Pairwise private SNPs and their frequencies
+# from https://github.com/nicksard/2019_Goby_ABC_scripts/blob/master/fast_stats_v2.R
+locMAF
+head(locMAF)
+neinames
+pops <- colnames(locMAF)
+combn(pops)
+combn(pops,2)
+locMAF[1:10,1:10]
+locMAF[1:10,1:5]
+tmp_locMAF <- loc_MAF[,c(1,2)]
+tmp_locMAF <- locMAF[,c(1,2)]
+tmp_locMAF[1:10,]
+sum(tmp_locMAF[,1] > 0 & tmp_locMAF[,2] == 0)
+locMAF
+pops <- colnames(locMAF)
+combos <- combn(pops,2)
+pwpriv_names <- c()
+pwpriv <- c()
+for(pair in 1:length(combos[1,])) {#
+    pwpriv_names <- c(pwpriv_names, paste("pwpriv_",combos[1,pair], combos[2,pair], collapse = "."), paste("pwpriv_", combos[2,pair], combos[1,pair]))#
+    tmp_locMAF <- locMAF[,c(combos[,pair[1,]], combos[,pair[2,]])]#
+    tmp_locMAF <- tmp_locMAF[rowSums(tmp_locMAF > 0),]#
+    #Sites that are polymorphic in pop 1, but not 2#
+    pwpriv <- c(pwpriv, sum(tmp_locMAF[,1] > 0 & tmp_locMAF[,2] == 0))#
+    #Sites that are polymorphic in pop 2, but not 1#
+    pwpriv <- c(pwpriv, sum(tmp_locMAF[,2] > 0 & tmp_locMAF[,1] == 0))#
 #
-abline(v = 60.5, lwd = 2, lty = "dashed", col = "red")#
-#legend("topright", fill = unique(mycolpal), legend = c("BRT-80km", "GLM-80km", "Maxent-80km", "NS-80km", "BRT-160km", "GLM-160km", "Maxent-160km", "NS-160km", "BRT-320km", "GLM-320km", "Maxent-320km", "NS-320km"), bty = "n", cex = 1.5)#
-text(x = 55.5, y = 0.7, labels = "CCSM", cex = 1.5, font = 2)#
-text(x = 65.5, y = 0.7, labels = "ECBilt", cex = 1.5, font = 2)#
+    rm(tmp_locMAF)#
+}
+combos[1,pair]
+locMAF
+pops <- colnames(locMAF)
+combos <- combn(pops,2)
+pwpriv_names <- c()
+pwpriv <- c()
+for(pair in 1:length(combos[1,])) {#
+    pwpriv_names <- c(pwpriv_names, paste("pwpriv_",combos[1,pair], combos[2,pair], collapse = "."), paste("pwpriv_", combos[2,pair], combos[1,pair]))#
+    tmp_locMAF <- locMAF[,c(combos[1,pair], combos[2,pair])]#
+    tmp_locMAF <- tmp_locMAF[rowSums(tmp_locMAF > 0),]#
+    #Sites that are polymorphic in pop 1, but not 2#
+    pwpriv <- c(pwpriv, sum(tmp_locMAF[,1] > 0 & tmp_locMAF[,2] == 0))#
+    #Sites that are polymorphic in pop 2, but not 1#
+    pwpriv <- c(pwpriv, sum(tmp_locMAF[,2] > 0 & tmp_locMAF[,1] == 0))#
 #
-rect(100, 0.7, 103, 0.75, col = ora[1])#
-rect(100, 0.65, 103, 0.7, col = ora[2])#
-rect(100, 0.6, 103, 0.65, col = ora[3])#
-#
-rect(104, 0.7, 107, 0.75, col = gre[1])#
-rect(104, 0.65, 107, 0.7, col = gre[2])#
-rect(104, 0.6, 107, 0.65, col = gre[3])#
-#
-rect(108, 0.7, 111, 0.75, col = blu[1])#
-rect(108, 0.65, 111, 0.7, col = blu[2])#
-rect(108, 0.6, 111, 0.65, col = blu[3])#
-#
-rect(112, 0.7, 115, 0.75, col = purp[1])#
-rect(112, 0.65, 115, 0.7, col = purp[2])#
-rect(112, 0.6, 115, 0.65, col = purp[3])#
-#
-text(x = 101.5, y = 0.765, label = "BRT", cex = 0.9)#
-text(x = 105.5, y = 0.765, label = "GLM", cex = 0.9)#
-text(x = 109.5, y = 0.765, label = "Maxent", cex = 0.9)#
-text(x = 113.5, y = 0.765, label = "NS", cex = 0.9)#
-#
-text(x = 98, y = 0.725, label = "80km", cex = 0.9)#
-text(x = 98, y = 0.675, label = "160km", cex = 0.9)#
-text(x = 98, y = 0.625, label = "320km", cex = 0.9)
-par(mar = c(4,6,2,2))
-mycolpal <- c(mycolpal, mycolpal)
-barplot(height= t(ms), beside = TRUE, col = mycolpal, names = c(1:24), xlab = "SDM", ylab = "Posterior Probability", cex.axis = 1.5, cex.lab = 2)
-abline(v = 60.5, lwd = 2, lty = "dashed", col = "red")
-#legend("topright", fill = unique(mycolpal), legend = c("BRT-80km", "GLM-80km", "Maxent-80km", "NS-80km", "BRT-160km", "GLM-160km", "Maxent-160km", "NS-160km", "BRT-320km", "GLM-320km", "Maxent-320km", "NS-320km"), bty = "n", cex = 1.5)
-text(x = 55.5, y = 0.7, labels = "CCSM", cex = 1.5, font = 2)
-text(x = 65.5, y = 0.7, labels = "ECBilt", cex = 1.5, font = 2)
-rect(100, 0.7, 103, 0.75, col = ora[1])
-rect(100, 0.65, 103, 0.7, col = ora[2])
-rect(100, 0.6, 103, 0.65, col = ora[3])
-rect(104, 0.7, 107, 0.75, col = gre[1])
-rect(104, 0.65, 107, 0.7, col = gre[2])
-rect(104, 0.6, 107, 0.65, col = gre[3])
-rect(108, 0.7, 111, 0.75, col = blu[1])
-rect(108, 0.65, 111, 0.7, col = blu[2])
-rect(108, 0.6, 111, 0.65, col = blu[3])
-rect(112, 0.7, 115, 0.75, col = purp[1])
-rect(112, 0.65, 115, 0.7, col = purp[2])
-rect(112, 0.6, 115, 0.65, col = purp[3])
-text(x = 101.5, y = 0.765, label = "BRT")
-text(x = 105.5, y = 0.765, label = "GLM")
-text(x = 109.5, y = 0.765, label = "Maxent")
-text(x = 113.5, y = 0.765, label = "NS")
-text(x = 98, y = 0.725, label = "80km")
-text(x = 98, y = 0.675, label = "160km")
-text(x = 98, y = 0.625, label = "320km")
-par(mar = c(4,6,2,2))#
-mycolpal <- c(mycolpal, mycolpal)#
-barplot(height= t(ms), beside = TRUE, col = mycolpal, names = c(1:24), xlab = "SDM", ylab = "Posterior Probability", cex.axis = 1.5, cex.lab = 2)#
-abline(v = 60.5, lwd = 2, lty = "dashed", col = "red")#
-#legend("topright", fill = unique(mycolpal), legend = c("BRT-80km", "GLM-80km", "Maxent-80km", "NS-80km", "BRT-160km", "GLM-160km", "Maxent-160km", "NS-160km", "BRT-320km", "GLM-320km", "Maxent-320km", "NS-320km"), bty = "n", cex = 1.5)#
-text(x = 55.5, y = 0.7, labels = "CCSM", cex = 1.5, font = 2)#
-text(x = 65.5, y = 0.7, labels = "ECBilt", cex = 1.5, font = 2)#
-#
-rect(100, 0.7, 103, 0.75, col = ora[1])#
-rect(100, 0.65, 103, 0.7, col = ora[2])#
-rect(100, 0.6, 103, 0.65, col = ora[3])#
-#
-rect(104, 0.7, 107, 0.75, col = gre[1])#
-rect(104, 0.65, 107, 0.7, col = gre[2])#
-rect(104, 0.6, 107, 0.65, col = gre[3])#
-#
-rect(108, 0.7, 111, 0.75, col = blu[1])#
-rect(108, 0.65, 111, 0.7, col = blu[2])#
-rect(108, 0.6, 111, 0.65, col = blu[3])#
-#
-rect(112, 0.7, 115, 0.75, col = purp[1])#
-rect(112, 0.65, 115, 0.7, col = purp[2])#
-rect(112, 0.6, 115, 0.65, col = purp[3])#
-#
-text(x = 101.5, y = 0.765, label = "BRT", cex = 0.9)#
-text(x = 105.5, y = 0.765, label = "GLM", cex = 0.9)#
-text(x = 109.5, y = 0.765, label = "Maxent", cex = 0.9)#
-text(x = 113.5, y = 0.765, label = "NS", cex = 0.9)#
-#
-text(x = 98, y = 0.725, label = "80km", cex = 0.9)#
-text(x = 98, y = 0.675, label = "160km", cex = 0.9)#
-text(x = 98, y = 0.625, label = "320km", cex = 0.9)
-?barplot
-angle <- c(0, 45, 90, 180)
-angle <- rep(angle, 24)
-density <- rep(20, 24)
-barplot(height= t(ms), beside = TRUE, col = mycolpal, names = c(1:24), xlab = "SDM", ylab = "Posterior Probability", cex.axis = 1.5, cex.lab = 2, angle = angle, density = density)
-angle <- 45
-density <- rep(c(0, 10, 20, 30),24)
-barplot(height= t(ms), beside = TRUE, col = mycolpal, names = c(1:24), xlab = "SDM", ylab = "Posterior Probability", cex.axis = 1.5, cex.lab = 2, angle = angle, density = density)
-barplot(height= t(ms), beside = TRUE, col = mycolpal, names = c(1:24), xlab = "SDM", ylab = "Posterior Probability", cex.axis = 1.5, cex.lab = 2)
-barplot(height= t(ms), add = TRUE, beside = TRUE, col = "black", angle = angle, density = density)
-angle <- c(0,45,90,180)
-density <- rep(c(0, 10, 20, 30),24)
-angle <- rep(c(0,45,90,180),24)
-density <- rep(c(0, 10, 20, 30),24)
-mycolpal <- c(mycolpal, mycolpal)
-barplot(height= t(ms), beside = TRUE, col = mycolpal, names = c(1:24), xlab = "SDM", ylab = "Posterior Probability", cex.axis = 1.5, cex.lab = 2)
-barplot(height= t(ms), add = TRUE, beside = TRUE, col = "black", angle = angle, density = density)
-angle <- rep(c(0,45,180,225),24)
-density <- rep(c(0, 10, 20, 30),24)
-#Version #1
-par(mar = c(4,6,2,2))
-mycolpal <- c(mycolpal, mycolpal)
-barplot(height= t(ms), beside = TRUE, col = mycolpal, names = c(1:24), xlab = "SDM", ylab = "Posterior Probability", cex.axis = 1.5, cex.lab = 2)
-barplot(height= t(ms), add = TRUE, beside = TRUE, col = "black", angle = angle, density = density)
-angle <- rep(c(0,45,180,135),24)
-density <- rep(c(0, 10, 20, 30),24)
-#Version #1
-par(mar = c(4,6,2,2))
-mycolpal <- c(mycolpal, mycolpal)
-barplot(height= t(ms), beside = TRUE, col = mycolpal, names = c(1:24), xlab = "SDM", ylab = "Posterior Probability", cex.axis = 1.5, cex.lab = 2)
-barplot(height= t(ms), add = TRUE, beside = TRUE, col = "black", angle = angle, density = density)
-angle <- rep(c(0,45,180,135),24)
-density <- rep(c(0, 10, 10, 10),24)
-#Version #1
-par(mar = c(4,6,2,2))
-mycolpal <- c(mycolpal, mycolpal)
-barplot(height= t(ms), beside = TRUE, col = mycolpal, names = c(1:24), xlab = "SDM", ylab = "Posterior Probability", cex.axis = 1.5, cex.lab = 2)
-barplot(height= t(ms), add = TRUE, beside = TRUE, col = "black", angle = angle, density = density)
-angle <- rep(c(0,45,45,45),24)
-density <- rep(c(0, 10, 20, 30),24)
-#Version #1
-par(mar = c(4,6,2,2))
-mycolpal <- c(mycolpal, mycolpal)
-barplot(height= t(ms), beside = TRUE, col = mycolpal, names = c(1:24), xlab = "SDM", ylab = "Posterior Probability", cex.axis = 1.5, cex.lab = 2)
-barplot(height= t(ms), add = TRUE, beside = TRUE, col = "black", angle = angle, density = density)
-?rect
-rect(100, 0.53, 103, 0.58)
-rect(104, 0.53, 107, 0.58, angle = 45, density = 10)
-rect(108, 0.53, 111, 0.58, angle = 45, density = 20)
-rect(112, 0.53, 115, 0.58, angle = 45, density = 30)
-t(ms)
-text(x = 101.5, y = 0.5, label = "rej.", cex = 0.9)
-text(x = 105.5, y = 0.5, label = "mnlog", cex = 0.9)
-text(x = 109.5, y = 0.5, label = "nnet", cex = 0.9)
-text(x = 113.5, y = 0.5, label = "rf", cex = 0.9)
-#Version #1#
-par(mar = c(4,6,2,2))#
-mycolpal <- c(mycolpal, mycolpal)#
-barplot(height= t(ms), beside = TRUE, col = mycolpal, names = c(1:24), xlab = "SDM", ylab = "Posterior Probability", cex.axis = 1.5, cex.lab = 2)#
-barplot(height= t(ms), add = TRUE, beside = TRUE, col = "black", angle = angle, density = density)#
-abline(v = 60.5, lwd = 2, lty = "dashed", col = "red")#
-#legend("topright", fill = unique(mycolpal), legend = c("BRT-80km", "GLM-80km", "Maxent-80km", "NS-80km", "BRT-160km", "GLM-160km", "Maxent-160km", "NS-160km", "BRT-320km", "GLM-320km", "Maxent-320km", "NS-320km"), bty = "n", cex = 1.5)#
-text(x = 55.5, y = 0.7, labels = "CCSM", cex = 1.5, font = 2)#
-text(x = 65.5, y = 0.7, labels = "ECBilt", cex = 1.5, font = 2)#
-#
-rect(100, 0.7, 103, 0.75, col = ora[1])#
-rect(100, 0.65, 103, 0.7, col = ora[2])#
-rect(100, 0.6, 103, 0.65, col = ora[3])#
-#
-rect(104, 0.7, 107, 0.75, col = gre[1])#
-rect(104, 0.65, 107, 0.7, col = gre[2])#
-rect(104, 0.6, 107, 0.65, col = gre[3])#
-#
-rect(108, 0.7, 111, 0.75, col = blu[1])#
-rect(108, 0.65, 111, 0.7, col = blu[2])#
-rect(108, 0.6, 111, 0.65, col = blu[3])#
-#
-rect(112, 0.7, 115, 0.75, col = purp[1])#
-rect(112, 0.65, 115, 0.7, col = purp[2])#
-rect(112, 0.6, 115, 0.65, col = purp[3])#
-#
-text(x = 101.5, y = 0.765, label = "BRT", cex = 0.9)#
-text(x = 105.5, y = 0.765, label = "GLM", cex = 0.9)#
-text(x = 109.5, y = 0.765, label = "Maxent", cex = 0.9)#
-text(x = 113.5, y = 0.765, label = "NS", cex = 0.9)#
-#
-text(x = 98, y = 0.725, label = "80km", cex = 0.9)#
-text(x = 98, y = 0.675, label = "160km", cex = 0.9)#
-text(x = 98, y = 0.625, label = "320km", cex = 0.9)#
-#
-rect(100, 0.53, 103, 0.58)#
-rect(104, 0.53, 107, 0.58, angle = 45, density = 10)#
-rect(108, 0.53, 111, 0.58, angle = 45, density = 20)#
-rect(112, 0.53, 115, 0.58, angle = 45, density = 30)#
-#
-text(x = 101.5, y = 0.5, label = "rej.", cex = 0.9)#
-text(x = 105.5, y = 0.5, label = "mnlog", cex = 0.9)#
-text(x = 109.5, y = 0.5, label = "nnet", cex = 0.9)#
-text(x = 113.5, y = 0.5, label = "rf", cex = 0.9)
-barplot(height= t(ms), beside = TRUE, col = mycolpal, names = c(1:24), xlab = "SDM", ylab = "Posterior Probability", cex.axis = 1.5, cex.lab = 2)
-barplot(height= t(ms), axes = FALSE, add = TRUE, beside = TRUE, col = "black", angle = angle, density = density)
-#Version #1#
-par(mar = c(4,6,2,2))#
-mycolpal <- c(mycolpal, mycolpal)#
-barplot(height= t(ms), beside = TRUE, col = mycolpal, names = c(1:24), xlab = "SDM", ylab = "Posterior Probability", cex.axis = 1.5, cex.lab = 2)#
-barplot(height= t(ms), axes = FALSE, add = TRUE, beside = TRUE, col = "black", angle = angle, density = density)#
-abline(v = 60.5, lwd = 2, lty = "dashed", col = "red")#
-#legend("topright", fill = unique(mycolpal), legend = c("BRT-80km", "GLM-80km", "Maxent-80km", "NS-80km", "BRT-160km", "GLM-160km", "Maxent-160km", "NS-160km", "BRT-320km", "GLM-320km", "Maxent-320km", "NS-320km"), bty = "n", cex = 1.5)#
-text(x = 55.5, y = 0.7, labels = "CCSM", cex = 1.5, font = 2)#
-text(x = 65.5, y = 0.7, labels = "ECBilt", cex = 1.5, font = 2)#
-#
-rect(100, 0.7, 103, 0.75, col = ora[1])#
-rect(100, 0.65, 103, 0.7, col = ora[2])#
-rect(100, 0.6, 103, 0.65, col = ora[3])#
-#
-rect(104, 0.7, 107, 0.75, col = gre[1])#
-rect(104, 0.65, 107, 0.7, col = gre[2])#
-rect(104, 0.6, 107, 0.65, col = gre[3])#
-#
-rect(108, 0.7, 111, 0.75, col = blu[1])#
-rect(108, 0.65, 111, 0.7, col = blu[2])#
-rect(108, 0.6, 111, 0.65, col = blu[3])#
-#
-rect(112, 0.7, 115, 0.75, col = purp[1])#
-rect(112, 0.65, 115, 0.7, col = purp[2])#
-rect(112, 0.6, 115, 0.65, col = purp[3])#
-#
-text(x = 101.5, y = 0.765, label = "BRT", cex = 0.9)#
-text(x = 105.5, y = 0.765, label = "GLM", cex = 0.9)#
-text(x = 109.5, y = 0.765, label = "Maxent", cex = 0.9)#
-text(x = 113.5, y = 0.765, label = "NS", cex = 0.9)#
-#
-text(x = 97.8, y = 0.725, label = "80km", cex = 0.9)#
-text(x = 97.8, y = 0.675, label = "160km", cex = 0.9)#
-text(x = 97.8, y = 0.625, label = "320km", cex = 0.9)#
-#
-rect(100, 0.53, 103, 0.58)#
-rect(104, 0.53, 107, 0.58, angle = 45, density = 10)#
-rect(108, 0.53, 111, 0.58, angle = 45, density = 20)#
-rect(112, 0.53, 115, 0.58, angle = 45, density = 30)#
-#
-text(x = 101.5, y = 0.5, label = "rej.", cex = 0.9)#
-text(x = 105.5, y = 0.5, label = "mnlog", cex = 0.9)#
-text(x = 109.5, y = 0.5, label = "nnet", cex = 0.9)#
-text(x = 113.5, y = 0.5, label = "rf", cex = 0.9)
-?barplot
-par(mar = c(4,6,2,2))#
-mycolpal <- c(mycolpal, mycolpal)#
-barplot(height= t(ms), beside = TRUE, col = mycolpal, names = c(1:24), xlab = "SDM", ylab = "Posterior Probability", cex.axis = 1.5, cex.lab = 2, cex.names = 1.5)#
-barplot(height= t(ms), axes = FALSE, add = TRUE, beside = TRUE, col = "black", angle = angle, density = density)#
-abline(v = 60.5, lwd = 2, lty = "dashed", col = "red")#
-#legend("topright", fill = unique(mycolpal), legend = c("BRT-80km", "GLM-80km", "Maxent-80km", "NS-80km", "BRT-160km", "GLM-160km", "Maxent-160km", "NS-160km", "BRT-320km", "GLM-320km", "Maxent-320km", "NS-320km"), bty = "n", cex = 1.5)#
-text(x = 55.5, y = 0.7, labels = "CCSM", cex = 1.5, font = 2)#
-text(x = 65.5, y = 0.7, labels = "ECBilt", cex = 1.5, font = 2)#
-#
-rect(100, 0.7, 103, 0.75, col = ora[1])#
-rect(100, 0.65, 103, 0.7, col = ora[2])#
-rect(100, 0.6, 103, 0.65, col = ora[3])#
-#
-rect(104, 0.7, 107, 0.75, col = gre[1])#
-rect(104, 0.65, 107, 0.7, col = gre[2])#
-rect(104, 0.6, 107, 0.65, col = gre[3])#
-#
-rect(108, 0.7, 111, 0.75, col = blu[1])#
-rect(108, 0.65, 111, 0.7, col = blu[2])#
-rect(108, 0.6, 111, 0.65, col = blu[3])#
-#
-rect(112, 0.7, 115, 0.75, col = purp[1])#
-rect(112, 0.65, 115, 0.7, col = purp[2])#
-rect(112, 0.6, 115, 0.65, col = purp[3])#
-#
-text(x = 101.5, y = 0.765, label = "BRT", cex = 0.9)#
-text(x = 105.5, y = 0.765, label = "GLM", cex = 0.9)#
-text(x = 109.5, y = 0.765, label = "Maxent", cex = 0.9)#
-text(x = 113.5, y = 0.765, label = "NS", cex = 0.9)#
-#
-text(x = 97.8, y = 0.725, label = "80km", cex = 0.9)#
-text(x = 97.8, y = 0.675, label = "160km", cex = 0.9)#
-text(x = 97.8, y = 0.625, label = "320km", cex = 0.9)#
-#
-rect(100, 0.53, 103, 0.58)#
-rect(104, 0.53, 107, 0.58, angle = 45, density = 10)#
-rect(108, 0.53, 111, 0.58, angle = 45, density = 20)#
-rect(112, 0.53, 115, 0.58, angle = 45, density = 30)#
-#
-text(x = 101.5, y = 0.5, label = "rej.", cex = 0.9)#
-text(x = 105.5, y = 0.5, label = "mnlog", cex = 0.9)#
-text(x = 109.5, y = 0.5, label = "nnet", cex = 0.9)#
-text(x = 113.5, y = 0.5, label = "rf", cex = 0.9)
-1/28
-1/30
-1/1600
-1/32
-1/33
-1/34
-1/36
-mat <- matrix(data = c(1:9), ncol = 3)
-mat
-col(mat)
-row(mat)
-2/150
-library(ape)
-?distDNA
-?dist.dna
-31*31
-citation(package = "maxnet")
-samp <- c(37,80,123,33,240,51,21,122,29,185,444,37,53,86,35,105,38,92,35,8)
-LD <- c(3,62,57,68,33,7,0.2, 38,7,144,228,9,249,106,33,7,2,50.2,17.9, 34.6)
-nc <- c(11301,1654,1097,36558,1637,NA,2124,NA,10420,7219,4705,18,NA,4813,9066,NA,NA,3974,NA,NA)
-length(samp)
-length(LD)
-length(nc)
-mydf <- data.frarme(samp,LD,nc)
-mydf <- data.frame(samp,LD,nc)
-mydf
-cor1df <- mydf[!is.na(mydf$nc),]
-cor2df <- cor1df[cor1df$samp >= 50,]
-cor1df
-cor2df
-cor.test(cor1df)
-cor.test(cor1df$LD,cor1df$nc)
-cor.test(cor1df$LD,cor1df$nc, method = "spearman")
-cor.test(cor2df$LD,cor2df$nc)
-cor.test(cor2df$LD,cor2df$nc, method = "spearman")
-plot(cor2df$LD,cor2df$nc)
-16/9
-24/18
-700/20
-16/9
-48/27
-48/36
-one <- runif(100)
-two <- runif(100)
-list.files()
-save(one, two, file = "~/Desktop/hSC_testing/test.Rdata")
-?save
-save(one, two, file = "~/Desktop/hSC_testing/test.Rdata", overwrite =T)
-save(one, two, three, file = "~/Desktop/hSC_testing/test.Rdata", overwrite =T)
-three <- one
-four <- one
-five <- two
-six <- two
-seven <- one
-eight <- two
-nine <- one
-ten <- two
-eleven <- one
-save(one, two, three, four, five, six, seven, eight, nine, ten, eleven, file = )
-save(one, two, three, four, five, six, seven, eight, nine, ten, eleven, file = "~/Desktop/hSC_testing/test2.Rdata", overwrite = T)
-42*(9/16)
-42/23.625
-16/9
-48/36
-42*(36/48)
-42/31.5
-log2(100)
-log2(1000)
-31*31
-library(tidyverse)
-?separate
-8/0.13
-33023.37+14329.69
-DNA <- c(3128,1078,365,16422)
-DNA*4
-exp(-5)
-exp(-10)
-8.4*4
-(26*26)/2
-(26*25)/2
-sqrt(10*0.25)
-sqrt(100*0.25)
-(100/2-90)/5
-(10/2-9)/1.581139
-61300-2800
-2800*0.05
-61300-2940
-library(holoSimCell)
-devtools::install_github('stranda/holoSimCell')
+    rm(tmp_locMAF)#
+}
+pwpriv
+locMAF
+pops <- colnames(locMAF)
+combos <- combn(pops,2)
+pwpriv_names <- c()
+pwpriv <- c()
+pair <- 1
+pwpriv_names <- c(pwpriv_names, paste("pwpriv_",combos[1,pair], combos[2,pair], collapse = "."), paste("pwpriv_", combos[2,pair], combos[1,pair]))
+pwpriv_names
+pwpriv_names <- c()
+pwpriv <- c()
+pwpriv_names <- c(pwpriv_names, paste0("pwpriv_",combos[1,pair],".",combos[2,pair]), paste0("pwpriv_", combos[2,pair],".",combos[1,pair]))
+pwpriv_names
+tmp_locMAF <- locMAF[,c(combos[1,pair], combos[2,pair])]
+tmp_locMAF[1:10,]
+tmp_locMAF <- tmp_locMAF[rowSums(tmp_locMAF > 0),]
+tmp_locMAF[1:10,]
+tmp_locMAF <- locMAF[,c(combos[1,pair], combos[2,pair])]
+rowSums(tmp_locMAF)
+sum(rowSums(tmp_locMAF) == 0)
+dim(tmp_locMAF)
+pwpriv_names <- c(pwpriv_names, paste0("pwpriv_",combos[1,pair],".",combos[2,pair]), paste0("pwpriv_", combos[2,pair],".",combos[1,pair]))
+tmp_locMAF <- locMAF[,c(combos[1,pair], combos[2,pair])]
+tmp_locMAF <- tmp_locMAF[rowSums(tmp_locMAF > 0),]
+dim(tmp_locMAF)
+pwpriv <- c(pwpriv, sum(tmp_locMAF[,1] > 0 & tmp_locMAF[,2] == 0))
+pwpriv <- c(pwpriv, sum(tmp_locMAF[,2] > 0 & tmp_locMAF[,1] == 0))
+pwpriv
+tmp_locMAF[tmp_locMAF[,2] == 0,]
+sum(locMAF == 1)
+tmp_loc_MAF[,1] > 0
+tmp_locMAF[,1] > 0
+tmp_locMAF
+N.LA
+N.UNK
+demes
+parms
+params
+privateSNP
+privateAlleles(df2gtypes(fscout, ploidy=2))
+dim(privateAlleles(df2gtypes(fscout, ploidy=2)))
+rowSums(locMAF) == 0
+rowSums(locMAF == 0)
+max(rowSums(locMAF == 0))
+114+100+94+26+25+50
+library(strataG)
+fscRun
+\\
+readArp
+fscReadArp
+.fscFormatGenotypes
+?demes
+fscSettingsDemes
+?fscSettingsDemes
+?fscDeme
+install.packages("Demerelate")
+devtools::install_github("jehangiramjad/tslib")
 Sys.unsetenv("GITHUB_PAT")
-devtools::install_github('stranda/holoSimCell')
-Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS=TRUE)
-devtools::install_github('stranda/holoSimCell')
-devtools::install_github('adamlilith/omnibus')
-Sys.unsetenv("GITHUB_PAT")
-devtools::install_github('adamlilith/omnibus')
-devtools::install_github('stranda/holoSimCell')
-Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS=TRUE)
-devtools::install_github('stranda/holoSimCell')
-library(holoSimCell)
-?drawParms
-?ashSetupLandscape
-?testPophist
-?drawParms
-?chooseRefugeCells
-rs <- raster::brick(paste0(system.file("extdata","rasters",package="holoSimCell"),"/","study_region_daltonIceMask_lakesMasked_linearIceSheetInterpolation.tif"))#
-chooseRefugeCells(rs[[1]])
-?holoStats
-modchoice <- 1#
-load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[modchoice]]$file))
-landscape$sumrast
-chooseRefugeCells(landscape$sumrast)
-modchoice <- 1#
-load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[modchoice]]$file))
-landscape$sumrast
-parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))#
-modchoice <- 1#
-load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[modchoice]]$file))#
-refpops <- pollenPulls[[modchoice]]$refs#
-avgCellsz <- mean(c(res(landscape$sumrast)))
-library(holoSimCell)
-?holoStats
-parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))#
-modchoice <- 1#
-load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[modchoice]]$file))#
-refpops <- pollenPulls[[modchoice]]$refs#
-avgCellsz <- mean(c(res(landscape$sumrast)))#
-#
-ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,#
-                       hab_suit=landscape,#
-                       refs=refpops,   #
-                       refsz=parms$ref_Ne,#
-                       lambda=parms$lambda,#
-                       mix=parms$mix,  #
-                       shortscale=parms$shortscale*avgCellsz,  #
-                       shortshape=parms$shortshape, #
-                       longmean=parms$longmean*avgCellsz,  #
-                       ysz=res(landscape$sumrast)[2], #
-                       xsz=res(landscape$sumrast)[1], #
-                       K = parms$Ne)
-plotHistSlice(20, ph, landscape)
-plotCellsOnSuit(1242, landscape, timeslice = 20)
-plotCellsOnSuit(1242, landscape, timeslice = 200)
-plotCellsOnSuit(1242, landscape, timeslice = 242)
-parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))
+devtools::install_github("jehangiramjad/tslib")
+devtools::install_github("thelinkan/tslib")
+devtools::install_github("armstrtw/fts")
+options(timeout=9999999)
+devtools::install_github("armstrtw/fts")
+setwd("GitHub/holoSimCell")
+devtools::load_all()
 modchoice <- 1
-load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[modchoice]]$file))
-refpops <- pollenPulls[[modchoice]]$refs
-plotCellsOnSuit(refpops, landscape, timeslice = 1)
-devtools::install_github('stranda/holoSimCell')
-Sys.unsetenv(GITHUB_PAT)
-Sys.unsetenv("GITHUB_PAT")
-Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS=TRUE)
-devtools::install_github('stranda/holoSimCell')
-library(holoSimCell)
-?drawParms
-?plotHistSlice
-parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))
-modchoice <- 1
-load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[modchoice]]$file))
-refpops <- pollenPulls[[modchoice]]$refs
-avgCellsz <- mean(c(res(landscape$sumrast)))
-ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,#
-                       hab_suit=landscape,#
-                       refs=refpops,   #
-                       refsz=parms$ref_Ne,#
-                       lambda=parms$lambda,#
-                       mix=parms$mix,  #
-                       shortscale=parms$shortscale*avgCellsz,  #
-                       shortshape=parms$shortshape, #
-                       longmean=parms$longmean*avgCellsz,  #
-                       ysz=res(landscape$sumrast)[2], #
-                       xsz=res(landscape$sumrast)[1], #
-                       K = parms$Ne)
-gmap=make.gmap(ph$pophist,#
-               xnum=2, #number of cells to aggregate in x-direction#
-               ynum=2) #number of aggregate in the y-direction
-ph2 <- pophist.aggregate(ph,gmap=gmap)
-loc_parms <- data.frame(marker = "snp",#
-                        nloci = parms$nloci,           #
-                        seq_length = parms$seq_length,#
-                        mu = parms$mu)
-preLGMparms <- data.frame(preLGM_t = parms$preLGM_t/parms$G,   #
-                          preLGM_Ne = parms$preLGM_Ne,#
-                         ref_Ne = parms$ref_Ne)
-out <- runFSC_step_agg3(ph = ph2,#
-                        l = landscape,#
-                        sample_n = 14,#
-                        preLGMparms = preLGMparms,#
-                        label = "test",#
-                        delete_files = TRUE,#
-                        num_cores = 1,#
-                        exec = "fsc26",#
-                        loc_parms = loc_parms,#
-                        found_Ne = parms$found_Ne,#
-                        gmap = gmap,#
-                        MAF = 0.01,#
-                        maxloc = 50000)
-popDF <- makePopdf(landscape,"cell")
-stats <- holoStats(out, popDF, cores = 1)
-stats
-library(holoSimCell)
-?transSampLoc
-transSampLoc
-?newLandscapeDim
-ls("package:holoSimCell")
-library(holoSimcell)
-library(holoSimCell)
-ls("package:holoSimCell")
-setwd("~/Desktop/GitHub/holoSimCell")
-devtools::document()
-?ashSetupLandscape
+load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",enmScenarios$enms$rasterStackName[modchoice],".rda"))
+dim(landscape$hab_suit)
+nrows(landscape$hab_suit)
+nrow(landscape$hab_suit)
+system.file("extdata", "rasters", "ccsm_160kmExtent_maxent.tif", package = "holoSimCell")
+m <- 1
+landscape <- ashSetupLandscape(brickname=system.file("extdata", "rasters", "ccsm_160kmExtent_maxent.tif", package = "holoSimCell"),cellreduce=0.45,partialsuit=T)
+landscape$hab_suit[1:10,1:10]
+landscape$hab_suit[1:500,1:10]
+landscape$hab_suit[1:10,1:500]

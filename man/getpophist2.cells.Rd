@@ -25,9 +25,8 @@ getpophist2.cells(
   refs = c(2),
   refsz = c(1000),
   popDispInfl = function(x) {     return(x) },
-  sz = 1,
-  ysz = sz,
-  xsz = sz,
+  ysz = 1,
+  xsz = 1,
   enmstep = NULL,
   numcolonists = 1
 )
@@ -83,8 +82,6 @@ getpophist2.cells(
 \item{refsz}{vector of integers indicating the effective population size for each cell occupied at the beginning of the forward demographic simulation. Each value is drawn from the prior distribution of the ancestral effective population size parameter.}
 
 \item{popDispInfl}{a function that describes the influence of population size on the probability of serving as a source for colonists.}
-
-\item{sz}{the size of each cell in the landscape.}
 
 \item{ysz}{height of cells in the landscape grid.}
 

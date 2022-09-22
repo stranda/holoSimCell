@@ -44,7 +44,6 @@ distancePDF <- function(x, ssh=1,ssc=1,lmn=100,lsd=100,mix=0)
 #' @param refs vector of integers identifying the cells occupied at the beginning of the forward demographic simulations (i.e., species refugia).
 #' @param refsz vector of integers indicating the effective population size for each cell occupied at the beginning of the forward demographic simulation. Each value is drawn from the prior distribution of the ancestral effective population size parameter.
 #' @param popDispInfl a function that describes the influence of population size on the probability of serving as a source for colonists.
-#' @param sz the size of each cell in the landscape.
 #' @param ysz height of cells in the landscape grid.
 #' @param xsz width of cells in the landscape grid.
 #' @param enmstep specifies the number of generations over which each habitat suitability layer should be applied.
@@ -107,9 +106,8 @@ getpophist2.cells <- function(h=225, #humber of habitats (populations)
                              refs=c(2), #population number of the refuges
                              refsz=c(1000),#the size of each refuge
                              popDispInfl=function(x){return (x)}, #function that maps pop size to col ability
-                             sz=1,  #size of each cell
-                             ysz=sz,
-                             xsz=sz,
+                             ysz=1,
+                             xsz=1,
                              enmstep=NULL, #vector of the number of time clicks for each habitat
                              numcolonists=1 #number of colonists in a newly colonized cell
                              )

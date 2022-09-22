@@ -18,14 +18,13 @@
 #' The control file includes the following required parameters as rows: 
 #' \item{\code{shortscale}} {the scale parameter for the distribution of short-distance dispersal events (k parameter of Weibull distribution).}  
 #' \item{\code{shortshape}} {the shape parameter for the distribution of short-distance dispersal events (lambda parameter of Weibull distribution).}  
-#' \item{\code{sz}} {the cell size in arbitrary units.  \emph{HELP HERE!!}}
 #' \item{\code{nloci}} {the number of genetic marker loci included in the observed dataset.}
 #' \item{\code{seq_length}} {the sequence length of the marker, used along with mu below in the fastsimcoal DNA model.}
 #' \item{\code{mu}} {the mutation rate (per bp, per generation) of the simulated locus, used with seq_length above in the fastsimcoal DNA model.}
 #' \item{\code{G}} {the generation time of the species in years.}
 #' \item{\code{longmean}} {the average distance of long-distance dispersal events.}
-#' \item{\code{lambda}} {the rate of population growth within cells.}
-#' \item{\code{mix}} {the mixture parameter for the distribution of dispersal distances, fraction of dispersal events that are long-distance.}
+#' \item{\code{lambda}} {the rate of population growth within cells (discrete rate of increase).}
+#' \item{\code{mix}} {the mixture parameter for the distribution of dispersal distances, the proportion of dispersal events that are long-distance.}
 #' \item{\code{Ne}} {the maximum effective population size of a cell in the landscape.}
 #' \item{\code{preLGM_t}} {the time at which refugial populations diverged from one another (e.g., the last interglacial).}
 #' \item{\code{preLGM_Ne}} {the effective population size of the species prior to refuge divergence.}
@@ -37,8 +36,10 @@
 #'
 #' @examples
 #' library(holoSimCell)
-#' drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))
-#' drawParms
+#' parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))
+#' parms
+#'
+#' @seealso \code{\link{getpophist2.cells}}
 #'
 #' @export
 

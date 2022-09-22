@@ -1,7 +1,6 @@
 param,min,max,type,is.int
 shortscale,0.12,NA,fixed,FALSE
 shortshape,1,NA,fixed,FALSE
-sz,1,NA,fixed,FALSE
 nloci,1000,NA,fixed,FALSE
 seq_length,80,NA,fixed,FALSE
 mu,1.00E-07,NA,fixed,FALSE
