@@ -65,7 +65,7 @@ refpops <- pollenPulls[[modchoice]]$refs
 avgCellsz <- mean(c(res(landscape$sumrast)))
 
 ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,
-                       hab_suit=landscape,
+                       landscape=landscape,
                        refs=refpops,   
                        refsz=parms$ref_Ne,
                        lambda=parms$lambda,

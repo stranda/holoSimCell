@@ -13,37 +13,38 @@ distancePDF <- function(x, ssh=1,ssc=1,lmn=100,lsd=100,mix=0)
 #'
 #' Run a forward demographic simulation that creates a recolonization history of a species across a grid landscape. 
 #'
-#' @param h integer defining the total number of cells in the landscape matrix.
-#' @param xdim integer indicating the number of cells in the x-axis of the landscape grid.
-#' @param ydim integer indicating the number of cells in the y-axis of the landscape grid.
-#' @param maxtime the maximum number of generations in the forward demographic simulation.
+#' @param h integer defining the total number of cells in the landscape matrix (pulled from \code{landscape}, if not NULL).
+#' @param xdim integer indicating the number of cells in the x-axis of the landscape grid (pulled from \code{landscape}, if not NULL).
+#' @param ydim integer indicating the number of cells in the y-axis of the landscape grid (pulled from \code{landscape}, if not NULL).
+#' @param maxtime the maximum number of generations in the forward demographic simulation. Required if \code{enmstep} is specified, defined by dimensions of \code{landscape$hab_suit} if \code{enmstep} is NULL.
 #' @param distance.fun a function describing the dispersal kernel for the simulation.
 #' @param shortscale scale parameter of the Weibull probability density function (i.e., short-distance component of species' dispersal kernel).
 #' @param longmean mean of the Normal probability density function (i.e., long-distance component of species' dispersal kernel).
 #' @param shortshape shape parameter of the Weibull probability density function (i.e., short-distance component of species' dispersal kernel).
 #' @param mix proportion of long-distance dispersal events out of the total number of dispersal events. 
-#' @param lambda population growth rate. It can be a fixed value or drawn from the prior distribution of the lambda parameter.
-#' @param deltLambda a vector (one entry per cell) that allows cell-specific growth rates to be modeled.  The default (0) implies no variation in growth across populations, while 0.1 increases growth rate by 10 percent and -0.1 reduces growth rate by 10 percent.
+#' @param lambda population growth rate (discrete rate of increase). It can be a fixed value or drawn from the prior distribution of the lambda parameter.
+#' @param deltLambda a vector (one entry per cell) that allows cell-specific growth rates to be modeled.  The default (0) implies no variation in growth across populations, while 0.1 increases growth rate by 10 percent and -0.1 reduces growth rate by 10 percent (set to 0 if \code{landscape} is specified).
 #' @param CVn the coefficient of variation in population size, if demographic stochasticity is modeled.
 #' @param pois.var if TRUE, population size in each time step is drawn from a Poisson distribution (to incorporate demographic stochasticity).
 #' @param extFUN a function that describes the probability of local extinction as a function of cell-specific population size.
-#' @param hab_suit list with the following elements:
+#' @param hab_suit unused, replaced by landscape but maintained here for backward compatibility with early simulation scripts
+#' @param landscape a landscape object as produced by \code{ashSetupLandscape}, includes the following elements:
 #' \itemize{
 #' \item{\code{details}} {Data frame with the spatial extent of the landscape grid}
-#' \item{\code{occupied}} {Integer indicating the number of occupied cells in the landscape grid}
-#' \item{\code{empty}} {Integer indicating the number of empty cells in the landscape grid}
-#' \item{\code{sampled}} {Integer indicating the spatial location (i.e., cells) of the sampled populations in the landscape grid}
-#' \item{\code{hab_suit}} {Matrix with species habitat suitability (ranging from zero to one) through time.}
-#' \item{\code{sumrast}} {Raster that illustrates the summed habitat suitability in each cell across all time steps}
+#' \item{\code{occupied}} {Vector of population IDs for occupied cells in the landscape grid}
+#' \item{\code{empty}} {Vector of population IDs for empty cells in the landscape grid}
+#' \item{\code{sampled}} {Vector of population IDs for sampled populations in the landscape grid}
+#' \item{\code{hab_suit}} {Matrix with species habitat suitability (ranging from zero to one) through time. Rows in the matrix correspond to discrete time units and columns correspond to cells in the landscape}
+#' \item{\code{sumrast}} {Raster that stores the extent and resolution of the simulation landscape}
 #' \item{\code{samplocsrast}} {Raster showing the locations of cells that correspond to sampled populations}
 #' \item{\code{samplocs}} {Simple feature encoding spatial vector data related to the sampling populations and a data frame with metadata of the sampling populations (population id, number of individuals, type of spatial data and coordinates)}
 #' \item{\code{sampdf}} {Data frame with the spatial location of the sampling populations in the landscape grid}
-#' \item{\code{NAmask}} {A matrix used to mask cells that are unsuitable (e.g., covered by glaciers, out of the study region, in large lakes or oceans)}}
+#' \item{\code{NAmask}} {A RasterBrick object used to mask cells that are unsuitable (e.g., covered by glaciers, out of the study region, in large lakes or oceans)}}
 #' @param K maximum population size in each grid cell (i.e., carrying capacity) scaled by habitat suitability in the cell.
-#' @param deltK per-population adjustment to carrying capacity of a cell.
+#' @param deltK per-population adjustment to carrying capacity of a cell (set to 1 if \code{landscape} is specified).
 #' @param refs vector of integers identifying the cells occupied at the beginning of the forward demographic simulations (i.e., species refugia).
-#' @param refsz vector of integers indicating the effective population size for each cell occupied at the beginning of the forward demographic simulation. Each value is drawn from the prior distribution of the ancestral effective population size parameter.
-#' @param popDispInfl a function that describes the influence of population size on the probability of serving as a source for colonists.
+#' @param refsz vector of integers indicating the maximum possible effective population size for each cell occupied at the beginning of the forward demographic simulation. Adjusted by habitat suitability of the cell, if a suitability surface is defined. Each value is drawn from the prior distribution of the ancestral effective population size parameter. 
+#' @param popDispInfl during the forward simulation, the probability of a population serving as a source for a newly colonized cell is directly related to population size. Through this argument, the user can specify a function (possibly non-linear) to describe this relationship.
 #' @param ysz height of cells in the landscape grid.
 #' @param xsz width of cells in the landscape grid.
 #' @param enmstep specifies the number of generations over which each habitat suitability layer should be applied.
@@ -56,9 +57,9 @@ distancePDF <- function(x, ssh=1,ssc=1,lmn=100,lsd=100,mix=0)
 #' Returns a pophist object
 #' \itemize{
 #' \item{\code{pophist}} {a data frame describing the population history (source of colonists, time of colonization, etc.).}
-#' \item{\code{Nvecs}} {a matrix that records cell-specific population size at each time step in the forward demographic simulation.}
+#' \item{\code{Nvecs}} {a matrix that records cell-specific population size at each time step in the forward demographic simulation. Rows correspond to individual cells and columns correspond to time steps in the simulation.}
 #' \item{\code{tmat}} {migration matrix showing probabilities of moving between populations in the landscape.}
-#' \item{\code{strct}} {A numeric vector with information about spatial extent of the landscape grid: number of generations, dispersal parameters, population carrying capacity, refugia location and size.}
+#' \item{\code{struct}} {A numeric vector with information about spatial extent of the landscape grid: number of generations, dispersal parameters, population carrying capacity, refugia location and size.}
 #' \item{\code{hab_suit}} {List of ten objects including information on the spatial extent of the landscape grid, number of occupied and empty cells, spatial location and metadata of sampling populations, and habitat suitability across the landscape grid}
 #' \item{\code{coalhist}} {a data frame that recodes colonization history in pophist for coalescent simulation (e.g., backward in time).}
 #' \item{\code{popslst}} {the colonization history of populations in the landscape in list format.  Records information on timing of extinction events, if extinction is allowed in the simulation.}
@@ -73,7 +74,7 @@ distancePDF <- function(x, ssh=1,ssc=1,lmn=100,lsd=100,mix=0)
 #' avgCellsz <- mean(c(res(landscape$sumrast)))
 #'
 #' ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,
-#'                        hab_suit=landscape,
+#'                        landscape=landscape,
 #'                        refs=refpops,   
 #'                        refsz=parms$ref_Ne,
 #'                        lambda=parms$lambda,
@@ -84,6 +85,8 @@ distancePDF <- function(x, ssh=1,ssc=1,lmn=100,lsd=100,mix=0)
 #'                        ysz=res(landscape$sumrast)[2], 
 #'                        xsz=res(landscape$sumrast)[1], 
 #'                        K = parms$Ne) 
+#'
+#' @seealso \code{\link{ashSetupLandscape}}, \code{\link{testPophist}}, \code{\link{make.gmap}}, \code{\link{pophist.aggregate}}, \code{\link{runFSC_step_agg3}}
 #'
 #' @export
 
@@ -100,7 +103,8 @@ getpophist2.cells <- function(h=225, #humber of habitats (populations)
                              pois.var = FALSE, #!# if TRUE, population size each generation is drawn from a Poisson
                              extFUN=NULL, #!# Function passed to extirpate() to implement local extinction due to demographic stochasticity - 2 arguments
                              ##hab_suit = NULL, #!# matrix of habitat suitability (0-1), npops rows and maxtime/samptime columns
-                             hab_suit = NULL, #object returned from def_grid_pred
+                             hab_suit = NULL, #unused, replaced by landscape below
+                             landscape = NULL, #a landscape object, as returned from def_grid_pred 
                              K=10000, #underlying carrying capacity per pop
                              deltK = rep(1,h), #!# per population adjustment to K
                              refs=c(2), #population number of the refuges
@@ -113,27 +117,31 @@ getpophist2.cells <- function(h=225, #humber of habitats (populations)
                              )
 {
 
+    if(is.null(landscape)) {
+        landscape <- hab_suit
+    }
+
     samptime=1
 
-    hab_suit$hab_suit[K*(hab_suit$hab_suit/max(hab_suit$hab_suit, na.rm = TRUE)) < 1] <- 0
+    landscape$hab_suit[K*(landscape$hab_suit/max(landscape$hab_suit, na.rm = TRUE)) < 1] <- 0
     
-    if (!is.null(hab_suit))
+    if (!is.null(landscape))
     {
-        if ((ydim*xdim)!=dim(hab_suit$hab_suit)[2])
+        if ((ydim*xdim)!=dim(landscape$hab_suit)[2])
         {
-            warning("x and y dimensions must be the same as the undelying hab_suit; changing them")
+            warning("x and y dimensions must be the same as the undelying landscape; changing them")
             
         }
-        if (h!=dim(hab_suit$hab_suit)[2])
+        if (h!=dim(landscape$hab_suit)[2])
         {
-            warning("h must be the same as the length of underlying hab_suit; changing")
+            warning("h must be the same as the length of underlying landscape; changing")
         }
-        xdim=hab_suit$details$x.dim[1]
-        ydim=hab_suit$details$y.dim[1]
-        h <- hab_suit$details$ncells[1]
+        xdim=landscape$details$x.dim[1]
+        ydim=landscape$details$y.dim[1]
+        h <- landscape$details$ncells[1]
         deltLambda=rep(0,h); 
         deltK = rep(1,h) 
-        if (is.null(enmstep)) {enmstep <- 1:dim(hab_suit$hab_suit)[1]; maxtime=length(enmstep)}
+        if (is.null(enmstep)) {enmstep <- 1:dim(landscape$hab_suit)[1]; maxtime=length(enmstep)}
     }
     
     print(paste("starting...",date()))
@@ -173,7 +181,7 @@ getpophist2.cells <- function(h=225, #humber of habitats (populations)
         refsz <- rep(refsz[1],length(refs))
     }
 
-    Nvec[refs] <- refsz * (hab_suit$hab_suit[1,refs]/max(hab_suit$hab_suit,na.rm=T))
+    Nvec[refs] <- refsz * (landscape$hab_suit[1,refs]/max(landscape$hab_suit,na.rm=T))
     
     pops$arrive[refs] <- 0
     cnt <- 1
@@ -195,7 +203,7 @@ getpophist2.cells <- function(h=225, #humber of habitats (populations)
     tmat <- integratedMigMat(landx=xdim,landy=ydim,xnum=5,ynum=5,ysz=ysz,xsz=xsz,
                              sshp=shortshape,ssc=shortscale,mix=mix,nmean=longmean,nvar=longmean^2)
 
-    if (!is.null(hab_suit)) enmcnt=0  
+    if (!is.null(landscape)) enmcnt=0  
     
     print(paste("setup done; simulating...",date()))
 
@@ -220,9 +228,9 @@ getpophist2.cells <- function(h=225, #humber of habitats (populations)
             dispersed <- F
         }
         
-        if(!is.null(hab_suit)) {
+        if(!is.null(landscape)) {
             if (gen %in% enmstep) {enmcnt <- enmcnt+1}
-            dk <- hab_suit$hab_suit[enmcnt,]/max(hab_suit$hab_suit,na.rm=T)
+            dk <- landscape$hab_suit[enmcnt,]/max(landscape$hab_suit,na.rm=T)
             Nvec <- growpops(Nvec, lambda = lambda, deltLambda = deltLambda,
                              K=K, deltK=dk,
                              CVn=CVn, pois.var = pois.var)   
@@ -277,11 +285,11 @@ getpophist2.cells <- function(h=225, #humber of habitats (populations)
     print(paste("simulating done...",date()))
                                         
     rl <- parsePopslst(popslst,pops)
-    tmpcoord <- coordinates(hab_suit$sumrast)
+    tmpcoord <- coordinates(landscape$sumrast)
     popcoords <- data.frame(pop = c(1:length(tmpcoord[,1])), longitude = tmpcoord[,1], latitude = tmpcoord[,2])
     rl$pophist <- merge(rl$pophist, popcoords)
     out <- list(pophist = rl$pophist, Nvecs = Nvec_hist, tmat = tmat,
-                struct = struct, hab_suit=hab_suit, coalhist=rl$coalhist,
+                struct = struct, hab_suit=landscape, coalhist=rl$coalhist,
                 popslst=popslst)   
     
     return(out)

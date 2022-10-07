@@ -20,6 +20,7 @@ getpophist2.cells(
   pois.var = FALSE,
   extFUN = NULL,
   hab_suit = NULL,
+  landscape = NULL,
   K = 10000,
   deltK = rep(1, h),
   refs = c(2),
@@ -32,13 +33,13 @@ getpophist2.cells(
 )
 }
 \arguments{
-\item{h}{integer defining the total number of cells in the landscape matrix.}
+\item{h}{integer defining the total number of cells in the landscape matrix (pulled from \code{landscape}, if not NULL).}
 
-\item{xdim}{integer indicating the number of cells in the x-axis of the landscape grid.}
+\item{xdim}{integer indicating the number of cells in the x-axis of the landscape grid (pulled from \code{landscape}, if not NULL).}
 
-\item{ydim}{integer indicating the number of cells in the y-axis of the landscape grid.}
+\item{ydim}{integer indicating the number of cells in the y-axis of the landscape grid (pulled from \code{landscape}, if not NULL).}
 
-\item{maxtime}{the maximum number of generations in the forward demographic simulation.}
+\item{maxtime}{the maximum number of generations in the forward demographic simulation. Required if \code{enmstep} is specified, defined by dimensions of \code{landscape$hab_suit} if \code{enmstep} is NULL.}
 
 \item{distance.fun}{a function describing the dispersal kernel for the simulation.}
 
@@ -50,9 +51,9 @@ getpophist2.cells(
 
 \item{mix}{proportion of long-distance dispersal events out of the total number of dispersal events.}
 
-\item{lambda}{population growth rate. It can be a fixed value or drawn from the prior distribution of the lambda parameter.}
+\item{lambda}{population growth rate (discrete rate of increase). It can be a fixed value or drawn from the prior distribution of the lambda parameter.}
 
-\item{deltLambda}{a vector (one entry per cell) that allows cell-specific growth rates to be modeled.  The default (0) implies no variation in growth across populations, while 0.1 increases growth rate by 10 percent and -0.1 reduces growth rate by 10 percent.}
+\item{deltLambda}{a vector (one entry per cell) that allows cell-specific growth rates to be modeled.  The default (0) implies no variation in growth across populations, while 0.1 increases growth rate by 10 percent and -0.1 reduces growth rate by 10 percent (set to 0 if \code{landscape} is specified).}
 
 \item{CVn}{the coefficient of variation in population size, if demographic stochasticity is modeled.}
 
@@ -60,28 +61,30 @@ getpophist2.cells(
 
 \item{extFUN}{a function that describes the probability of local extinction as a function of cell-specific population size.}
 
-\item{hab_suit}{list with the following elements:
+\item{hab_suit}{unused, replaced by landscape but maintained here for backward compatibility with early simulation scripts}
+
+\item{landscape}{a landscape object as produced by \code{ashSetupLandscape}, includes the following elements:
 \itemize{
 \item{\code{details}} {Data frame with the spatial extent of the landscape grid}
-\item{\code{occupied}} {Integer indicating the number of occupied cells in the landscape grid}
-\item{\code{empty}} {Integer indicating the number of empty cells in the landscape grid}
-\item{\code{sampled}} {Integer indicating the spatial location (i.e., cells) of the sampled populations in the landscape grid}
-\item{\code{hab_suit}} {Matrix with species habitat suitability (ranging from zero to one) through time.}
-\item{\code{sumrast}} {Raster that illustrates the summed habitat suitability in each cell across all time steps}
+\item{\code{occupied}} {Vector of population IDs for occupied cells in the landscape grid}
+\item{\code{empty}} {Vector of population IDs for empty cells in the landscape grid}
+\item{\code{sampled}} {Vector of population IDs for sampled populations in the landscape grid}
+\item{\code{hab_suit}} {Matrix with species habitat suitability (ranging from zero to one) through time. Rows in the matrix correspond to discrete time units and columns correspond to cells in the landscape}
+\item{\code{sumrast}} {Raster that stores the extent and resolution of the simulation landscape}
 \item{\code{samplocsrast}} {Raster showing the locations of cells that correspond to sampled populations}
 \item{\code{samplocs}} {Simple feature encoding spatial vector data related to the sampling populations and a data frame with metadata of the sampling populations (population id, number of individuals, type of spatial data and coordinates)}
 \item{\code{sampdf}} {Data frame with the spatial location of the sampling populations in the landscape grid}
-\item{\code{NAmask}} {A matrix used to mask cells that are unsuitable (e.g., covered by glaciers, out of the study region, in large lakes or oceans)}}}
+\item{\code{NAmask}} {A RasterBrick object used to mask cells that are unsuitable (e.g., covered by glaciers, out of the study region, in large lakes or oceans)}}}
 
 \item{K}{maximum population size in each grid cell (i.e., carrying capacity) scaled by habitat suitability in the cell.}
 
-\item{deltK}{per-population adjustment to carrying capacity of a cell.}
+\item{deltK}{per-population adjustment to carrying capacity of a cell (set to 1 if \code{landscape} is specified).}
 
 \item{refs}{vector of integers identifying the cells occupied at the beginning of the forward demographic simulations (i.e., species refugia).}
 
-\item{refsz}{vector of integers indicating the effective population size for each cell occupied at the beginning of the forward demographic simulation. Each value is drawn from the prior distribution of the ancestral effective population size parameter.}
+\item{refsz}{vector of integers indicating the maximum possible effective population size for each cell occupied at the beginning of the forward demographic simulation. Adjusted by habitat suitability of the cell, if a suitability surface is defined. Each value is drawn from the prior distribution of the ancestral effective population size parameter.}
 
-\item{popDispInfl}{a function that describes the influence of population size on the probability of serving as a source for colonists.}
+\item{popDispInfl}{during the forward simulation, the probability of a population serving as a source for a newly colonized cell is directly related to population size. Through this argument, the user can specify a function (possibly non-linear) to describe this relationship.}
 
 \item{ysz}{height of cells in the landscape grid.}
 
@@ -95,9 +98,9 @@ getpophist2.cells(
 Returns a pophist object
 \itemize{
 \item{\code{pophist}} {a data frame describing the population history (source of colonists, time of colonization, etc.).}
-\item{\code{Nvecs}} {a matrix that records cell-specific population size at each time step in the forward demographic simulation.}
+\item{\code{Nvecs}} {a matrix that records cell-specific population size at each time step in the forward demographic simulation. Rows correspond to individual cells and columns correspond to time steps in the simulation.}
 \item{\code{tmat}} {migration matrix showing probabilities of moving between populations in the landscape.}
-\item{\code{strct}} {A numeric vector with information about spatial extent of the landscape grid: number of generations, dispersal parameters, population carrying capacity, refugia location and size.}
+\item{\code{struct}} {A numeric vector with information about spatial extent of the landscape grid: number of generations, dispersal parameters, population carrying capacity, refugia location and size.}
 \item{\code{hab_suit}} {List of ten objects including information on the spatial extent of the landscape grid, number of occupied and empty cells, spatial location and metadata of sampling populations, and habitat suitability across the landscape grid}
 \item{\code{coalhist}} {a data frame that recodes colonization history in pophist for coalescent simulation (e.g., backward in time).}
 \item{\code{popslst}} {the colonization history of populations in the landscape in list format.  Records information on timing of extinction events, if extinction is allowed in the simulation.}
@@ -118,7 +121,7 @@ refpops <- pollenPulls[[modchoice]]$refs
 avgCellsz <- mean(c(res(landscape$sumrast)))
 
 ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,
-                       hab_suit=landscape,
+                       landscape=landscape,
                        refs=refpops,   
                        refsz=parms$ref_Ne,
                        lambda=parms$lambda,
@@ -130,4 +133,7 @@ ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.
                        xsz=res(landscape$sumrast)[1], 
                        K = parms$Ne) 
 
+}
+\seealso{
+\code{\link{ashSetupLandscape}}, \code{\link{testPophist}}, \code{\link{make.gmap}}, \code{\link{pophist.aggregate}}, \code{\link{runFSC_step_agg3}}
 }

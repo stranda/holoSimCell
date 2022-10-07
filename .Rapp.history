@@ -1,43 +1,3 @@
-mu <- 3.6e-9  #Mutation rate (nuisance parameter - fix or specify a range, but don't worry about estimating)
-sample_size <- rep(10,9)
-sample_size[2] <- 0 # unsampled UNK pop
-popids <- c("LA","UNK", "FC1", "FC2", "SHD", "MB", "FAR", "ROW", "ST")
-indexids <- rbind(popids, indexids=c(0:8))
-## Create population info (demelist)
-N.LA = round(runif(1,1000,20000))   #Ne Louisana pop
-N.UNK = round(runif(1,1000,10000))    #Ne Unsampled native pop
-N.FC1 = round(runif(1,1000,10000))    #Ne Fox Creek group 1
-N.FC2 = round(runif(1,1000,10000))    #Ne Fox Creek group 2
-N.SHD = round(runif(1,1000,10000))    #Ne Sheraton (+TB+HO) group
-N.MB = round(runif(1,1000,10000))   #Ne Meadowbrook (+AUB) group
-N.FAR = round(runif(1,1000,10000))    #Ne Farmington Rd (+PR) group
-N.ROW = round(runif(1,1000,10000))    #Ne River Oaks (+SC+BB) group
-N.ST = round(runif(1,1000,10000))   #Ne Newland Drain group
-pop_size <- c(N.LA, N.UNK, N.FC1, N.FC2, N.SHD, N.MB, N.FAR, N.ROW, N.ST)
-demelist <- vector("list",length(sample_size))
-for(p in 1:length(sample_size)) {#
-    demelist[[p]] <- fscDeme(deme.size = pop_size[p], sample.size = sample_size[p], sample.time = 0, inbreeding = 0, growth = 0)#
-  }
-names(demelist) <- popids
-demes <- do.call(fscSettingsDemes, c(demelist, ploidy = 2))
-## Genetic markers
-seq_length <- 150
-num_markers_sim <- 1165 #930*1.25
-genetics <- fscSettingsGenetics(fscBlock_snp(sequence.length = seq_length, mut.rate = mu), num.chrom = num_markers_sim)
-## Migration matrix
-migmat <- matrix(data = 0, nrow = 9, ncol = 9)
-# migration between Louisiana and Unsampled (within native range)
-m.NA <-runif(1, 0.001, 0.04) # high m rate
-# migration between FC1 and FC2 (within all of Fox Creek)
-m.FC <- runif(1, 0.001, 0.01) # med m rate
-# migration between SHD group and MB group
-m.SHD <- runif(1, 0.0001, 0.001) # lower m rate
-migmat[1,2] <- m.NA
-migmat[2,1] <- m.NA
-migmat[3,4] <- m.FC
-migmat[4,3] <- m.FC
-migmat[5,6] <- m.SHD
-migmat[6,5] <- m.SHD
 migration <- fscSettingsMigration(migmat)
 ## Historical events
 ## Event times (coalescence and bottlenecks)
@@ -310,16 +270,54 @@ devtools::install_github("thelinkan/tslib")
 devtools::install_github("armstrtw/fts")
 options(timeout=9999999)
 devtools::install_github("armstrtw/fts")
-setwd("GitHub/holoSimCell")
+1.09/0.62
+0.62/1.09
+1.09/0.59
+50000*24
+580036-1500
+601431-1500
+tmp <- read.table("AB1.thetas.idx.txt", header = TRUE)
+10^-10.386044
+exp(-10.386044)
+head(tmp)
+tmp <- read.table("AB1.thetas.idx.txt", header = TRUE)
+names(tmp)
+range(tmp$Pairwise)
+length(which(tmp$Pairwise == "-Inf"))
+tmp[which(tmp$Pairwise == "-Inf")[1],]
+exp(-Inf)
+10^-Inf
+pwise <- 10^tmp$Pairwise
+pwise[1:100]
+mean(pwise)
+pwise2 <- exp(tmp$Pairwise)
+mean(pwise2)
+range(pwise)
+range(pwise2)
+log(5.6)
+log10(5.6)
+-1500+622735
+-1500+628742
+50000*24
+25000*24
+20000*24
+634-678
+634-578
+600/56
+24*40000
+-1500+654829
+-1500+681720
+-1500+684132
+seq(16,100,16)
+-1500+686171
+-1500+700390
+setwd("~/Desktop/GitHub/holoSimCell")
 devtools::load_all()
-modchoice <- 1
-load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",enmScenarios$enms$rasterStackName[modchoice],".rda"))
-dim(landscape$hab_suit)
-nrows(landscape$hab_suit)
-nrow(landscape$hab_suit)
-system.file("extdata", "rasters", "ccsm_160kmExtent_maxent.tif", package = "holoSimCell")
-m <- 1
-landscape <- ashSetupLandscape(brickname=system.file("extdata", "rasters", "ccsm_160kmExtent_maxent.tif", package = "holoSimCell"),cellreduce=0.45,partialsuit=T)
-landscape$hab_suit[1:10,1:10]
-landscape$hab_suit[1:500,1:10]
-landscape$hab_suit[1:10,1:500]
+653-578
+712-653
+400/60
+?getpophist2.cells
+?getpophist2.cells
+?testPophist
+?drawParms
+?ashSetupLandscape

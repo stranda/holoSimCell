@@ -18,7 +18,12 @@ Returns a logical (T or F) indicating whether all sampled cells are occupied at 
 Function to take output from getpophist_cells and def_grid and test for cell occupancy
 }
 \details{
-All cells with population genetic samples must be colonized during the forward simulation.  Simulations that do not fully colonize sampled populations are discarded.
+All cells with population genetic samples must be colonized during the forward simulation.  Simulations that do not fully colonize sampled populations are discarded. This function tests three aspects of the lansdcape produced in the forward demographic simulation:
+\itemize{
+\item{All populations with genetic samples are colonized during the forward simulation.}
+\item{Habitat suitability is non-zero at the last simulation time step in all cells with genetic samples.}
+\item{The spatial extent of the simulated landscape matches that of the genetic samples.}    
+}
 }
 \examples{
 library(holoSimCell)
@@ -29,7 +34,7 @@ refpops <- pollenPulls[[modchoice]]$refs
 avgCellsz <- mean(c(res(landscape$sumrast)))
 
 ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,
-                       hab_suit=landscape,
+                       landscape=landscape,
                        refs=refpops,   
                        refsz=parms$ref_Ne,
                        lambda=parms$lambda,
@@ -42,4 +47,7 @@ ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.
                        K = parms$Ne) 
 testPophist(ph, landscape)
 
+}
+\seealso{
+\code{\link{ashSetupLandscape}}, \code{\link{getpophist2.cells}}, \code{\link{make.gmap}}, \code{\link{pophist.aggregate}}, \code{\link{runFSC_step_agg3}}
 }

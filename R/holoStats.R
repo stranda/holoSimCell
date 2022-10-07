@@ -93,7 +93,7 @@
 #' avgCellsz <- mean(c(res(landscape$sumrast)))
 #'
 #' ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,
-#'                        hab_suit=landscape,
+#'                        landscape=landscape,
 #'                        refs=refpops,   
 #'                        refsz=parms$ref_Ne,
 #'                        lambda=parms$lambda,
@@ -386,13 +386,27 @@ holoStats = function(out, popDF, cores=1) {
 
 
   SNPsamp <- sample(c(1:(ncol(data)-2)), min(500, (ncol(data)-2)), replace = FALSE)
-	  
+	
+  df2 <- matrix(data = NA, nrow = nrow(data)/2, ncol = ncol(data))
+  df2 <- as.data.frame(df2)
+  colnames(df2) <- colnames(data)
+  allele1seq <- seq(1,nrow(data),2)
+  rw <- 1
+  for(x in allele1seq){
+    tmp <- data[c(x,x+1),]
+    df2$st[rw] <- tmp$st[1]
+    df2$ones[rw] <- tmp$ones[1]
+    df2[rw,-c(1,2)] <- colSums(tmp[,-c(1,2)])
+    rm(tmp)
+    rw <- rw+1
+  }  
+  rm(rw)
 
   for(i in 1:npops){
-    loci_pop <- subset(data, data$st == pops.xy$pop[i])
+    loci_pop <- subset(df2, df2$st == pops.xy$pop[i])
     snps <- loci_pop[,-c(1,2)]
     snps <- snps[,SNPsamp]
-    pair_LD <- LD.Measures(snps,data = "H")
+    pair_LD <- LD.Measures(snps,data = "G")
     mean_LD_pop <- mean(pair_LD$r2)
     ifelse(i==1,
            LD_pop <- as.data.frame(mean_LD_pop,row.names = paste0("LD",pops.xy$pop[i])),
@@ -413,8 +427,6 @@ holoStats = function(out, popDF, cores=1) {
   ld.long.stats <- t(data.frame(ld.long.stats))
   
   ld_stats <- cbind(LD_pop2,ld.lat.stats,ld.long.stats)
-
-
 
   psi<- psiCalc(locMAF, samplen=nsamples)
 
