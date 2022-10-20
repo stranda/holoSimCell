@@ -54,7 +54,7 @@ distancePDF <- function(x, ssh=1,ssc=1,lmn=100,lsd=100,mix=0)
 #' Conducts forward simulation of landscape colonization from a set of refugial populations.  Requires parameters related to refugial locations, maximum possible population size, dispersal, habitat suitability through time, and population growth rate.
 #'
 #' @return
-#' Returns a pophist object
+#' Returns a pophist object with the following elements:
 #' \itemize{
 #' \item{\code{pophist}} {a data frame describing the population history (source of colonists, time of colonization, etc.).}
 #' \item{\code{Nvecs}} {a matrix that records cell-specific population size at each time step in the forward demographic simulation. Rows correspond to individual cells and columns correspond to time steps in the simulation.}

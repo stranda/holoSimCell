@@ -1,105 +1,3 @@
-migration <- fscSettingsMigration(migmat)
-## Historical events
-## Event times (coalescence and bottlenecks)
-T.LA = round(runif(1,1000,5000))
-T.UNK = round(runif(1,50, T.LA))  #Time of coalescence to LA pop
-T.FC1 = round(runif(1,10, T.UNK)) #Time of coalescence for Fox Creek group 1 to UNK
-T.FC2 = round(runif(1,10, T.FC1))   #Time of coalescence for Fox Creek group 2, constrained by R.FC1
-T.SHD = round(runif(1,10, T.FC1))   #Time of coalescence for Sheraton (+TB+HO) group
-T.FAR = round(runif(1,10, T.FC1)) #Time of coalescence for Farmington Rd (+PR) group
-T.MB = round(runif(1,5, T.SHD)) #Time of coalescence for Meadowbrook (+AUB) group, constrained by T.SHD
-T.ROW = round(runif(1,10, T.FC1)) #Time of coalescence for River Oaks (+SC+BB) group
-T.ST = round(runif(1,5, T.ROW)) #Time of coalescence for Newland Drain group, constrained by T.ROW
-T.UNK_1 = T.UNK-1 #Time of bottleneck for UNK
-T.FC1_1 = T.FC1-1 #Time of bottleneck for Fox Creek group 1
-T.FC2_1 = T.FC2-1 #Time of bottleneck for FC2 into FC1
-T.SHD_1 = T.SHD-1 #Time of bottleneck for SHD into FC1
-T.FAR_1 = T.FAR-1 #Time of bottleneck for FAR into FC1
-T.MB_1 = T.MB-1 #Time of bottleneck for MB1 into SHD
-T.ROW_1 = T.ROW-1 #Time of bottleneck for ROW into UNK
-T.ST_1 = T.ST-1 #Time of bottleneck for ST into ROW
-bott.sev <- round(runif(1,0,0.25), 3)
-# build dataframe for historical event info
-time.names <- c("T.UNK", "T.FC1", "T.FC2", "T.SHD", "T.FAR", "T.MB", "T.ROW", "T.ST", "T.UNK_1", "T.FC1_1", "T.FC2_1", "T.SHD_1", "T.FAR_1", "T.MB_1", "T.ROW_1", "T.ST_1")
-E.times <-  c(T.UNK, T.FC1, T.FC2, T.SHD, T.FAR, T.MB, T.ROW, T.ST, T.UNK_1, T.FC1_1, T.FC2_1, T.SHD_1, T.FAR_1, T.MB_1, T.ROW_1, T.ST_1)
-source <- c(1,2,3,4,6,5,7,8,1,2,3,4,6,5,7,8)
-sink <- c(0,1,2,2,2,4,1,7,1,2,3,4,6,5,7,8)
-prop.migrants <- c(rep(1,8), rep(0,8))
-new.size <- c(rep(1,8), rep(bott.sev,8))
-event.df <- as.data.frame(cbind(time.names, E.times, source, sink, prop.migrants, new.size, new.growth=rep(0,16), migr.mat=rep(0,16)))
-event.df[,2:(length(event.df))] <- sapply(event.df[,2:(length(event.df))], as.numeric)
-# build list for historical event info
-eventlist <- list()
-for(ev in 1:nrow(event.df)) {#
-    eventlist[[ev]] <- fscEvent(event.time = event.df$E.times[ev], source = event.df$source[ev], sink = event.df$sink[ev], prop.migrants = event.df$prop.migrants[ev], new.size = event.df$new.size[ev], new.growth = event.df$new.growth[ev], migr.mat = event.df$migr.mat[ev])#
-  }
-# create events obj for fsc
-events <- do.call(fscSettingsEvents, eventlist)
-# Add event times to kill ea deme (needed for fsc27)
-kill.df <- events[events$source == events$sink,]
-kill.df$event.time <- kill.df$event.time+1
-kill.df$new.size <- 0
-events <- rbind(events, kill.df)
-# order events newest to oldest
-events <- events[order(events$event.time),]
-#setwd("~/RSC/ABC")
-#Define functions needed below
-source("~/Desktop/GitHub/holoSimCell/R/helper-functions.R")
-source("~/Desktop/GitHub/holoSimCell/R/additional_stats_functions.R")
-MAF= 0.05  #MAF - minor allele frequency filter... loci with minor allele frequencies below this value are excluded from output
-nloci = 900
-maxloc = 200000       #max number of marker loci to attempt in fastsimcoal
-varSNPs <- 0
-while(varSNPs < nloci) {#
- # p <- fscWrite(demes = demes, genetics = genetics, events = events, migration = migration, label = paste0(label, "-", nreps), use.wd = TRUE)#
-  p <- fscWrite(demes = demes, genetics = genetics, events = events, migration = migration, label = paste0(label, "-", node), use.wd = TRUE)#
-  p <- fscRun(p, all.sites = FALSE, inf.sites = FALSE, dna.to.snp = TRUE, quiet = FALSE, num.cores = num_cores, exec = exec)#
-  out <- fscReadArp(p)#
-    print(date())#
-    #print(paste("cleaning up fsc files:",label, "-", nreps))#
-    #fscCleanup(paste0(label, "-", nreps))#
-    print(paste("cleaning up fsc files:",label, "-", node))#
-    fscCleanup(paste0(label, "-", node))#
-  message(paste("Coalescent simulation with",attr(genetics,"num.chrom"), "loci resulted in", (ncol(out)-2)/2, "polymorphic sites"), appendLF=TRUE)#
-  fscout <- sampleOnePerLocus(mat = out, MAF = MAF)#
-  tmp_gtype <- df2gtypes(fscout, ploidy = 2)#
-  varSNPs <- sum(numAlleles(tmp_gtype)$num.alleles == 2)#
-  message(paste("Subsampling to one SNP per locus...", varSNPs, "loci have at least one polymorphic sites with MAF >", MAF), appendLF=TRUE)#
-  if(varSNPs < nloci) {#
-    if(attr(genetics, "num.chrom") == maxloc) {#
-      stop("Too few SNPs pass the MAF!  Redrawing parameter values for this replicate!  Setting maxSNPstried to a larger value will lead to longer simulations")#
-    }#
-    scaleSNP <- 1.1*(attr(genetics, "num.chrom")/varSNPs)#
-    newSNPnum <- round(scaleSNP*attr(genetics, "num.chrom"),0)#
-    if(newSNPnum > maxloc) {#
-      newSNPnum <- maxloc#
-      message(paste("Coalescent simulation with", attr(genetics, "num.chrom"), "loci resulted in", varSNPs, "variable markers. Trying again with the maximum number of loci allowable -",newSNPnum, "!"), appendLF=TRUE)#
-    } else {#
-      message(paste("Coalescent simulation with", attr(genetics, "num.chrom"), "loci resulted in", varSNPs, "variable markers. Trying again with",newSNPnum, "loci!"), appendLF=TRUE)#
-    }#
-    attr(genetics, "num.chrom") <- newSNPnum#
-    rm(scaleSNP, newSNPnum)#
-  } else if(varSNPs > nloci) {#
-    nalleles <- numAlleles(tmp_gtype)#
-    varchromnames <-  nalleles$locus[nalleles$num.alleles == 2]#
-    keep.loci <- sample(varchromnames, nloci, replace = FALSE)#
-    keep.columns <- c(1,2)#
-    for(locus in keep.loci) {#
-      keep.columns <- c(keep.columns, grep(locus, colnames(fscout)))#
-    }#
-    fscout <- fscout[,keep.columns]#
-  }#
-}
-params <- data.frame(Model= label, date = date(), node=node, runBy=runBy,#
-                     GenTime=G, mu=format(mu, scientific = T), MAF=MAF, seqLength=seq_length,#
-                     N.LA=N.LA, N.UNK=N.UNK, N.FC1=N.FC1, N.FC2=N.FC2, N.SHD=N.SHD, N.MB=N.MB, N.FAR=N.FAR, N.ROW=N.ROW, N.ST=N.ST,#
-                     migNat=round(m.NA,4), migFC=round(m.FC, 4), migSHD=round(m.SHD,4), bottleneckSeverity=bott.sev,#
-                     T.UNK=T.UNK, T.FC1=T.FC1, T.FC2=T.FC2, T.SHD=T.SHD, T.FAR=T.FAR, T.MB=T.MB, T.ROW=T.ROW, T.ST=T.ST, #
-                     T.UNK_1=T.UNK_1, T.FC1_1=T.FC1_1, T.FC2_1=T.FC2_1, T.SHD_1=T.SHD_1, T.FAR_1=T.FAR_1, T.MB_1=T.MB_1, T.ROW_1=T.ROW_1, T.ST_1=T.ST_1)
-# Calculate summary statistics from simulated SNP data
-# from https://github.com/EricArcher/strataG/blob/master/vignettes/summaries.R
-# also see functions from strataG: https://github.com/EricArcher/strataG/blob/master/vignettes/summaries.R
-popid <- unique(fscout$deme)
 # Statistics measuring levels of genetic diversity within populations:
 allMAF <- mafreq(fscout)
 totalHe <- 2*allMAF*(1-allMAF)
@@ -311,13 +209,92 @@ log10(5.6)
 seq(16,100,16)
 -1500+686171
 -1500+700390
-setwd("~/Desktop/GitHub/holoSimCell")
-devtools::load_all()
-653-578
-712-653
-400/60
-?getpophist2.cells
+-1500+729099
+Sys.unsetenv("GITHUB_PAT")
+options(timeout = 99999999)
+Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS=TRUE)
+devtools::install_github('stranda/holoSimCell')
+library(adegenet)
+install.packages("adegenet")
+library(adegenet)
+library(rlang)
+install.packages("rlang")
+install.packages("adegenet")
+devtools::install_github('stranda/holoSimCell')
+library(holoSimCell)
+?pophist2.cells
 ?getpophist2.cells
 ?testPophist
-?drawParms
-?ashSetupLandscape
+-1500+769061
+-1500+782301
+-1500+783101
+-1500+794231
+-1500+814483
+100*100
+500*500
+-1500+868853
+library(rmetasim)
+showVignettes(rmetasim)
+vignette(rmetasim)
+vignette(package = "rmetasim")
+-1500+881590
+library(vegan)
+?specpool
+-1500+892542
+-1500+907570
+library(holoSimCell)
+?make.gmap
+parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))#
+modchoice <- 1#
+load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[modchoice]]$file))#
+refpops <- pollenPulls[[modchoice]]$refs#
+avgCellsz <- mean(c(res(landscape$sumrast)))#
+#
+ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,#
+                       landscape=landscape,#
+                       refs=refpops,  #set at cell 540 right now #
+                       refsz=parms$ref_Ne,#
+                       lambda=parms$lambda,#
+                       mix=parms$mix,  #note how small.#
+                       shortscale=parms$shortscale*avgCellsz,  # scale parameter of weibull with shape below#
+                       shortshape=parms$shortshape, #weibull shape#
+                       longmean=parms$longmean*avgCellsz,  # mean of normal with sd = longmean#
+                       ysz=res(landscape$sumrast)[2], #height of cell in raster (same units as longmean and shortscale)#
+                       xsz=res(landscape$sumrast)[1], #width of cell in raster#
+                       K = parms$Ne) #maximum population size in a grid cell, scaled with hab_suit from landscape object#
+#
+gmap=make.gmap(ph$pophist,#
+               xnum=2, #number of cells to aggregate in x-direction#
+               ynum=2) #number of aggregate in the y-direction#
+#
+ph2 <- pophist.aggregate(ph,gmap=gmap)
+?getpophist2.cells
+?DoesGmapCombine
+?doesGmapCombine
+doesGmapCombine(gmap, landscape)
+?pophist.aggregate
+ph2 <- pophist.aggregate(ph,gmap=gmap)
+dim(ph2$Nvecs)
+dim(ph2$tmat)
+ph2$struct
+dim(ph2$hab_suit)
+dim(ph2$popslst)
+ph2$popslst
+length(ph2$poslst)
+length(ph2$popslst)
+51*49
+ph2$popslst[[1]]
+dim(ph2$old_hab_suit)
+ph2$old_hab_suit
+names(ph2$old_hab_suit)
+dim(ph2$old_hab_suit$hab_suit)
+dim(ph2$old_tmat)
+ph2$gmap
+library(holoSimCell)
+?make.gmap
+?getpophist2.cells
+?doesGmapCombine
+?pophist.aggregate
+?holoStats
+setwd("~/Desktop/GitHub/holoSimCell")
+devtools::document()

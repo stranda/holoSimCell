@@ -7,7 +7,7 @@
 make.gmap(pophist, xnum = 2, ynum = 2)
 }
 \arguments{
-\item{pophist}{a demographic population history from getpophist2.cells()}
+\item{pophist}{a data frame describing the population history (source of colonists, time of colonization, etc.; output from \code{getpophist2.cells()}).}
 
 \item{xnum}{number of columns to aggregate}
 
@@ -52,5 +52,5 @@ ph2 <- pophist.aggregate(ph,gmap=gmap)
 
 }
 \seealso{
-\code{\link{pophist.aggregate}}, \code{\link{getpophist2.cells}}, \code{\link{run_FSC_step_agg3}}
+\code{\link{pophist.aggregate}}, \code{\link{getpophist2.cells}}, \code{\link{run_FSC_step_agg3}}, \code{\link{doesGmapCombine}}
 }

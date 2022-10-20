@@ -98,14 +98,14 @@ testPophist <- function(ph,landscape)
 #'
 #' Test the gmap aggregation scheme against a landscape to see if cells with genetic samples are being combined
 #'
-#' @param gmap data frame that maps forward time populations to genetic populations (from make.gmap())
+#' @param gmap data frame that maps forward time populations to genetic populations (from \code{make.gmap()})
 #' @param landscape the landscape object used in the forward simulation
 #'
 #' @details
 #' Avoid combining cells with two separate genetic samples during cell aggregation
 #'
 #' @return
-#' Returns a logical (TRUE or FALSE) indicating whether the aggregation scheme specified by gmap would combine two cells with genetic samples.
+#' Returns a logical (TRUE or FALSE) indicating whether the aggregation scheme specified by gmap would combine two cells with genetic samples. Combining genetic samples can result in problems during subsequent coalescent simulations. If FALSE, no issues are expected.
 #'
 #' @examples
 #' library(holoSimCell)
@@ -134,7 +134,7 @@ testPophist <- function(ph,landscape)
 #'
 #' doesGmapCombine(gmap, landscape)
 #'
-#' @seealso \code{\link{make.gmap}}, \code{\link{pophist.aggregate}}
+#' @seealso \code{\link{getpophist2.cells}}, \code{\link{make.gmap}}, \code{\link{pophist.aggregate}}, \code{\link{runFSC_step_agg3}}
 #' @export
  
 doesGmapCombine <- function(gmap,landscape)

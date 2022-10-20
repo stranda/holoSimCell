@@ -7,12 +7,12 @@
 doesGmapCombine(gmap, landscape)
 }
 \arguments{
-\item{gmap}{data frame that maps forward time populations to genetic populations (from make.gmap())}
+\item{gmap}{data frame that maps forward time populations to genetic populations (from \code{make.gmap()})}
 
 \item{landscape}{the landscape object used in the forward simulation}
 }
 \value{
-Returns a logical (TRUE or FALSE) indicating whether the aggregation scheme specified by gmap would combine two cells with genetic samples.
+Returns a logical (TRUE or FALSE) indicating whether the aggregation scheme specified by gmap would combine two cells with genetic samples. Combining genetic samples can result in problems during subsequent coalescent simulations. If FALSE, no issues are expected.
 }
 \description{
 Test the gmap aggregation scheme against a landscape to see if cells with genetic samples are being combined
@@ -49,5 +49,5 @@ doesGmapCombine(gmap, landscape)
 
 }
 \seealso{
-\code{\link{make.gmap}}, \code{\link{pophist.aggregate}}
+\code{\link{getpophist2.cells}}, \code{\link{make.gmap}}, \code{\link{pophist.aggregate}}, \code{\link{runFSC_step_agg3}}
 }

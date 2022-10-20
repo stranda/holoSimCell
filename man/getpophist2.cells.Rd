@@ -95,7 +95,7 @@ getpophist2.cells(
 \item{numcolonists}{the number of individuals that colonize a new population.}
 }
 \value{
-Returns a pophist object
+Returns a pophist object with the following elements:
 \itemize{
 \item{\code{pophist}} {a data frame describing the population history (source of colonists, time of colonization, etc.).}
 \item{\code{Nvecs}} {a matrix that records cell-specific population size at each time step in the forward demographic simulation. Rows correspond to individual cells and columns correspond to time steps in the simulation.}
