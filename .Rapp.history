@@ -1,125 +1,3 @@
-# Statistics measuring levels of genetic diversity within populations:
-allMAF <- mafreq(fscout)
-totalHe <- 2*allMAF*(1-allMAF)
-SNPs <- sum(allMAF<1)
-names(SNPs) <- "tot_SNPs"
-split_out <- vector("list", length(unique(fscout$deme)))
-for(p in 1:length(unique(fscout$deme))) {#
-  split_out[[p]] <- fscout[fscout$deme == unique(fscout$deme)[p],]#
-  names(split_out)[p] <- unique(split_out[[p]]$deme)#
-}
-split_out
-names(split_out)
-popid
-fscout$deme
-demes
-names(out)
-colnames(out)
-colnames(out)[1:10]
-out$deme
-minor <- sapply(names(allMAF), FUN=function(x){strsplit(x, split = "[.]")[[1]][2]})
-locMAF <- loc.mafreq(split_out, minor)
-DW <- colSums(locMAF/allMAF)
-names(DW) <- paste0("DW_",names(DW))
-locHe <- colMeans(2*locMAF*(1-locMAF))
-varlocHe <- apply(2*locMAF*(1-locMAF),2,var)
-locN <- sapply(split_out,function(o){nrow(o)})
-localSNP <- apply(locMAF,2,function(x){sum(x<1 & x>0)})
-names(localSNP) <- paste0("S.", names(localSNP))
-richnessSNP <- allelicRichness(df2gtypes(fscout, ploidy = 2), by.strata=TRUE)
-richnessSNP <- richnessSNP %>% group_by(stratum) %>% summarize(mean=mean(allelic.richness))
-richnessSNP <- as.data.frame(t(richnessSNP))
-names(richnessSNP) <- paste0("rS.", richnessSNP[1,])
-richnessSNP <- richnessSNP[-1,]
-privateSNP <- colSums(privateAlleles(df2gtypes(fscout, ploidy = 2)))
-privateSNP <- privateSNP[match(unique(fscout$deme), names(privateSNP))]
-names(privateSNP) <- paste0("pS.", names(privateSNP))
-total_priv = sum(privateSNP)
-names(total_priv) <- "tot_priv"
-# Statistics measuring levels of genetic differentiation between populations:
-cores=1
-pwhet <- pwise.het(locMAF,locN,cores)
-FstMat.loc <- as.dist(pwise.fst.loc(locMAF,allMAF,locN,pwhet))
-neimat <- pwise.nei(locMAF,cores)
-pairnei <- as.vector(neimat)
-neinames <- c()
-neimat_names <- attr(neimat, "Labels")
-for(pid in 1:(length(neimat_names)-1)) {#
-  neinames <- c(neinames, paste0("Nei_", neimat_names[pid],".", neimat_names[(pid+1):length(neimat_names)]))#
-}
-names(pairnei) = neinames
-attr(FstMat.loc,"Labels") <- attr(neimat,"Labels")
-FstMat_names <- attr(FstMat.loc,"Labels")
-pairFst.loc = as.vector(FstMat.loc)
-Fstnames.loc = c()
-for(pid in 1:(length(FstMat_names)-1)) {#
-  Fstnames.loc = c(Fstnames.loc, paste0("Fst_", FstMat_names[pid],".", FstMat_names[(pid+1):length(FstMat_names)]))#
-}
-names(pairFst.loc) = Fstnames.loc
-# directionality index
-psi<- psiCalc(locMAF, samplen=nsamples)
-# Pairwise private SNPs and their frequencies
-# from https://github.com/nicksard/2019_Goby_ABC_scripts/blob/master/fast_stats_v2.R
-locMAF
-head(locMAF)
-neinames
-pops <- colnames(locMAF)
-combn(pops)
-combn(pops,2)
-locMAF[1:10,1:10]
-locMAF[1:10,1:5]
-tmp_locMAF <- loc_MAF[,c(1,2)]
-tmp_locMAF <- locMAF[,c(1,2)]
-tmp_locMAF[1:10,]
-sum(tmp_locMAF[,1] > 0 & tmp_locMAF[,2] == 0)
-locMAF
-pops <- colnames(locMAF)
-combos <- combn(pops,2)
-pwpriv_names <- c()
-pwpriv <- c()
-for(pair in 1:length(combos[1,])) {#
-    pwpriv_names <- c(pwpriv_names, paste("pwpriv_",combos[1,pair], combos[2,pair], collapse = "."), paste("pwpriv_", combos[2,pair], combos[1,pair]))#
-    tmp_locMAF <- locMAF[,c(combos[,pair[1,]], combos[,pair[2,]])]#
-    tmp_locMAF <- tmp_locMAF[rowSums(tmp_locMAF > 0),]#
-    #Sites that are polymorphic in pop 1, but not 2#
-    pwpriv <- c(pwpriv, sum(tmp_locMAF[,1] > 0 & tmp_locMAF[,2] == 0))#
-    #Sites that are polymorphic in pop 2, but not 1#
-    pwpriv <- c(pwpriv, sum(tmp_locMAF[,2] > 0 & tmp_locMAF[,1] == 0))#
-#
-    rm(tmp_locMAF)#
-}
-combos[1,pair]
-locMAF
-pops <- colnames(locMAF)
-combos <- combn(pops,2)
-pwpriv_names <- c()
-pwpriv <- c()
-for(pair in 1:length(combos[1,])) {#
-    pwpriv_names <- c(pwpriv_names, paste("pwpriv_",combos[1,pair], combos[2,pair], collapse = "."), paste("pwpriv_", combos[2,pair], combos[1,pair]))#
-    tmp_locMAF <- locMAF[,c(combos[1,pair], combos[2,pair])]#
-    tmp_locMAF <- tmp_locMAF[rowSums(tmp_locMAF > 0),]#
-    #Sites that are polymorphic in pop 1, but not 2#
-    pwpriv <- c(pwpriv, sum(tmp_locMAF[,1] > 0 & tmp_locMAF[,2] == 0))#
-    #Sites that are polymorphic in pop 2, but not 1#
-    pwpriv <- c(pwpriv, sum(tmp_locMAF[,2] > 0 & tmp_locMAF[,1] == 0))#
-#
-    rm(tmp_locMAF)#
-}
-pwpriv
-locMAF
-pops <- colnames(locMAF)
-combos <- combn(pops,2)
-pwpriv_names <- c()
-pwpriv <- c()
-pair <- 1
-pwpriv_names <- c(pwpriv_names, paste("pwpriv_",combos[1,pair], combos[2,pair], collapse = "."), paste("pwpriv_", combos[2,pair], combos[1,pair]))
-pwpriv_names
-pwpriv_names <- c()
-pwpriv <- c()
-pwpriv_names <- c(pwpriv_names, paste0("pwpriv_",combos[1,pair],".",combos[2,pair]), paste0("pwpriv_", combos[2,pair],".",combos[1,pair]))
-pwpriv_names
-tmp_locMAF <- locMAF[,c(combos[1,pair], combos[2,pair])]
-tmp_locMAF[1:10,]
 tmp_locMAF <- tmp_locMAF[rowSums(tmp_locMAF > 0),]
 tmp_locMAF[1:10,]
 tmp_locMAF <- locMAF[,c(combos[1,pair], combos[2,pair])]
@@ -296,5 +174,293 @@ library(holoSimCell)
 ?doesGmapCombine
 ?pophist.aggregate
 ?holoStats
+Sys.unsetenv("GITHUB_PAT")
+options(timeout=9999999)
+Sys.sentenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS=TRUE)
+Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS=TRUE)
+devtools::install_github('stranda/holoSimCell')
+library(holoSimCell)
+?runFSC_step_agg3
+library(holoSimCell)#
+parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))#
+modchoice <- 1#
+load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[modchoice]]$file))#
+refpops <- pollenPulls[[modchoice]]$refs#
+avgCellsz <- mean(c(res(landscape$sumrast)))#
+#
+ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,#
+                       landscape=landscape,#
+                       refs=refpops,   #
+                       refsz=parms$ref_Ne,#
+                       lambda=parms$lambda,#
+                       mix=parms$mix,  #
+                       shortscale=parms$shortscale*avgCellsz,  #
+                       shortshape=parms$shortshape, #
+                       longmean=parms$longmean*avgCellsz,  #
+                       ysz=res(landscape$sumrast)[2], #
+                       xsz=res(landscape$sumrast)[1], #
+                       K = parms$Ne) #
+#
+gmap=make.gmap(ph$pophist,#
+               xnum=2, #number of cells to aggregate in x-direction#
+               ynum=2) #number of aggregate in the y-direction#
+#
+ph2 <- pophist.aggregate(ph,gmap=gmap)#
+#
+loc_parms <- data.frame(marker = "snp",#
+                        nloci = parms$nloci,           #
+                        seq_length = parms$seq_length,#
+                        mu = parms$mu)#
+preLGMparms <- data.frame(preLGM_t = parms$preLGM_t/parms$G,   #
+                          preLGM_Ne = parms$preLGM_Ne,#
+                         ref_Ne = parms$ref_Ne)#
+#
+out <- runFSC_step_agg3(ph = ph2,#
+                        l = landscape,#
+                        sample_n = 14,#
+                        preLGMparms = preLGMparms,#
+                        label = "test",#
+                        delete_files = TRUE,#
+                        num_cores = 1,#
+                        exec = "fsc26",#
+                        loc_parms = loc_parms,#
+                        found_Ne = parms$found_Ne,#
+                        gmap = gmap,#
+                        MAF = 0.01,#
+                        maxloc = 50000)
+out
+-1500+920480
+251958-13
+-1500+939581
+938081+251945+134072
+134071+251945
+1.2e6*0.01
+1.2e6*0.001
+1.2e6*0.005
+1.2e6*0.05
+1.2e6*0.01
+1.2e6*0.005
+1.2e6*0.001
+remotes::install_github("lter/lterdatasampler")#
+library(lterdatasampler)#
+library(tidyverse)#
+lterdatasampler::knz_bison %>%#
+  filter(rec_year == 1994 | rec_year == 1998) %>%#
+  add_count(animal_code) %>%#
+  filter(n == 2) %>%#
+  ggplot(aes(x = rec_year,#
+             y = animal_weight,#
+             group = animal_code#
+             )) +#
+  geom_line() +#
+  geom_point() +#
+  ylab("Animal weight") +#
+  xlab("Year") +#
+  theme_classic(base_size = 18) +#
+  theme(legend.position = "none") +#
+  NULL
+Sys.unsetenv("GITHUB_PAT")
+remotes::install_github("lter/lterdatasampler")#
+library(lterdatasampler)#
+library(tidyverse)#
+lterdatasampler::knz_bison %>%#
+  filter(rec_year == 1994 | rec_year == 1998) %>%#
+  add_count(animal_code) %>%#
+  filter(n == 2) %>%#
+  ggplot(aes(x = rec_year,#
+             y = animal_weight,#
+             group = animal_code#
+             )) +#
+  geom_line() +#
+  geom_point() +#
+  ylab("Animal weight") +#
+  xlab("Year") +#
+  theme_classic(base_size = 18) +#
+  theme(legend.position = "none") +#
+  NULL
+install.packages("credentials")
+library(credentials)
+set_github_pat(force_new = TRUE)
+remotes::install_github("lter/lterdatasampler")
+install.packages("gitcreds")
+gitcreds::gitcreds_set()
+remotes::install_github("lter/lterdatasampler")
+usethis::edit_r_environ()
+remotes::install_github("lter/lterdatasampler")
+citation(package = "mclust")
+citation(package = "bmixture")
+citation(package = "bayesmix")
+library(strataG)
+?fscRun
+?fscReadArp
+Fsttest <- c(0.001, 0.25, NA, 0.3)
+min(Fsttest)
+max(Fsttest)
+Fsttest <- c(0.001, 0.25, "temp", 0.3)
+max(Fsttest)
+min(Fsttest)
+max(as.numeric(Fsttest))
+max(as.numeric(Fsttest), na.rm = TRUE)
+Fsttest <- matrix(data = runif(81), nrow= 9, ncol = 9)
+Fsttest
+Fsttest[3,3] <- "jojo"
+Fsttest
+Fstrowmax <- apply(Fsttest,1,FUN=function(x){max(as.numeric(x), na.rm = TRUE)})
+Fstrowmin <- apply(Fsttest,1,FUN=function(x){min(as.numeric(x), na.rm = TRUE)})
+Fstrowmax
+Fstrowmin
+is.numeric(Fsttest)
+Fstrowtext <- apply(Fsttest, 1, FUN=function(x){sum(!is.numeric(x))})
+Fstrowtext
+is.numeric(Fsttest)
+is.numeric(Fsttest[1,])
+is.numeric(as.numeric(Fsttest[1,]))
+is.numeric(as.numeric(Fsttest[3,]))
+is.na(as.numeric(Fsttest[3,]))
+Fstrowtext <- apply(Fsttest, 1, FUN=function(x){sum(is.na(as.numeric(x)))})
+Fstrowtext
+remrows <- which(Fstrowtext > 0)
+Fstrowtext <- apply(Fsttest, 1, FUN=function(x){sum(is.na(as.numeric(x)))})
+Fstrowmax <- apply(Fsttest,1,FUN=function(x){max(as.numeric(x), na.rm = TRUE)})
+Fstrowmin <- apply(Fsttest,1,FUN=function(x){min(as.numeric(x), na.rm = TRUE)})
+remrows <- which(Fstrowtext > 0)
+remrows <- c(remrows, which(Fstrowmax > 1)
+remrows <- c(remrows, which(Fstrowmin < 0))
+print(paste("There are",length(remrows),"rows to remove"))
+remrows
+?install.packages()
+library(holoSimCell)
+?makePopdf
+parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))#
+modchoice <- 1#
+load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[modchoice]]$file))#
+refpops <- pollenPulls[[modchoice]]$refs#
+avgCellsz <- mean(c(res(landscape$sumrast)))#
+#
+ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,#
+                       landscape=landscape,#
+                       refs=refpops,   #
+                       refsz=parms$ref_Ne,#
+                       lambda=parms$lambda,#
+                       mix=parms$mix,  #
+                       shortscale=parms$shortscale*avgCellsz,  #
+                       shortshape=parms$shortshape, #
+                       longmean=parms$longmean*avgCellsz,  #
+                       ysz=res(landscape$sumrast)[2], #
+                       xsz=res(landscape$sumrast)[1], #
+                       K = parms$Ne) #
+#
+gmap=make.gmap(ph$pophist,#
+               xnum=2, #number of cells to aggregate in x-direction#
+               ynum=2) #number of aggregate in the y-direction#
+#
+ph2 <- pophist.aggregate(ph,gmap=gmap)#
+#
+loc_parms <- data.frame(marker = "snp",#
+                        nloci = parms$nloci,           #
+                        seq_length = parms$seq_length,#
+                        mu = parms$mu)#
+preLGMparms <- data.frame(preLGM_t = parms$preLGM_t/parms$G,   #
+                          preLGM_Ne = parms$preLGM_Ne,#
+                         ref_Ne = parms$ref_Ne)#
+#
+out <- runFSC_step_agg3(ph = ph2,#
+                        l = landscape,#
+                        sample_n = 14,#
+                        preLGMparms = preLGMparms,#
+                        label = "test",#
+                        delete_files = TRUE,#
+                        num_cores = 1,#
+                        exec = "fsc26",#
+                        loc_parms = loc_parms,#
+                        found_Ne = parms$found_Ne,#
+                        gmap = gmap,#
+                        MAF = 0.01,#
+                        maxloc = 50000)#
+popDF <- makePopdf(landscape,"cell")
+popDF
+?runFSC_step_agg3
+parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))#
+modchoice <- 1#
+load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[modchoice]]$file))#
+refpops <- pollenPulls[[modchoice]]$refs#
+avgCellsz <- mean(c(res(landscape$sumrast)))#
+#
+ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,#
+                       landscape=landscape,#
+                       refs=refpops,   #
+                       refsz=parms$ref_Ne,#
+                       lambda=parms$lambda,#
+                       mix=parms$mix,  #
+                       shortscale=parms$shortscale*avgCellsz,  #
+                       shortshape=parms$shortshape, #
+                       longmean=parms$longmean*avgCellsz,  #
+                       ysz=res(landscape$sumrast)[2], #
+                       xsz=res(landscape$sumrast)[1], #
+                       K = parms$Ne) #
+#
+gmap=make.gmap(ph$pophist,#
+               xnum=2, #number of cells to aggregate in x-direction#
+               ynum=2) #number of aggregate in the y-direction#
+#
+ph2 <- pophist.aggregate(ph,gmap=gmap)#
+#
+loc_parms <- data.frame(marker = "snp",#
+                        nloci = parms$nloci,           #
+                        seq_length = parms$seq_length,#
+                        mu = parms$mu)#
+preLGMparms <- data.frame(preLGM_t = parms$preLGM_t/parms$G,   #
+                          preLGM_Ne = parms$preLGM_Ne,#
+                         ref_Ne = parms$ref_Ne)#
+#
+out <- runFSC_step_agg3(ph = ph2,#
+                        l = landscape,#
+                        sample_n = 14,#
+                        preLGMparms = preLGMparms,#
+                        label = "test",#
+                        delete_files = TRUE,#
+                        num_cores = 1,#
+                        exec = "fsc26",#
+                        loc_parms = loc_parms,#
+                        found_Ne = parms$found_Ne,#
+                        gmap = gmap,#
+                        MAF = 0.01,#
+                        maxloc = 50000)
+class(loc_parms)
+loc_parms
+popDF
+?makePopdf
+?runFSC_step_agg3
+gmap=make.gmap(ph$pophist,#
+               xnum=1, #number of cells to aggregate in x-direction#
+               ynum=1) #number of aggregate in the y-direction
+gmap
+ph2 <- pophist.aggregate(ph,gmap=gmap)
+loc_parms <- data.frame(marker = "snp",#
+                        nloci = parms$nloci,           #
+                        seq_length = parms$seq_length,#
+                        mu = parms$mu)#
+preLGMparms <- data.frame(preLGM_t = parms$preLGM_t/parms$G,   #
+                          preLGM_Ne = parms$preLGM_Ne,#
+                         ref_Ne = parms$ref_Ne)#
+#
+out <- runFSC_step_agg3(ph = ph2,#
+                        l = landscape,#
+                        sample_n = 14,#
+                        preLGMparms = preLGMparms,#
+                        label = "test",#
+                        delete_files = TRUE,#
+                        num_cores = 1,#
+                        exec = "fsc26",#
+                        loc_parms = loc_parms,#
+                        found_Ne = parms$found_Ne,#
+                        gmap = gmap,#
+                        MAF = 0.01,#
+                        maxloc = 50000)
+ph2$coalhist
+ls()
+out[1:10,1:10]
+?holoStats
 setwd("~/Desktop/GitHub/holoSimCell")
 devtools::document()
+?runFSC_step_agg3

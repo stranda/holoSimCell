@@ -2,7 +2,7 @@
 #'
 #' Generates a population data frame with information on site IDs and cell or geographic coordinates of sampled populations
 #'
-#' @param l the landscape object used in the forward simulation
+#' @param l the landscape object used in the forward demographic simulation
 #' @param system specifies the coordinate system to use, either cells (x and y positions on the landscape) or geographic coordinates (latitude and longitude)
 #'
 #' @details
@@ -62,7 +62,7 @@
 #'                         maxloc = 50000)
 #' popDF <- makePopdf(landscape,"cell")
 #'
-#' @seealso \code{\link{holoStats}}
+#' @seealso \code{\link{holoStats}}, \code{\link{ashSetupLandscape}}
 #' @export
 
 

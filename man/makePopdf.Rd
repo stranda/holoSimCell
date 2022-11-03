@@ -7,7 +7,7 @@
 makePopdf(l, system = c("geo", "cell")[1])
 }
 \arguments{
-\item{l}{the landscape object used in the forward simulation}
+\item{l}{the landscape object used in the forward demographic simulation}
 
 \item{system}{specifies the coordinate system to use, either cells (x and y positions on the landscape) or geographic coordinates (latitude and longitude)}
 }
@@ -73,5 +73,5 @@ popDF <- makePopdf(landscape,"cell")
 
 }
 \seealso{
-\code{\link{holoStats}}
+\code{\link{holoStats}}, \code{\link{ashSetupLandscape}}
 }

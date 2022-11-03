@@ -2,22 +2,22 @@
 #'
 #' Takes a population history from the forward demographic simulation and parameterizes a coalescent simulation in fastsimcoal (Excoffier et al. 2013)
 #'
-#' @param ph A pophist object, output by the forward demographic simulation function: \code{getpophist2.cells}.  Includes slots: \code{pophist}, \code{Nvecs}, \code{tmat}, \code{struct}, \code{hab_suit}, \code{coalhist}, \code{popslst}, \code{old_hab_suit}, \code{old_tmat}, \code{gmap}.
+#' @param ph A pophist object, output by the forward demographic simulation function: \code{getpophist2.cells}.  Includes slots: \code{pophist}, \code{Nvecs}, \code{tmat}, \code{struct}, \code{hab_suit}, \code{coalhist}, \code{popslst}, \code{old_hab_suit}, \code{old_tmat}, \code{gmap}.  Cells in typical landscapes (>400 cells) should be aggregated after the forward-time simulation using the functions \code{make.gmap} and \code{pophist.aggregate} to improve computational efficiency. 
 #' @param l An object that defines the simulation landscape from the forward demographic simulation, includes slots: \code{details}, \code{occupied}, \code{empty}, \code{sampled}, \code{hab_suit}, \code{sumrast}, \code{samplocsrast}, \code{samplocs}, \code{sampdf}, \code{NAmask}.
 #' @param sample_n The number of sampled (diploid) individuals per population.  Assumed to be equal across all sampled populations.
-#' @param preLGMparms Parameters related to the size and history of populations in glacial refugia: \code{preLGM_t}, \code{preLGM_Ne}, \code{ref_Ne}
-#' @param label A text string specifying a filename prefix for output from fastsimcoal.
-#' @param delete_files A logical (TRUE/FALSE) indicating whether temporary simulation files and directories from fastsimcoal should be deleted after genetic data are read into R.
+#' @param preLGMparms A one row data frame of parameters related to the size and history of populations in glacial refugia: \code{preLGM_t} (time in generations at which refugial populations are assumed to diverge, e.g., previous interglacial), \code{preLGM_Ne} (effective population size in the ancestral population), \code{ref_Ne} (effective size of populations in refugial cells).
+#' @param label A text string specifying a filename prefix for output from fastsimcoal.  Note that hyphens (-) should be avoided; they are converted to periods (.) in files output by fastsimcoal.  In order to delete files with \code{strataG::fscCleanup}, avoid hyphens in file names.
+#' @param delete_files A logical (TRUE/FALSE) indicating whether temporary simulation files and directories from fastsimcoal should be deleted after genetic data are read into R.  If TRUE, \code{strataG::fscCleanup} is used to remove files output during the coalescent simulation.
 #' @param num_cores Number of processors to use for fastsimcoal simulations.
 #' @param exec The filename for the fastsimcoal executable.
-#' @param loc_parms Parameters related to simulated genetic markers: \code{marker}, \code{nloci}, \code{seq_length}, \code{mu}.
-#' @param found_Ne The effective population size associated with newly colonized populations in the coalescent simulation.
+#' @param loc_parms A one row data frame of parameters providing details on the simulated genetic markers.  Contains the following named elements: \code{marker} (the type of marker to simulate, e.g., "snp"), \code{nloci} (the final number of loci included in the output dataset), \code{seq_length} (the assumed sequence length of simulated loci, if \code{marker} = "snp"), \code{mu} (the mutation rate for the simulated marker).
+#' @param found_Ne A parameter describing the effective population size associated with newly colonized populations in the coalescent simulation.
 #' @param gmap A map specifying a scheme for aggregating cells from the finer grained forward demographic simulation for more efficient coalescent simulation.
 #' @param MAF A numeric value specifying a minor allele frequency filter.  SNP loci with minor alleles below this frequency are excluded from output.
-#' @param maxloc The maximum number of marker loci to attempt to simulate in fastsimcoal.  If too few variable sites are generated, additional markers are simulated up to this value.
+#' @param maxloc The maximum number of loci to attempt to simulate in fastsimcoal.  If too few variable sites are generated, additional markers are simulated up to this value.
 #'
 #' @details 
-#' Provides a wrapper for several helpful functions from the \code{strataG} R package.  Input parameters include a pophist object (from \code{getpophist2.cells}), a landscape object, and parameter values associated with refugial populations and genetic markers. Population size changes are limited to step-changes from founding population size (\code{found_Ne}) to the population size at the end of the forward simulation (from elements of \code{ph$Nvecs}). To improve computational efficiency, coalescent simulations are conducted for aggregated groups of cells, with an aggregation scheme defined by the function \code{make.gmap}. \emph{Note that the fastsimcoal executable must be installed and in a directory in the user's $PATH for coalescent simulations.}
+#' Provides a wrapper for several helpful functions from the \code{strataG} R package.  Input parameters include a pophist object (from \code{getpophist2.cells}), a landscape object, and parameter values associated with refugial populations and genetic markers. Population size changes are limited to step-changes from founding population size (\code{found_Ne}) to the population size at the end of the forward simulation (from elements of \code{ph$Nvecs}). To improve computational efficiency, coalescent simulations are conducted for aggregated groups of cells, with an aggregation scheme defined by the function \code{make.gmap}. SNP data output by this function are subsampled to retain only one variable position from each simulated DNA segment (locus).  \emph{Note that the fastsimcoal executable must be installed and in a directory in the user's $PATH for coalescent simulations.}
 #'
 #' @return
 #' Returns a data frame of individual SNP genotypes from fastsimcoal.  The first column of this data frame provides an individual ID, the second specifies the population or deme associated with the individual, and columns that follow provide diploid genotypes for simulated individuals (in two-column format).
@@ -72,7 +72,7 @@
 #'                         MAF = 0.01,
 #'                         maxloc = 50000)
 #'
-#' @seealso \code{\link[strataG]{fscTutorial}}, \code{\link[strataG]{fscWrite}}, \code{\link[strataG]{fscRun}}, \code{\link[strataG]{fscReadArp}}, \code{\link{getpophist2.cells}}, \code{\link{pophist.aggregate}}, \code{\link{make.gmap}}, \url{http://cmpg.unibe.ch/software/fastsimcoal26/man/fastsimcoal26.pdf}
+#' @seealso \code{\link[strataG]{fscTutorial}}, \code{\link[strataG]{fscWrite}}, \code{\link[strataG]{fscRun}}, \code{\link[strataG]{fscReadArp}}, \code{\link{getpophist2.cells}}, \code{\link{pophist.aggregate}}, \code{\link{make.gmap}}, \code{\link{holoStats}}, \url{http://cmpg.unibe.ch/software/fastsimcoal26/man/fastsimcoal26.pdf}
 #'
 #' @export
 
