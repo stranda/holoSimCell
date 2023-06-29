@@ -14,13 +14,13 @@
 #' \item{"Frequency down-weighted marker values", calculated as the sum (across loci) of location-specific minor allele frequencies dividied by global minor allele frequency (see Schonswetter & Tribsch 2005)}
 #' \item{Mean and standard deviation of minor allele counts per locus}
 #' \item{Mean and standard deviations of Euclidean distances in spatial PCA space, considering within population comparisons (see Alvarado-Serrano & Hickerson 2016)}
-#' \item{Levels of linkage disequilibrium among loci within populations (using correlation in allele frequencies within individuals, r^2)}
+#' \item{Levels of linkage disequilibrium among loci within populations (using correlation in allele frequencies within individuals, r^2; Hill 1981)}
 #' }
 #'
 #' \itemize{
 #' Statistics measuring levels of genetic differentiation between populations:
-#' \item{Pairwise Fst from local and combined expected heterozygosity (i.e., Hs and Ht)}
-#' \item{Pairwise Nei's genetic distance}
+#' \item{Pairwise Fst (Wright 1949) from local and combined expected heterozygosity (i.e., Hs and Ht)}
+#' \item{Pairwise Nei's genetic distance (Nei 1973)}
 #' \item{Mean and standard deviation of pairwise differences in minor allele counts per locus}
 #' \item{Mean and standard deviations of Euclidean distances in spatial PCA space, considering between population comparisons (see Alvarado-Serrano & Hickerson 2016)}
 #' \item{Pairwise Bray-Curtis dissimilarity calculated from Euclidean distance in allele frequencies between populations}
@@ -33,15 +33,15 @@
 #' \item{Summaries of polynomial regressions between latitude / longitude and measures of diversity (expected heterozygosity, principal component scores on the first 3 axes, LD)}
 #' \item{Summaries of the Geographic Spectrum of Shared Alleles (Harpending's raggedness index, GSSA mean, and GSSA variance per population; see Alvarado-Serrano & Hickerson 2018)}
 #' \item{Summaries of spatial autocorrelation in the site frequency spectrum (see Smouse & Peakall 1999 and Alvarado-Serrano & Hickerson 2016)}
-#' \item{Measures of spatial autocorrelation in genetic data,  including Moran's I (see Moran 1950) and the beta, sill, nuggget, and range of the variogram}
+#' \item{Measures of spatial autocorrelation in genetic data,  including Moran's I (see Moran 1950) and the beta, sill, nugget, and range of the variogram}
 #' \item{Summaries of Monmonier's algorithm - mean and standard deviation of path length, x and y positions of path vertices (see Alvarado-Serrano & Hickerson 2016)}
 #' \item{Pairwise directionality index (see Peter & Slatkin 2013)}
-#' \item{Per population betweenness and closeness centralities from a population graph calculated from SNP genotype data}
+#' \item{Per population betweenness and closeness centralities (Freeman 1979) from a population graph calculated from SNP genotype data}
 #' }
 #'
 #' @return 
 #' \itemize{
-#' Returns a one-row dataframe with summary statistics calculated from SNP data. Summaries in the output are named as follows:
+#' Returns a one-row dataframe with variable numbers of columns, representing summary statistics calculated from SNP data. Summaries in the output are named as follows:
 #' \item{\code{tot_SNPs}} {The total number of polymorphic sites in the dataset, this should equal the \code{nloci} argument to \code{runFSC_step_agg3()}, and is not used in subsequent analyses}
 #' \item{\code{S.<POP_ID>}} {The number of polymorphic SNP loci in each population.}
 #' \item{\code{pS.<POP_ID>}} {The number of private polymorphic SNP loci (SNPs that are only variable in the focal population) per population.}
@@ -87,9 +87,8 @@
 #' @examples
 #' library(holoSimCell)
 #' parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))
-#' modchoice <- 1
-#' load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[modchoice]]$file))
-#' refpops <- pollenPulls[[modchoice]]$refs
+#' load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[1]]$file))
+#' refpops <- pollenPulls[[1]]$refs
 #' avgCellsz <- mean(c(res(landscape$sumrast)))
 #'
 #' ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,
@@ -137,7 +136,7 @@
 #'
 #' stats <- holoStats(out, popDF, cores = 1)
 #'
-#' @seealso \code{\link{makePopdf}}, \code{\link{run_FSC_step_agg3}}, \code{\link[strataG]{privateAlleles}}, \code{\link[stats]{prcomp}}, \code{\link[adegenet]{spca}}, \code{\link[LDcorSV]{LD.Measures}}, \code{\link[igraph]{betweenness}}, \code{\link[igraph]{closeness}}, \code{\link[popgraph]{popgraph}}, \code{\link[vegan]{vegdist}}, \url{https://onlinelibrary.wiley.com/doi/full/10.1111/evo.12202}, \url{https://www.nature.com/articles/6885180}, \url{https://www.biorxiv.org/content/10.1101/457556v1}, \url{https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12489}, \url{https://onlinelibrary.wiley.com/doi/abs/10.2307/25065429}, \url{https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1365-294X.2010.04748.x}
+#' @seealso \code{\link{makePopdf}}, \code{\link{run_FSC_step_agg3}}, \code{\link[strataG]{privateAlleles}}, \code{\link[stats]{prcomp}}, \code{\link[adegenet]{spca}}, \code{\link[LDcorSV]{LD.Measures}}, \code{\link[igraph]{betweenness}}, \code{\link[igraph]{closeness}}, \code{\link[popgraph]{popgraph}}, \code{\link[vegan]{vegdist}}, \url{https://onlinelibrary.wiley.com/doi/full/10.1111/evo.12202}, \url{https://www.nature.com/articles/6885180}, \url{https://www.biorxiv.org/content/10.1101/457556v1}, \url{https://doi.org/10.1017/S0016672300020553}, \url{https://onlinelibrary.wiley.com/doi/pdf/10.1111/j.1469-1809.1949.tb02451.x}, \url{https://www.pnas.org/doi/10.1073/pnas.70.12.3321}, \url{https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12489}, \url{https://onlinelibrary.wiley.com/doi/abs/10.2307/25065429}, \url{https://doi.org/10.1016/0378-8733(78)90021-7}, \url{https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1365-294X.2010.04748.x}
 #' @export
 #' 
 #holostats function

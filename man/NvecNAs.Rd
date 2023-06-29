@@ -2,7 +2,7 @@
 % Please edit documentation in R/Nvec_NAs.R
 \name{NvecNAs}
 \alias{NvecNAs}
-\title{converts cells in Nvec form to NA if their underlying hab suit is NA for that time point}
+\title{Convert population size in unsuitable cells to NA}
 \usage{
 NvecNAs(ph, l)
 }
@@ -11,6 +11,52 @@ NvecNAs(ph, l)
 
 \item{l}{landscape containing the rasters}
 }
+\value{
+a pophist object where population size in unsuitable cells at each time point is recorded as NA
+}
 \description{
 converts cells in Nvec form to NA if their underlying hab suit is NA for that time point
+}
+\details{
+returns a pophist object where the Nvecs matrix (population size through time) has been altered such that population size in glaciated cells is recorded as NA. All other components of the returned pophist object are unaltered from \code{ph}. Useful for calculation of biotic velocity using \code{enmSdm::bioticVelocity()}.
+}
+\examples{
+library(holoSimCell)
+parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))
+load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[1]]$file))
+refpops <- pollenPulls[[1]]$refs
+avgCellsz <- mean(c(res(landscape$sumrast)))
+
+ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,
+                       landscape=landscape,
+                       refs=refpops,   
+                       refsz=parms$ref_Ne,
+                       lambda=parms$lambda,
+                       mix=parms$mix,  
+                       shortscale=parms$shortscale*avgCellsz,  
+                       shortshape=parms$shortshape, 
+                       longmean=parms$longmean*avgCellsz,  
+                       ysz=res(landscape$sumrast)[2], 
+                       xsz=res(landscape$sumrast)[1], 
+                       K = parms$Ne) 
+
+times_1k <- seq(-21000,0,by=990)
+   
+pharray <- pophistToArray(NvecNAs(ph, landscape), times = times_1G)
+   
+metrics <- c('centroid', 'nsQuants', 'summary')
+
+BV_permill_all <- bioticVelocity(
+  x=pharray$pophistAsArray,
+  times = times_1G,
+  atTimes = times_1k,
+  longitude=pharray$longitude,
+  latitude=pharray$latitude,
+  metrics=metrics,
+  quants=c(0.05, 0.1, 0.9, 0.95),
+  onlyInSharedCells = FALSE)
+
+}
+\seealso{
+\code{\link{getpophist2.cells}}, \code{\link{pophistToArray}}, \code{\link[enmSdm]{bioticVelocity}}
 }

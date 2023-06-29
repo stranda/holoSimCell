@@ -115,9 +115,8 @@ Conducts forward simulation of landscape colonization from a set of refugial pop
 \examples{
 library(holoSimCell)
 parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))
-modchoice <- 1
-load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[modchoice]]$file))
-refpops <- pollenPulls[[modchoice]]$refs
+load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[1]]$file))
+refpops <- pollenPulls[[1]]$refs
 avgCellsz <- mean(c(res(landscape$sumrast)))
 
 ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,

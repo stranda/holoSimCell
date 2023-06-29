@@ -1,336 +1,228 @@
-tmp_locMAF <- tmp_locMAF[rowSums(tmp_locMAF > 0),]
-tmp_locMAF[1:10,]
-tmp_locMAF <- locMAF[,c(combos[1,pair], combos[2,pair])]
-rowSums(tmp_locMAF)
-sum(rowSums(tmp_locMAF) == 0)
-dim(tmp_locMAF)
-pwpriv_names <- c(pwpriv_names, paste0("pwpriv_",combos[1,pair],".",combos[2,pair]), paste0("pwpriv_", combos[2,pair],".",combos[1,pair]))
-tmp_locMAF <- locMAF[,c(combos[1,pair], combos[2,pair])]
-tmp_locMAF <- tmp_locMAF[rowSums(tmp_locMAF > 0),]
-dim(tmp_locMAF)
-pwpriv <- c(pwpriv, sum(tmp_locMAF[,1] > 0 & tmp_locMAF[,2] == 0))
-pwpriv <- c(pwpriv, sum(tmp_locMAF[,2] > 0 & tmp_locMAF[,1] == 0))
-pwpriv
-tmp_locMAF[tmp_locMAF[,2] == 0,]
-sum(locMAF == 1)
-tmp_loc_MAF[,1] > 0
-tmp_locMAF[,1] > 0
-tmp_locMAF
-N.LA
-N.UNK
-demes
-parms
-params
-privateSNP
-privateAlleles(df2gtypes(fscout, ploidy=2))
-dim(privateAlleles(df2gtypes(fscout, ploidy=2)))
-rowSums(locMAF) == 0
-rowSums(locMAF == 0)
-max(rowSums(locMAF == 0))
-114+100+94+26+25+50
+mypal <- colorRamps::matlab.like2(ncol(matrix[,-1]))
+barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), col = mypal, names = matrix$Sample, las = 3)
+mypal <- grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6)
+barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), col = mypal, names = matrix$Sample, las = 3)
+legend("topleft", ncol = 3, cex = 0.75, bty = "n", legend = colnames(matrix[,-1][,order(colnames(matrix[,-1]))]), fill = mypal)
+mypal <- rev(grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6))
+barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), col = mypal, names = matrix$Sample, las = 3)
+legend("topleft", ncol = 3, cex = 0.75, bty = "n", legend = colnames(matrix[,-1][,order(colnames(matrix[,-1]))]), fill = mypal)
+mypal <- grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6)
+mylabs <- colnames(matrix[,-1][,order(colnames(matrix[,-1]))])
+mypal[mylabs == "Petromyzontidae_unclassified"] <- "black"
+mypal[mylabs == "Salvelinus_namaycush"] <- "white"
+barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), col = mypal, names = matrix$Sample, las = 3)
+legend("topleft", ncol = 3, cex = 0.75, bty = "n", legend = colnames(matrix[,-1][,order(colnames(matrix[,-1]))]), fill = mypal)
+par(mar = c(10,5,2,2))
+mypal <- grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6)
+mylabs <- colnames(matrix[,-1][,order(colnames(matrix[,-1]))])
+mypal[mylabs == "Petromyzontidae_unclassified"] <- "black"
+mypal[mylabs == "Salvelinus_namaycush"] <- "grey"
+barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), col = mypal, names = gsub(".12S","",matrix$Sample), las = 3, cex.lab = 0.7)
+legend("topleft", ncol = 3, cex = 0.75, bty = "n", legend = colnames(matrix[,-1][,order(colnames(matrix[,-1]))]), fill = mypal)
+matrix[matrix$Sample == "25_NoBlock_HP5.12S",]
+par(mar = c(10,5,2,2))
+mypal <- grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6)
+mylabs <- colnames(matrix[,-1][,order(colnames(matrix[,-1]))])
+mypal[mylabs == "Petromyzontidae_unclassified"] <- "black"
+mypal[mylabs == "Salvelinus_namaycush"] <- "grey"
+barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), col = mypal, names = gsub(".12S","",matrix$Sample), las = 3, cex.axis = 0.7)
+legend("topleft", ncol = 3, cex = 0.75, bty = "n", legend = colnames(matrix[,-1][,order(colnames(matrix[,-1]))]), fill = mypal)
+par(mar = c(10,5,2,2))
+mypal <- grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6)
+mylabs <- colnames(matrix[,-1][,order(colnames(matrix[,-1]))])
+mypal[mylabs == "Petromyzontidae_unclassified"] <- "black"
+mypal[mylabs == "Salvelinus_namaycush"] <- "grey"
+xlabels <- gsub(".12S","",gsub("PMBlock_", "", matrix$Sample))
+barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), col = mypal, names = xlabels, las = 3, cex.axis = 0.7)
+legend("topleft", ncol = 3, cex = 0.75, bty = "n", legend = colnames(matrix[,-1][,order(colnames(matrix[,-1]))]), fill = mypal)
+info
+library(tidyverse)
+library(readxl)
+options(scipen = 999)  # removing scientific notation
+matrix <- read_excel("./Output/12S_SL_BP_Micro.mothur.community.matrix.xls")
+head(matrix)
+# change name of first column to indicate the sample
+colnames(matrix)[1] <- "Sample"
+extraction <- sapply(matrix$Sample, FUN = function(x){tail(strsplit(x,split = "_")[[1]],1)})
+matrix <- matrix[order(extraction),]
+matrix
+par(mar = c(10,5,2,2))
+mypal <- grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6)
+mylabs <- colnames(matrix[,-1][,order(colnames(matrix[,-1]))])
+mypal[mylabs == "Petromyzontidae_unclassified"] <- "black"
+mypal[mylabs == "Salvelinus_namaycush"] <- "grey"
+xlabels <- gsub(".12S","",gsub("PMBlock_", "", matrix$Sample))
+barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), col = mypal, names = xlabels, las = 3, cex.axis = 0.7)
+legend("topleft", ncol = 3, cex = 0.75, bty = "n", legend = colnames(matrix[,-1][,order(colnames(matrix[,-1]))]), fill = mypal)
+legend("topright", ncol = 1, cex = 0.75, bty = "n", legend = colnames(matrix[,-1][,order(colnames(matrix[,-1]))]), fill = mypal)
+?order
+cycles <- sapply(matrix$Sample, FUN = function(x){strsplit(x,split = "_")[[1]][1]})
+cycles
+library(tidyverse)
+library(readxl)
+options(scipen = 999)  # removing scientific notation
+matrix <- read_excel("./Output/12S_SL_BP_Micro.mothur.community.matrix.xls")
+head(matrix)
+# change name of first column to indicate the sample
+colnames(matrix)[1] <- "Sample"
+cycles <- sapply(matrix$Sample, FUN = function(x){strsplit(x,split = "_")[[1]][1]})
+extraction <- sapply(matrix$Sample, FUN = function(x){tail(strsplit(x,split = "_")[[1]],1)})
+matrix <- matrix[order(cycles,extraction),]
+par(mar = c(10,5,2,2))
+mypal <- grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6)
+mylabs <- colnames(matrix[,-1][,order(colnames(matrix[,-1]))])
+mypal[mylabs == "Petromyzontidae_unclassified"] <- "black"
+mypal[mylabs == "Salvelinus_namaycush"] <- "grey"
+xlabels <- gsub(".12S","",gsub("PMBlock_", "", matrix$Sample))
+barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), col = mypal, names = xlabels, las = 3, cex.axis = 0.7)
+legend("topleft", ncol = 3, cex = 0.75, bty = "n", legend = colnames(matrix[,-1][,order(colnames(matrix[,-1]))]), fill = mypal)
+legend("topright", ncol = 1, cex = 0.75, bty = "n", legend = colnames(matrix[,-1][,order(colnames(matrix[,-1]))]), fill = mypal)
+legend("topright", ncol = 1, cex = 0.5, bty = "n", legend = colnames(matrix[,-1][,order(colnames(matrix[,-1]))]), fill = mypal)
+legend("topright", ncol = 1, cex = 0.65, bty = "n", legend = colnames(matrix[,-1][,order(colnames(matrix[,-1]))]), fill = mypal)
+barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), col = mypal, names = xlabels, las = 3, cex.label = 0.7)
+?barplot
+barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), col = mypal, names = xlabels, las = 3, cex.names = 0.7)
+barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), col = mypal, names = xlabels, las = 3, cex.names = 0.8)
+legend("topright", ylab = "Sequence Reads", ncol = 1, cex = 0.65, bty = "n", legend = colnames(matrix[,-1][,order(colnames(matrix[,-1]))]), fill = mypal)
+barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), ylab = "Sequence Reads", col = mypal, names = xlabels, las = 3, cex.names = 0.8)
+?par
+par(mar = c(10,5,2,2), fin = c(12,6))
+mypal <- grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6)
+mylabs <- colnames(matrix[,-1][,order(colnames(matrix[,-1]))])
+mypal[mylabs == "Petromyzontidae_unclassified"] <- "black"
+mypal[mylabs == "Salvelinus_namaycush"] <- "grey"
+xlabels <- gsub(".12S","",gsub("PMBlock_", "", matrix$Sample))
+barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), ylab = "Sequence Reads", col = mypal, names = xlabels, las = 3, cex.names = 0.8)
+par(mar = c(10,5,2,2), fin = c(12,6))
+mypal <- grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6)
+mylabs <- colnames(matrix[,-1][,order(colnames(matrix[,-1]))])
+mypal[mylabs == "Petromyzontidae_unclassified"] <- "black"
+mypal[mylabs == "Salvelinus_namaycush"] <- "grey"
+xlabels <- gsub(".12S","",gsub("PMBlock_", "", matrix$Sample))
+barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), ylab = "Sequence Reads", col = mypal, names = xlabels, las = 3, cex.names = 0.8)
+legend("topright", ncol = 1, cex = 0.65, bty = "n", legend = colnames(matrix[,-1][,order(colnames(matrix[,-1]))]), fill = mypal)
+library(tidyverse)
+library(readxl)
+options(scipen = 999)  # removing scientific notation
+#matrix <- read_excel("./Output/12S_SL_BP_Micro.mothur.community.matrix.xls")
+matrix <- read_excel("~/Downloads/12S_SL_BP_Micro.mothur.community.matrix.xls")
+head(matrix)
+# change name of first column to indicate the sample
+colnames(matrix)[1] <- "Sample"
+cycles <- sapply(matrix$Sample, FUN = function(x){strsplit(x,split = "_")[[1]][1]})
+extraction <- sapply(matrix$Sample, FUN = function(x){tail(strsplit(x,split = "_")[[1]],1)})
+matrix <- matrix[order(cycles,extraction),]
+par(mar = c(10,5,2,2), fin = c(12,6))
+mypal <- grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6)
+mylabs <- colnames(matrix[,-1][,order(colnames(matrix[,-1]))])
+mypal[mylabs == "Petromyzontidae_unclassified"] <- "black"
+mypal[mylabs == "Salvelinus_namaycush"] <- "grey"
+xlabels <- gsub(".12S","",gsub("PMBlock_", "", matrix$Sample))
+barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), ylab = "Sequence Reads", col = mypal, names = xlabels, las = 3, cex.names = 0.8)
+legend("topright", ncol = 1, cex = 0.65, bty = "n", legend = colnames(matrix[,-1][,order(colnames(matrix[,-1]))]), fill = mypal)
+#The plot is very wide... probably needs to be the width of your screen
+par(mar = c(10,5,2,2))
+mypal <- grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6)
+mylabs <- colnames(matrix[,-1][,order(colnames(matrix[,-1]))])
+mypal[mylabs == "Petromyzontidae_unclassified"] <- "black"
+mypal[mylabs == "Salvelinus_namaycush"] <- "grey"
+xlabels <- gsub(".12S","",gsub("PMBlock_", "", matrix$Sample))
+barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), ylab = "Sequence Reads", col = mypal, names = xlabels, las = 3, cex.names = 0.8)
+legend("topright", ncol = 1, cex = 0.65, bty = "n", legend = colnames(matrix[,-1][,order(colnames(matrix[,-1]))]), fill = mypal)
+mypal <- grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6)
+mylabs <- colnames(matrix[,-1][,order(colnames(matrix[,-1]))])
+mypal[mylabs == "Petromyzontidae_unclassified"] <- "black"
+mypal[mylabs == "Salvelinus_namaycush"] <- "grey"
+xlabels <- gsub(".12S","",gsub("PMBlock_", "", matrix$Sample))
+barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), ylab = "Sequence Reads", col = mypal, names = xlabels, las = 3, cex.names = 0.8)
+legend("topright", ncol = 1, cex = 0.65, bty = "n", legend = colnames(matrix[,-1][,order(colnames(matrix[,-1]))]), fill = mypal)
+barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), ylab = "Sequence Reads", col = mypal, names = xlabels, las = 3, cex.names = 0.8)
+legend("topright", ncol = 1, cex = 0.65, bty = "n", legend = colnames(matrix[,-1][,order(colnames(matrix[,-1]))]), fill = mypal)
+dev.size()
+pdf("Barplot_12Sbp_NanoRun.pdf", height = 10, width = 24)#
+par(mar = c(10,5,2,2))#
+mypal <- grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6)#
+mylabs <- colnames(matrix[,-1][,order(colnames(matrix[,-1]))])#
+mypal[mylabs == "Petromyzontidae_unclassified"] <- "black"#
+mypal[mylabs == "Salvelinus_namaycush"] <- "grey"#
+xlabels <- gsub(".12S","",gsub("PMBlock_", "", matrix$Sample))#
+barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), ylab = "Sequence Reads", col = mypal, names = xlabels, las = 3, cex.names = 0.8)#
+legend("topright", ncol = 1, cex = 0.65, bty = "n", legend = colnames(matrix[,-1][,order(colnames(matrix[,-1]))]), fill = mypal)#
+dev.off()
+pdf("Barplot_12Sbp_MicroRun.pdf", height = 10, width = 24)#
+par(mar = c(10,5,2,2))#
+mypal <- grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6)#
+mylabs <- colnames(matrix[,-1][,order(colnames(matrix[,-1]))])#
+mypal[mylabs == "Petromyzontidae_unclassified"] <- "black"#
+mypal[mylabs == "Salvelinus_namaycush"] <- "grey"#
+xlabels <- gsub(".12S","",gsub("PMBlock_", "", matrix$Sample))#
+barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), ylab = "Sequence Reads", col = mypal, names = xlabels, las = 3, cex.names = 0.8)#
+legend("topright", ncol = 1, cex = 0.65, bty = "n", legend = colnames(matrix[,-1][,order(colnames(matrix[,-1]))]), fill = mypal)#
+dev.off()
+3618-2
+3616/2
 library(strataG)
-fscRun
-\\
-readArp
-fscReadArp
-.fscFormatGenotypes
-?demes
-fscSettingsDemes
-?fscSettingsDemes
-?fscDeme
-install.packages("Demerelate")
-devtools::install_github("jehangiramjad/tslib")
-Sys.unsetenv("GITHUB_PAT")
-devtools::install_github("jehangiramjad/tslib")
-devtools::install_github("thelinkan/tslib")
-devtools::install_github("armstrtw/fts")
-options(timeout=9999999)
-devtools::install_github("armstrtw/fts")
-1.09/0.62
-0.62/1.09
-1.09/0.59
-50000*24
-580036-1500
-601431-1500
-tmp <- read.table("AB1.thetas.idx.txt", header = TRUE)
-10^-10.386044
-exp(-10.386044)
+?numAlleles
+numAlleles
+load("landscapes.rds")
+read.csv("landscapes.rds", header = TRUE)
+tmp <- read.table("landscapes.rds")
+tmp[1:10,]
+tmp
+tmp[1,]
+tmp[2,]
+tmp[3,]
+tmp[4,]
+tmp[5,]
+tmp[1:10,]
 head(tmp)
-tmp <- read.table("AB1.thetas.idx.txt", header = TRUE)
-names(tmp)
-range(tmp$Pairwise)
-length(which(tmp$Pairwise == "-Inf"))
-tmp[which(tmp$Pairwise == "-Inf")[1],]
-exp(-Inf)
-10^-Inf
-pwise <- 10^tmp$Pairwise
-pwise[1:100]
-mean(pwise)
-pwise2 <- exp(tmp$Pairwise)
-mean(pwise2)
-range(pwise)
-range(pwise2)
-log(5.6)
-log10(5.6)
--1500+622735
--1500+628742
-50000*24
-25000*24
-20000*24
-634-678
-634-578
-600/56
-24*40000
--1500+654829
--1500+681720
--1500+684132
-seq(16,100,16)
--1500+686171
--1500+700390
--1500+729099
-Sys.unsetenv("GITHUB_PAT")
-options(timeout = 99999999)
-Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS=TRUE)
-devtools::install_github('stranda/holoSimCell')
-library(adegenet)
-install.packages("adegenet")
-library(adegenet)
-library(rlang)
-install.packages("rlang")
-install.packages("adegenet")
-devtools::install_github('stranda/holoSimCell')
-library(holoSimCell)
-?pophist2.cells
-?getpophist2.cells
-?testPophist
--1500+769061
--1500+782301
--1500+783101
--1500+794231
--1500+814483
-100*100
-500*500
--1500+868853
-library(rmetasim)
-showVignettes(rmetasim)
-vignette(rmetasim)
-vignette(package = "rmetasim")
--1500+881590
-library(vegan)
-?specpool
--1500+892542
--1500+907570
-library(holoSimCell)
-?make.gmap
-parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))#
-modchoice <- 1#
-load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[modchoice]]$file))#
-refpops <- pollenPulls[[modchoice]]$refs#
-avgCellsz <- mean(c(res(landscape$sumrast)))#
-#
-ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,#
-                       landscape=landscape,#
-                       refs=refpops,  #set at cell 540 right now #
-                       refsz=parms$ref_Ne,#
-                       lambda=parms$lambda,#
-                       mix=parms$mix,  #note how small.#
-                       shortscale=parms$shortscale*avgCellsz,  # scale parameter of weibull with shape below#
-                       shortshape=parms$shortshape, #weibull shape#
-                       longmean=parms$longmean*avgCellsz,  # mean of normal with sd = longmean#
-                       ysz=res(landscape$sumrast)[2], #height of cell in raster (same units as longmean and shortscale)#
-                       xsz=res(landscape$sumrast)[1], #width of cell in raster#
-                       K = parms$Ne) #maximum population size in a grid cell, scaled with hab_suit from landscape object#
-#
-gmap=make.gmap(ph$pophist,#
-               xnum=2, #number of cells to aggregate in x-direction#
-               ynum=2) #number of aggregate in the y-direction#
-#
-ph2 <- pophist.aggregate(ph,gmap=gmap)
-?getpophist2.cells
-?DoesGmapCombine
-?doesGmapCombine
-doesGmapCombine(gmap, landscape)
-?pophist.aggregate
-ph2 <- pophist.aggregate(ph,gmap=gmap)
-dim(ph2$Nvecs)
-dim(ph2$tmat)
-ph2$struct
-dim(ph2$hab_suit)
-dim(ph2$popslst)
-ph2$popslst
-length(ph2$poslst)
-length(ph2$popslst)
-51*49
-ph2$popslst[[1]]
-dim(ph2$old_hab_suit)
-ph2$old_hab_suit
-names(ph2$old_hab_suit)
-dim(ph2$old_hab_suit$hab_suit)
-dim(ph2$old_tmat)
-ph2$gmap
-library(holoSimCell)
-?make.gmap
-?getpophist2.cells
-?doesGmapCombine
-?pophist.aggregate
+library(raster)
+tmp <- brick("landscapes.rds")
+setwd("~/Downloads")
+load("landscapes.rds")
+readRDS("landscapes.rds")
+tmp <- readRDS("landscapes.rds")
+tmp[1:10,]
+tmp[1,]
+tmp[1]
+str(tmp)
+tmp$arid[1:10,]
+setwd("~/Desktop")
+tmp2 <- load("landscapes.rds")
+tmp2 <- readRDS("landscapes.rds")
+str(tmp2)
+tmp2$arid[1:10,]
+names(tmp2)
+tmp2$prec[1:10,]
+tmp2$prec[1:1000,1100:1200]
+rowSums(is.na(tmp2$prec))
+colSums(is.na(tmp2$prec))
+names(tmp2)
+mat<- matrix(data = NA, nrow = 10, ncol = 10)
+length(mat)
+?apply
+tidyverse::str_pad(c(1:1000), width = 5, side = "left", pad = "0")
+library(stringr)
+str_pad(c(1:1000), width = 5, side = "left", pad = "0")
+str_pad(c(1:1000), width = 5, side = "left", pad = "0") -> tmp
+paste0(tmp, c(".1",".2"))
+?paste
+rep(tmp,2)
+sort(rep(tmp,2))
+c(“id”, “deme”, paste0(“C”, sort(rep(str_pad(c(1:nloci), width = 5, side = “left”, pad = “0”), 2)), “B1_SNP”, c(“.1”,”.2”)))
+c("id", "deme", paste0("C",sort(rep(str_pad(c(1:1808), width = 5, side = "left", pad = "0"), 2)), "B1_SNP", c(".1", ".2")))
+tmp <- c(0,1,1,1,0,1,1,1,NA,NA)
+tmp-1
+tmp-1*-1
+-1*(tmp-1)
+tmp
+library(gstudio)
+library(popgraph)
+?popgraph
+setwd("~/Desktop/GitHub/holoSimCell")
+devtools::load_all()
 ?holoStats
-Sys.unsetenv("GITHUB_PAT")
-options(timeout=9999999)
-Sys.sentenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS=TRUE)
-Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS=TRUE)
-devtools::install_github('stranda/holoSimCell')
-library(holoSimCell)
-?runFSC_step_agg3
 library(holoSimCell)#
-parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))#
-modchoice <- 1#
-load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[modchoice]]$file))#
-refpops <- pollenPulls[[modchoice]]$refs#
-avgCellsz <- mean(c(res(landscape$sumrast)))#
-#
-ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,#
-                       landscape=landscape,#
-                       refs=refpops,   #
-                       refsz=parms$ref_Ne,#
-                       lambda=parms$lambda,#
-                       mix=parms$mix,  #
-                       shortscale=parms$shortscale*avgCellsz,  #
-                       shortshape=parms$shortshape, #
-                       longmean=parms$longmean*avgCellsz,  #
-                       ysz=res(landscape$sumrast)[2], #
-                       xsz=res(landscape$sumrast)[1], #
-                       K = parms$Ne) #
-#
-gmap=make.gmap(ph$pophist,#
-               xnum=2, #number of cells to aggregate in x-direction#
-               ynum=2) #number of aggregate in the y-direction#
-#
-ph2 <- pophist.aggregate(ph,gmap=gmap)#
-#
-loc_parms <- data.frame(marker = "snp",#
-                        nloci = parms$nloci,           #
-                        seq_length = parms$seq_length,#
-                        mu = parms$mu)#
-preLGMparms <- data.frame(preLGM_t = parms$preLGM_t/parms$G,   #
-                          preLGM_Ne = parms$preLGM_Ne,#
-                         ref_Ne = parms$ref_Ne)#
-#
-out <- runFSC_step_agg3(ph = ph2,#
-                        l = landscape,#
-                        sample_n = 14,#
-                        preLGMparms = preLGMparms,#
-                        label = "test",#
-                        delete_files = TRUE,#
-                        num_cores = 1,#
-                        exec = "fsc26",#
-                        loc_parms = loc_parms,#
-                        found_Ne = parms$found_Ne,#
-                        gmap = gmap,#
-                        MAF = 0.01,#
-                        maxloc = 50000)
-out
--1500+920480
-251958-13
--1500+939581
-938081+251945+134072
-134071+251945
-1.2e6*0.01
-1.2e6*0.001
-1.2e6*0.005
-1.2e6*0.05
-1.2e6*0.01
-1.2e6*0.005
-1.2e6*0.001
-remotes::install_github("lter/lterdatasampler")#
-library(lterdatasampler)#
-library(tidyverse)#
-lterdatasampler::knz_bison %>%#
-  filter(rec_year == 1994 | rec_year == 1998) %>%#
-  add_count(animal_code) %>%#
-  filter(n == 2) %>%#
-  ggplot(aes(x = rec_year,#
-             y = animal_weight,#
-             group = animal_code#
-             )) +#
-  geom_line() +#
-  geom_point() +#
-  ylab("Animal weight") +#
-  xlab("Year") +#
-  theme_classic(base_size = 18) +#
-  theme(legend.position = "none") +#
-  NULL
-Sys.unsetenv("GITHUB_PAT")
-remotes::install_github("lter/lterdatasampler")#
-library(lterdatasampler)#
-library(tidyverse)#
-lterdatasampler::knz_bison %>%#
-  filter(rec_year == 1994 | rec_year == 1998) %>%#
-  add_count(animal_code) %>%#
-  filter(n == 2) %>%#
-  ggplot(aes(x = rec_year,#
-             y = animal_weight,#
-             group = animal_code#
-             )) +#
-  geom_line() +#
-  geom_point() +#
-  ylab("Animal weight") +#
-  xlab("Year") +#
-  theme_classic(base_size = 18) +#
-  theme(legend.position = "none") +#
-  NULL
-install.packages("credentials")
-library(credentials)
-set_github_pat(force_new = TRUE)
-remotes::install_github("lter/lterdatasampler")
-install.packages("gitcreds")
-gitcreds::gitcreds_set()
-remotes::install_github("lter/lterdatasampler")
-usethis::edit_r_environ()
-remotes::install_github("lter/lterdatasampler")
-citation(package = "mclust")
-citation(package = "bmixture")
-citation(package = "bayesmix")
-library(strataG)
-?fscRun
-?fscReadArp
-Fsttest <- c(0.001, 0.25, NA, 0.3)
-min(Fsttest)
-max(Fsttest)
-Fsttest <- c(0.001, 0.25, "temp", 0.3)
-max(Fsttest)
-min(Fsttest)
-max(as.numeric(Fsttest))
-max(as.numeric(Fsttest), na.rm = TRUE)
-Fsttest <- matrix(data = runif(81), nrow= 9, ncol = 9)
-Fsttest
-Fsttest[3,3] <- "jojo"
-Fsttest
-Fstrowmax <- apply(Fsttest,1,FUN=function(x){max(as.numeric(x), na.rm = TRUE)})
-Fstrowmin <- apply(Fsttest,1,FUN=function(x){min(as.numeric(x), na.rm = TRUE)})
-Fstrowmax
-Fstrowmin
-is.numeric(Fsttest)
-Fstrowtext <- apply(Fsttest, 1, FUN=function(x){sum(!is.numeric(x))})
-Fstrowtext
-is.numeric(Fsttest)
-is.numeric(Fsttest[1,])
-is.numeric(as.numeric(Fsttest[1,]))
-is.numeric(as.numeric(Fsttest[3,]))
-is.na(as.numeric(Fsttest[3,]))
-Fstrowtext <- apply(Fsttest, 1, FUN=function(x){sum(is.na(as.numeric(x)))})
-Fstrowtext
-remrows <- which(Fstrowtext > 0)
-Fstrowtext <- apply(Fsttest, 1, FUN=function(x){sum(is.na(as.numeric(x)))})
-Fstrowmax <- apply(Fsttest,1,FUN=function(x){max(as.numeric(x), na.rm = TRUE)})
-Fstrowmin <- apply(Fsttest,1,FUN=function(x){min(as.numeric(x), na.rm = TRUE)})
-remrows <- which(Fstrowtext > 0)
-remrows <- c(remrows, which(Fstrowmax > 1)
-remrows <- c(remrows, which(Fstrowmin < 0))
-print(paste("There are",length(remrows),"rows to remove"))
-remrows
-?install.packages()
-library(holoSimCell)
-?makePopdf
 parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))#
 modchoice <- 1#
 load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[modchoice]]$file))#
@@ -378,89 +270,229 @@ out <- runFSC_step_agg3(ph = ph2,#
                         MAF = 0.01,#
                         maxloc = 50000)#
 popDF <- makePopdf(landscape,"cell")
-popDF
-?runFSC_step_agg3
-parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))#
-modchoice <- 1#
-load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[modchoice]]$file))#
-refpops <- pollenPulls[[modchoice]]$refs#
-avgCellsz <- mean(c(res(landscape$sumrast)))#
-#
-ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,#
-                       landscape=landscape,#
-                       refs=refpops,   #
-                       refsz=parms$ref_Ne,#
-                       lambda=parms$lambda,#
-                       mix=parms$mix,  #
-                       shortscale=parms$shortscale*avgCellsz,  #
-                       shortshape=parms$shortshape, #
-                       longmean=parms$longmean*avgCellsz,  #
-                       ysz=res(landscape$sumrast)[2], #
-                       xsz=res(landscape$sumrast)[1], #
-                       K = parms$Ne) #
-#
-gmap=make.gmap(ph$pophist,#
-               xnum=2, #number of cells to aggregate in x-direction#
-               ynum=2) #number of aggregate in the y-direction#
-#
-ph2 <- pophist.aggregate(ph,gmap=gmap)#
-#
-loc_parms <- data.frame(marker = "snp",#
-                        nloci = parms$nloci,           #
-                        seq_length = parms$seq_length,#
-                        mu = parms$mu)#
-preLGMparms <- data.frame(preLGM_t = parms$preLGM_t/parms$G,   #
-                          preLGM_Ne = parms$preLGM_Ne,#
-                         ref_Ne = parms$ref_Ne)#
-#
-out <- runFSC_step_agg3(ph = ph2,#
-                        l = landscape,#
-                        sample_n = 14,#
-                        preLGMparms = preLGMparms,#
-                        label = "test",#
-                        delete_files = TRUE,#
-                        num_cores = 1,#
-                        exec = "fsc26",#
-                        loc_parms = loc_parms,#
-                        found_Ne = parms$found_Ne,#
-                        gmap = gmap,#
-                        MAF = 0.01,#
-                        maxloc = 50000)
-class(loc_parms)
-loc_parms
-popDF
-?makePopdf
-?runFSC_step_agg3
-gmap=make.gmap(ph$pophist,#
-               xnum=1, #number of cells to aggregate in x-direction#
-               ynum=1) #number of aggregate in the y-direction
-gmap
-ph2 <- pophist.aggregate(ph,gmap=gmap)
-loc_parms <- data.frame(marker = "snp",#
-                        nloci = parms$nloci,           #
-                        seq_length = parms$seq_length,#
-                        mu = parms$mu)#
-preLGMparms <- data.frame(preLGM_t = parms$preLGM_t/parms$G,   #
-                          preLGM_Ne = parms$preLGM_Ne,#
-                         ref_Ne = parms$ref_Ne)#
-#
-out <- runFSC_step_agg3(ph = ph2,#
-                        l = landscape,#
-                        sample_n = 14,#
-                        preLGMparms = preLGMparms,#
-                        label = "test",#
-                        delete_files = TRUE,#
-                        num_cores = 1,#
-                        exec = "fsc26",#
-                        loc_parms = loc_parms,#
-                        found_Ne = parms$found_Ne,#
-                        gmap = gmap,#
-                        MAF = 0.01,#
-                        maxloc = 50000)
-ph2$coalhist
-ls()
+original_out <- out
 out[1:10,1:10]
-?holoStats
-setwd("~/Desktop/GitHub/holoSimCell")
-devtools::document()
-?runFSC_step_agg3
+out[1,3:4]
+out[1,3:4] <- NA
+cores <- 1
+pops.xy = popDF[,c("pop","x","y")]#
+  names(pops.xy) <- c("pop", "col", "row")#
+#
+  allMAF <- mafreq(out)#
+  totalHe <- 2*allMAF*(1-allMAF)#
+  popid <- unique(out$deme)#
+  SNPs <- sum(allMAF<1)#
+  names(SNPs) <- "tot_SNPs"#
+  split_out <- vector("list", length(unique(out$deme)))#
+  for(p in 1:length(unique(out$deme))) {#
+    split_out[[p]] <- out[out$deme == unique(out$deme)[p],]#
+    names(split_out)[p] <- unique(split_out[[p]]$deme)#
+  }#
+#
+  minor <- sapply(names(allMAF), FUN=function(x){strsplit(x, split = "[.]")[[1]][2]})#
+#
+  locMAF <- loc.mafreq(split_out, minor)#
+  DW <- colSums(locMAF/allMAF)#
+  names(DW) <- paste0("DW_",names(DW))#
+#
+  locHe <- colMeans(2*locMAF*(1-locMAF))#
+  varlocHe <- apply(2*locMAF*(1-locMAF),2,var)#
+  locN <- sapply(split_out,function(o){nrow(o)})#
+  localSNP <- apply(locMAF,2,function(x){sum(x<1 & x>0)})#
+#
+  names(localSNP) <- paste0("S.", names(localSNP))#
+#
+  privateSNP <- colSums(privateAlleles(df2gtypes(out, ploidy = 2)))#
+  privateSNP <- privateSNP[match(unique(out$deme), names(privateSNP))]#
+#
+  names(privateSNP) <- paste0("pS.", names(privateSNP))#
+#
+  total_priv = sum(privateSNP)#
+  names(total_priv) <- "tot_priv"#
+  pwhet <- pwise.het(locMAF,locN,cores)#
+  FstMat.loc <- as.dist(pwise.fst.loc(locMAF,allMAF,locN,pwhet))#
+  neimat <- pwise.nei(locMAF,cores)#
+  pairnei <- as.vector(neimat)#
+  neinames <- c()#
+#
+  neimat_names <- attr(neimat, "Labels")#
+  for(pid in 1:(length(neimat_names)-1)) {#
+    neinames <- c(neinames, paste0("Nei_", neimat_names[pid],".", neimat_names[(pid+1):length(neimat_names)]))#
+  }#
+  names(pairnei) = neinames#
+  attr(FstMat.loc,"Labels") <- attr(neimat,"Labels")  #
+  FstMat_names <- attr(FstMat.loc,"Labels")#
+  pairFst.loc = as.vector(FstMat.loc)#
+  Fstnames.loc = c()#
+#
+  for(pid in 1:(length(FstMat_names)-1)) {#
+    Fstnames.loc = c(Fstnames.loc, paste0("Fst_", FstMat_names[pid],".", FstMat_names[(pid+1):length(FstMat_names)]))#
+  } #
+#
+  names(pairFst.loc) = Fstnames.loc#
+  eucdist = dist(t(locMAF))#
+  paireuc = as.vector(eucdist)#
+  eucnames = c()#
+  dnames = attr(eucdist,"Labels")#
+#
+  for(pid in 1:(length(popDF$id)-1)) {#
+    eucnames = c(eucnames, paste0(dnames[pid],".", dnames[(pid+1):length(dnames)]))#
+  }#
+  names(paireuc) <- eucnames#
+#
+  pdist=as.matrix(dist(popDF[,c("x","y")]))#
+#
+  colnames(pdist) <- popDF$pop#
+  rownames(pdist) <- colnames(pdist)#
+  diag(pdist) <- NA#
+  pdist[upper.tri(pdist)] <- NA#
+  dsts = as.data.frame(as.table(pdist))#
+  dsts = dsts[complete.cases(dsts),]#
+  names(dsts) <- c("to","from","d")#
+  dsts$from <- as.character(dsts$from)#
+  dsts$to <- as.character(dsts$to)#
+  dsts <- dsts[order(dsts$to,dsts$from),]#
+  print("this far")#
+  he_by_pop <- colMeans(2*locMAF*(1-locMAF))#
+  hedf <- data.frame(he=he_by_pop, pop=names(he_by_pop),stringsAsFactors=F)#
+#
+  pr=prcomp(t(locMAF))#
+  pcadf <- data.frame(pop=rownames(predict(pr)),pc1=predict(pr)[,1],pc2=predict(pr)[,2],pc3=predict(pr)[,3])#
+  popDF <- merge(pcadf,merge(popDF,hedf))#
+  polyfit <- function(p,resp="he",ind="y",ord=1)#
+  {#
+    fit <- lm(p[,resp]~poly(p[,ind],ord))#
+    c(coef(fit))#
+  }#
+  he.lat.stats <- polyfit(popDF,"he","y",ord=2)#
+  names(he.lat.stats) <- paste0("helat.",c("int","frst","scnd"))#
+  he.long.stats <- polyfit(popDF,"he","x",ord=2)#
+  names(he.long.stats) <- paste0("helong.",c("int","frst","scnd"))#
+  pc1.lat.stats <- polyfit(popDF,"pc1","y",ord=2)#
+  pc1.long.stats <- polyfit(popDF,"pc1","x",ord=2)#
+  names(pc1.lat.stats) <- paste0("pc1lat.",c("int","frst","scnd"))#
+  names(pc1.long.stats) <- paste0("pc1long.",c("int","frst","scnd"))#
+  pc2.lat.stats <- polyfit(popDF,"pc2","y",ord=2)#
+  pc2.long.stats <- polyfit(popDF,"pc2","x",ord=2)#
+  names(pc2.lat.stats) <- paste0("pc2lat.",c("int","frst","scnd"))#
+  names(pc2.long.stats) <- paste0("pc2long.",c("int","frst","scnd"))#
+  pc3.lat.stats <- polyfit(popDF,"pc3","y",ord=2)#
+  pc3.long.stats <- polyfit(popDF,"pc3","x",ord=2)#
+  names(pc3.lat.stats) <- paste0("pc3lat.",c("int","frst","scnd"))#
+  names(pc3.long.stats) <- paste0("pc3long.",c("int","frst","scnd"))#
+  fsts = data.frame(fst=pairFst.loc)#
+  fsts = cbind(fsts,data.frame(t(sapply(strsplit(names(pairFst.loc),"\\."),function(nms){c(from=strsplit(nms[1],"_")[[1]][2],to=nms[2])})),stringsAsFactors=F))#
+  fsts = fsts[order(fsts$to,fsts$from),]#
+  neis = data.frame(nei=pairnei)#
+  neis = cbind(neis,data.frame(t(sapply(strsplit(names(pairnei),"\\."),function(nms){c(from=strsplit(nms[1],"_")[[1]][2],to=nms[2])})),stringsAsFactors=F))#
+  neis = neis[order(neis$to,neis$from),]#
+  edist = data.frame(edist=paireuc)#
+  edist = cbind(edist,data.frame(t(sapply(strsplit(names(paireuc),"\\."),function(nms){c(from=nms[1],to=nms[2])})),stringsAsFactors=F))#
+  edist = edist[order(edist$to,edist$from),]#
+  dsts <- merge(merge(merge(dsts,fsts),edist),neis)#
+  IBDfst <- lm((fst/(1-fst))~log(d),dsts) #changed from the previous line to implement Rousset's (1997) version #
+  ibdfst.slope <- c(coef(IBDfst)[2])#
+  ibdfst.int <- c(coef(IBDfst)[1])#
+  bsfst <- segmentGLM(c(dsts$d),log(c(dsts$fst+1)))#
+  IBDnei <- lm(log(nei+1)~log(d),dsts)#
+  ibdnei.slope <- c(coef(IBDnei)[2])#
+  ibdnei.int <- c(coef(IBDnei)[1])#
+  bsnei <- segmentGLM(c(dsts$d),log(c(dsts$nei+1)))#
+  IBDedist <- lm(log(edist+1)~log(d),dsts)#
+  ibdedist.slope <- c(coef(IBDedist)[2])#
+  ibdedist.int <- c(coef(IBDedist)[1])#
+  bsedist <- segmentGLM(c(dsts$d),log(c(dsts$edist+1)))#
+  chrom.names <- unique(regmatches(colnames(out[,-c(1,2)]), regexpr("^C[[:digit:]]+", colnames(out[,-c(1,2)]))))#
+  df <- matrix(data = NA, nrow = 2*nrow(out), ncol = length(chrom.names)+2)#
+  df <- as.data.frame(df)#
+  colnames(df) <- c("id","deme",chrom.names)#
+  df$id <- c(out$id, out$id)#
+  df$deme <- c(out$deme, out$deme)#
+  for(loc in chrom.names) {#
+    tmp.columns <- grep(loc, colnames(out))#
+    if(length(tmp.columns) == 2) {#
+      tmp <- c(out[,tmp.columns[1]], out[,tmp.columns[2]])#
+      df[,loc] <- tmp#
+      rm(tmp.columns, tmp)#
+    } else {#
+      stop(paste("too many columns for chromosome", loc, "subsample to one per locus?"))#
+    }#
+  }#
+  myorder <- c()#
+  for(pop in unique(out$deme)) {#
+    tmp <- which(df$deme == pop)#
+    tmp <- tmp[order(df$id[tmp])]#
+    myorder <- c(myorder, tmp)#
+    rm(tmp)#
+  }#
+  df <- df[myorder,]#
+  data <- data_reformat(raw_data = df)
+maj_min_fix <- function(x){#
+    if(mean(x, na.rm = TRUE) > 0.5){#
+      x <- -1*(x-1)#
+    }#
+    x#
+  }
+data <- data_reformat(raw_data = df)
+data_reformat
+maj_min_fix
+data <- data_reformat(raw_data = df)
+data_reformat2 <- function(raw_data){#
+  st <- raw_data$deme#
+  ones <- rep(1:1,each=length(st))#
+  act_snps <- raw_data[,-c(1,2)] #
+  act_snps <- apply(act_snps,2,as.character)#
+  act_snps <- apply(act_snps,2,as.numeric)#
+  act_snps <- apply(act_snps,2,maj_min_fix2)#
+  SNPs_reformat <- as.data.frame(cbind(st,ones,act_snps))#
+  SNPs_reformat[,-1] <- apply(SNPs_reformat[,-1],2,as.character)#
+  SNPs_reformat[,-1] <- apply(SNPs_reformat[,-1],2,as.numeric)#
+  SNPs_reformat#
+#
+}
+maj_min_fix
+maj_min_fix2 <- function(x){#
+    if(mean(x, na.rm = TRUE) > 0.5){#
+      x <- -1*(x-1)#
+    }#
+    x#
+  }
+data <- data_reformat2(raw_data = df)
+graphstats <- graph_theory(data = data, stats = c("cGD", "betweenness", "closeness"), plot = FALSE)
+stats <- holoStats(out, popDF, cores = 1)
+?read_population
+data
+data[1:10,1:10]
+indat <- apply(data[,-c(1,2)], 2, as.numeric)
+indat2 <- matrix(data = NA, nrow = nrow(indat)/2, ncol = ncol(indat))
+allele1row <- seq(1,nrow(indat),2)
+for(r in 1:nrow(indat2)){#
+    indat2[r,] <- indat[allele1row[r],]+indat[(allele1row[r]+1),]#
+  }
+pops <- as.character(data$st[allele1row])
+lat <- rep(NA, nrow(indat2))
+long <- rep(NA, nrow(indat2))
+colnames(indat2) <- paste0("loc",c(1:ncol(indat2)))
+writeme <- data.frame(Population = pops, Latitude = lat, Longitude = long, indat2)
+if (FALSE)
+{#
+    tmpfilename <- paste0("tmpsnp-",round(runif(1),5),".csv")#
+    write.csv(writeme, tmpfilename, quote = FALSE, row.names = FALSE)#
+    indat3 <- read_population(tmpfilename, type = "snp", locus.columns = c(4:ncol(writeme)))#
+    file.remove(tmpfilename)#
+  } else {# use text connection#
+    vec=  c(paste0(paste(names(writeme),collapse=","),"\n"),sapply(1:nrow(writeme),function(l){paste0(paste(writeme[l,],collapse=", "),"\n")}))#
+    indat3 <- read_population(textConnection(vec), type = "snp", locus.columns = c(4:ncol(writeme)))#
+  }
+indat3$Population <- writeme$Population
+indat4 <- to_mv(indat3)
+pops <- indat3$Population
+myg <- popgraph(x = indat4, groups = pops)
+?to_mv
+indat4[1:10, 1:10]
+indat3[1:10,1:10]
+indat4 <- to_mv(indat3)
+indat4 <- to_mv(indat3, leave.as.na = TRUE)
+myg <- popgraph(x = indat4, groups = pops)
+popgraph
+?svd

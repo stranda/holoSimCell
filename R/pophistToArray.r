@@ -6,6 +6,9 @@
 #' @param latitude Either \code{NULL} (default) or a vector of latitudes, one per row in the output object. Note that if \code{latitude} is \code{NULL} and the "pophist" object in \code{x} contains a field named \code{x$pophist$latitude}, then this will be used (and will override the values in \code{latitude} if it is specified).
 #' @param times Either \code{NULL} (default) or a numeric vector. This specifies the time period represented by each column in \code{x}. Times \emph{must} appear in sequential order. For example, if time periods are 24 kybp, 23 kybp, 22 kybp, use \code{c(-24, -23, -22)}, \emph{not} \code{c(24, 23, 22)}. Note that if \code{times} is \code{NULL} and the "pophist" object in \code{x} contains a field named \code{x$pophist$times}, then this will be used (and will override the values in \code{times} if it is specified).
 #' @param warn Logical, if \code{TRUE} then display function-specific warnings.
+#'
+#' @details Utility function for pre-processing an Nvecs matrix from a pophist object for biotic velocity calculations.
+#'
 #' @return A list object with:
 #' \itemize{
 #' 	\item \code{pophistAsArray}: Array representing values in \code{x$pophist} with one "layer" (3rd dimension) per time period.
@@ -13,6 +16,45 @@
 #' 	\item \code{latitude}: Array representing latitudes.
 #' 	\item \code{times}: Vector representing times.
 #' }
+#'
+#' @examples
+#' library(holoSimCell)
+#' parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))
+#' load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[1]]$file))
+#' refpops <- pollenPulls[[1]]$refs
+#' avgCellsz <- mean(c(res(landscape$sumrast)))
+#'
+#' ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,
+#'                        landscape=landscape,
+#'                        refs=refpops,   
+#'                        refsz=parms$ref_Ne,
+#'                        lambda=parms$lambda,
+#'                        mix=parms$mix,  
+#'                        shortscale=parms$shortscale*avgCellsz,  
+#'                        shortshape=parms$shortshape, 
+#'                        longmean=parms$longmean*avgCellsz,  
+#'                        ysz=res(landscape$sumrast)[2], 
+#'                        xsz=res(landscape$sumrast)[1], 
+#'                        K = parms$Ne) 
+#'
+#' times_1k <- seq(-21000,0,by=990)
+#'    
+#' pharray <- pophistToArray(NvecNAs(ph, landscape), times = times_1G)
+#'    
+#' metrics <- c('centroid', 'nsQuants', 'summary')
+#'
+#' BV_permill_all <- bioticVelocity(
+#'   x=pharray$pophistAsArray,
+#'   times = times_1G,
+#'   atTimes = times_1k,
+#'   longitude=pharray$longitude,
+#'   latitude=pharray$latitude,
+#'   metrics=metrics,
+#'   quants=c(0.05, 0.1, 0.9, 0.95),
+#'   onlyInSharedCells = FALSE)
+#'
+#' @seealso \code{\link{getpophist2.cells}}, \code{\link{NvecNAs}}, \code{\link[enmSdm]{bioticVelocity}}
+#'
 #' @export
 pophistToArray <- function(
 	x,

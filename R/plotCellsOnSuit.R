@@ -15,9 +15,8 @@
 #' @examples
 #' library(holoSimCell)
 #' parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))
-#' modchoice <- 1
-#' load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[modchoice]]$file))
-#' refpops <- pollenPulls[[modchoice]]$refs
+#' load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[1]]$file))
+#' refpops <- pollenPulls[[1]]$refs
 #' plotCellsOnSuit(refpops, landscape, timeslice = 1)
 #'
 #' @seealso \code{\link{ashSetupLandscape}}
