@@ -2,7 +2,7 @@
 % Please edit documentation in R/def_grid2.R
 \name{newLandscapeDim}
 \alias{newLandscapeDim}
-\title{resample the landscape to new dimensions given by continuous scaling number 'fac'}
+\title{Resample a raster brick into a new resolution}
 \usage{
 newLandscapeDim(rs, fac = 1)
 }
@@ -11,7 +11,22 @@ newLandscapeDim(rs, fac = 1)
 
 \item{fac}{is a number that is multiplied times the number of cols to calculate new dims}
 }
+\value{
+Raster brick with resolution specified by the combination of the input landscape (\code{rs}) and the rescaling parameter (\code{fac})
+}
 \description{
-This function depends on enmSdm's 'rastWithSquareCells()' function to do the resampling to
-a square-celled landscape of a particular resolution.  IOW the output raster has square cells.  Or at least close to square cells.
+resample the landscape to new dimensions given by continuous scaling number \code{fac}
+}
+\details{
+Takes a raster brick and resamples into a new resolution more coarse than the current raster brick resolution. \code{fac} is a factor on the interval 0-1 that determines how many cells in the new raster brick, relative to the original raster brick. For example, \code{fac = 0.5} would take the number of cells in each dimension in the original raster brick and reduce the same extent into 50% of the cells. This function depends on enmSdm's /code{rastWithSquareCells} function to do the resampling to a square-celled landscape of a particular resolution. IOW the output raster has square cells. Or at least close to square cells.
+}
+\examples{
+library(holoSimCell)
+rs <- raster::brick(system.file("extdata/rasters/ccsm_160kmExtent_maxent.tif", package = "holoSimCell"))
+newrs <- newLandscapeDim(rs,0.45)
+land <- def_grid_pred2(pred=newrs, samps=transSampLoc(pts, range.epsg=4326, raster.proj=crs(rs)@projargs), raster.proj=crs(rs)@projargs)
+
+}
+\seealso{
+\code{\link{ashSetupLandscape}}, \code{\link{def_grid_pred2}}, \code{\link{getpophist2.cells}}
 }

@@ -1,6 +1,6 @@
 #' Choose refuge cells from a plot of the landscape used in the simulations.
 #'
-#' Interactive function allowing a user to identify specific cells on the landscape, which are subsequently used as starting locations for a forward-time demographic simulation.
+#' Interactive function allowing a user to identify specific cells on the landscape, which can be used as starting locations for a forward-time demographic simulation.
 #'
 #' @param r this is the surface (a single raster layer)
 #'

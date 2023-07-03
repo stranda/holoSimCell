@@ -1,3 +1,35 @@
+barplot(t(as.matrix(matrix[,-1])))
+dim(matrix)
+?palette
+palette("R3")
+barplot(t(as.matrix(matrix[,-1])))
+palette("Okabe-Ito"); sinplot("Okabe-Ito")
+barplot(t(as.matrix(matrix[,-1])), col = palette("ggplot2"))
+library(RColorBrewer)
+help(package = "RColorBrewer")
+display.brewer.pal()
+display.brewer.all()
+brewer.pal(ncol(matrix[,-1]), "Spectral")
+library(grDevices)
+rainbow(n = ncol(matrix[,-1]))
+barplot(t(as.matrix(matrix[,-1])), col = grDevices::rainbow(n = ncol(matrix[,-1])))
+barplot(t(as.matrix(matrix[,-1])), col = grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.5))
+barplot(t(as.matrix(matrix[,-1])), col = grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6))
+legend("topleft", ncol = 4, cex = 0.75, legend = colnames(matrix[,-1]), fill = rainbow(n = ncol(matrix[,-1]), alpha = 0.6))
+barplot(t(as.matrix(matrix[,-1])), col = grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6))
+legend("topleft", ncol = 3, cex = 0.75, bty = "n", legend = colnames(matrix[,-1]), fill = rainbow(n = ncol(matrix[,-1]), alpha = 0.6))
+barplot(t(as.matrix(matrix[,-1])), col = grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6))li
+library(colorRamps)
+matlab.like2(26)
+matlab.like2(26, alpha = 0.6)
+barplot(t(as.matrix(matrix[,-1])), col = mypal, xlab = matrix$Sample)
+mypal <- colorRamps::matlab.like2(ncol(matrix[,-1])))
+barplot(t(as.matrix(matrix[,-1])), col = mypal, xlab = matrix$Sample)
+mypal <- colorRamps::matlab.like2(ncol(matrix[,-1])))
+mypal <- colorRamps::matlab.like2(ncol(matrix[,-1]))
+barplot(t(as.matrix(matrix[,-1])), col = mypal, xlab = matrix$Sample)
+mypal <- colorRamps::matlab.like2(ncol(matrix[,-1]))
+barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), col = mypal, xlab = matrix$Sample)
 mypal <- colorRamps::matlab.like2(ncol(matrix[,-1]))
 barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), col = mypal, names = matrix$Sample, las = 3)
 mypal <- grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6)
@@ -216,17 +248,26 @@ tmp-1
 tmp-1*-1
 -1*(tmp-1)
 tmp
-library(gstudio)
+library(igraph)
+?closeness
+?betweenness
+read.csv(textConnection(tmp), header = TRUE)
+?textConnection
 library(popgraph)
-?popgraph
+?read_population
+library(gstudio)
+?read_population
+?to_mv
+?read_population
+946+450+619+591+253+118+776
 setwd("~/Desktop/GitHub/holoSimCell")
-devtools::load_all()
+devtools::document()
 ?holoStats
-library(holoSimCell)#
+?def_grid_pred
+def_grid_pred()
 parms <- drawParms(control = system.file("extdata/ashpaper","Ash_priors.csv",package="holoSimCell"))#
-modchoice <- 1#
-load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[modchoice]]$file))#
-refpops <- pollenPulls[[modchoice]]$refs#
+load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[1]]$file))#
+refpops <- pollenPulls[[1]]$refs#
 avgCellsz <- mean(c(res(landscape$sumrast)))#
 #
 ph = getpophist2.cells(h = landscape$details$ncells, xdim = landscape$details$x.dim, ydim = landscape$details$y.dim,#
@@ -269,230 +310,6 @@ out <- runFSC_step_agg3(ph = ph2,#
                         gmap = gmap,#
                         MAF = 0.01,#
                         maxloc = 50000)#
-popDF <- makePopdf(landscape,"cell")
-original_out <- out
-out[1:10,1:10]
-out[1,3:4]
-out[1,3:4] <- NA
-cores <- 1
-pops.xy = popDF[,c("pop","x","y")]#
-  names(pops.xy) <- c("pop", "col", "row")#
+popDF <- makePopdf(landscape,"cell")#
 #
-  allMAF <- mafreq(out)#
-  totalHe <- 2*allMAF*(1-allMAF)#
-  popid <- unique(out$deme)#
-  SNPs <- sum(allMAF<1)#
-  names(SNPs) <- "tot_SNPs"#
-  split_out <- vector("list", length(unique(out$deme)))#
-  for(p in 1:length(unique(out$deme))) {#
-    split_out[[p]] <- out[out$deme == unique(out$deme)[p],]#
-    names(split_out)[p] <- unique(split_out[[p]]$deme)#
-  }#
-#
-  minor <- sapply(names(allMAF), FUN=function(x){strsplit(x, split = "[.]")[[1]][2]})#
-#
-  locMAF <- loc.mafreq(split_out, minor)#
-  DW <- colSums(locMAF/allMAF)#
-  names(DW) <- paste0("DW_",names(DW))#
-#
-  locHe <- colMeans(2*locMAF*(1-locMAF))#
-  varlocHe <- apply(2*locMAF*(1-locMAF),2,var)#
-  locN <- sapply(split_out,function(o){nrow(o)})#
-  localSNP <- apply(locMAF,2,function(x){sum(x<1 & x>0)})#
-#
-  names(localSNP) <- paste0("S.", names(localSNP))#
-#
-  privateSNP <- colSums(privateAlleles(df2gtypes(out, ploidy = 2)))#
-  privateSNP <- privateSNP[match(unique(out$deme), names(privateSNP))]#
-#
-  names(privateSNP) <- paste0("pS.", names(privateSNP))#
-#
-  total_priv = sum(privateSNP)#
-  names(total_priv) <- "tot_priv"#
-  pwhet <- pwise.het(locMAF,locN,cores)#
-  FstMat.loc <- as.dist(pwise.fst.loc(locMAF,allMAF,locN,pwhet))#
-  neimat <- pwise.nei(locMAF,cores)#
-  pairnei <- as.vector(neimat)#
-  neinames <- c()#
-#
-  neimat_names <- attr(neimat, "Labels")#
-  for(pid in 1:(length(neimat_names)-1)) {#
-    neinames <- c(neinames, paste0("Nei_", neimat_names[pid],".", neimat_names[(pid+1):length(neimat_names)]))#
-  }#
-  names(pairnei) = neinames#
-  attr(FstMat.loc,"Labels") <- attr(neimat,"Labels")  #
-  FstMat_names <- attr(FstMat.loc,"Labels")#
-  pairFst.loc = as.vector(FstMat.loc)#
-  Fstnames.loc = c()#
-#
-  for(pid in 1:(length(FstMat_names)-1)) {#
-    Fstnames.loc = c(Fstnames.loc, paste0("Fst_", FstMat_names[pid],".", FstMat_names[(pid+1):length(FstMat_names)]))#
-  } #
-#
-  names(pairFst.loc) = Fstnames.loc#
-  eucdist = dist(t(locMAF))#
-  paireuc = as.vector(eucdist)#
-  eucnames = c()#
-  dnames = attr(eucdist,"Labels")#
-#
-  for(pid in 1:(length(popDF$id)-1)) {#
-    eucnames = c(eucnames, paste0(dnames[pid],".", dnames[(pid+1):length(dnames)]))#
-  }#
-  names(paireuc) <- eucnames#
-#
-  pdist=as.matrix(dist(popDF[,c("x","y")]))#
-#
-  colnames(pdist) <- popDF$pop#
-  rownames(pdist) <- colnames(pdist)#
-  diag(pdist) <- NA#
-  pdist[upper.tri(pdist)] <- NA#
-  dsts = as.data.frame(as.table(pdist))#
-  dsts = dsts[complete.cases(dsts),]#
-  names(dsts) <- c("to","from","d")#
-  dsts$from <- as.character(dsts$from)#
-  dsts$to <- as.character(dsts$to)#
-  dsts <- dsts[order(dsts$to,dsts$from),]#
-  print("this far")#
-  he_by_pop <- colMeans(2*locMAF*(1-locMAF))#
-  hedf <- data.frame(he=he_by_pop, pop=names(he_by_pop),stringsAsFactors=F)#
-#
-  pr=prcomp(t(locMAF))#
-  pcadf <- data.frame(pop=rownames(predict(pr)),pc1=predict(pr)[,1],pc2=predict(pr)[,2],pc3=predict(pr)[,3])#
-  popDF <- merge(pcadf,merge(popDF,hedf))#
-  polyfit <- function(p,resp="he",ind="y",ord=1)#
-  {#
-    fit <- lm(p[,resp]~poly(p[,ind],ord))#
-    c(coef(fit))#
-  }#
-  he.lat.stats <- polyfit(popDF,"he","y",ord=2)#
-  names(he.lat.stats) <- paste0("helat.",c("int","frst","scnd"))#
-  he.long.stats <- polyfit(popDF,"he","x",ord=2)#
-  names(he.long.stats) <- paste0("helong.",c("int","frst","scnd"))#
-  pc1.lat.stats <- polyfit(popDF,"pc1","y",ord=2)#
-  pc1.long.stats <- polyfit(popDF,"pc1","x",ord=2)#
-  names(pc1.lat.stats) <- paste0("pc1lat.",c("int","frst","scnd"))#
-  names(pc1.long.stats) <- paste0("pc1long.",c("int","frst","scnd"))#
-  pc2.lat.stats <- polyfit(popDF,"pc2","y",ord=2)#
-  pc2.long.stats <- polyfit(popDF,"pc2","x",ord=2)#
-  names(pc2.lat.stats) <- paste0("pc2lat.",c("int","frst","scnd"))#
-  names(pc2.long.stats) <- paste0("pc2long.",c("int","frst","scnd"))#
-  pc3.lat.stats <- polyfit(popDF,"pc3","y",ord=2)#
-  pc3.long.stats <- polyfit(popDF,"pc3","x",ord=2)#
-  names(pc3.lat.stats) <- paste0("pc3lat.",c("int","frst","scnd"))#
-  names(pc3.long.stats) <- paste0("pc3long.",c("int","frst","scnd"))#
-  fsts = data.frame(fst=pairFst.loc)#
-  fsts = cbind(fsts,data.frame(t(sapply(strsplit(names(pairFst.loc),"\\."),function(nms){c(from=strsplit(nms[1],"_")[[1]][2],to=nms[2])})),stringsAsFactors=F))#
-  fsts = fsts[order(fsts$to,fsts$from),]#
-  neis = data.frame(nei=pairnei)#
-  neis = cbind(neis,data.frame(t(sapply(strsplit(names(pairnei),"\\."),function(nms){c(from=strsplit(nms[1],"_")[[1]][2],to=nms[2])})),stringsAsFactors=F))#
-  neis = neis[order(neis$to,neis$from),]#
-  edist = data.frame(edist=paireuc)#
-  edist = cbind(edist,data.frame(t(sapply(strsplit(names(paireuc),"\\."),function(nms){c(from=nms[1],to=nms[2])})),stringsAsFactors=F))#
-  edist = edist[order(edist$to,edist$from),]#
-  dsts <- merge(merge(merge(dsts,fsts),edist),neis)#
-  IBDfst <- lm((fst/(1-fst))~log(d),dsts) #changed from the previous line to implement Rousset's (1997) version #
-  ibdfst.slope <- c(coef(IBDfst)[2])#
-  ibdfst.int <- c(coef(IBDfst)[1])#
-  bsfst <- segmentGLM(c(dsts$d),log(c(dsts$fst+1)))#
-  IBDnei <- lm(log(nei+1)~log(d),dsts)#
-  ibdnei.slope <- c(coef(IBDnei)[2])#
-  ibdnei.int <- c(coef(IBDnei)[1])#
-  bsnei <- segmentGLM(c(dsts$d),log(c(dsts$nei+1)))#
-  IBDedist <- lm(log(edist+1)~log(d),dsts)#
-  ibdedist.slope <- c(coef(IBDedist)[2])#
-  ibdedist.int <- c(coef(IBDedist)[1])#
-  bsedist <- segmentGLM(c(dsts$d),log(c(dsts$edist+1)))#
-  chrom.names <- unique(regmatches(colnames(out[,-c(1,2)]), regexpr("^C[[:digit:]]+", colnames(out[,-c(1,2)]))))#
-  df <- matrix(data = NA, nrow = 2*nrow(out), ncol = length(chrom.names)+2)#
-  df <- as.data.frame(df)#
-  colnames(df) <- c("id","deme",chrom.names)#
-  df$id <- c(out$id, out$id)#
-  df$deme <- c(out$deme, out$deme)#
-  for(loc in chrom.names) {#
-    tmp.columns <- grep(loc, colnames(out))#
-    if(length(tmp.columns) == 2) {#
-      tmp <- c(out[,tmp.columns[1]], out[,tmp.columns[2]])#
-      df[,loc] <- tmp#
-      rm(tmp.columns, tmp)#
-    } else {#
-      stop(paste("too many columns for chromosome", loc, "subsample to one per locus?"))#
-    }#
-  }#
-  myorder <- c()#
-  for(pop in unique(out$deme)) {#
-    tmp <- which(df$deme == pop)#
-    tmp <- tmp[order(df$id[tmp])]#
-    myorder <- c(myorder, tmp)#
-    rm(tmp)#
-  }#
-  df <- df[myorder,]#
-  data <- data_reformat(raw_data = df)
-maj_min_fix <- function(x){#
-    if(mean(x, na.rm = TRUE) > 0.5){#
-      x <- -1*(x-1)#
-    }#
-    x#
-  }
-data <- data_reformat(raw_data = df)
-data_reformat
-maj_min_fix
-data <- data_reformat(raw_data = df)
-data_reformat2 <- function(raw_data){#
-  st <- raw_data$deme#
-  ones <- rep(1:1,each=length(st))#
-  act_snps <- raw_data[,-c(1,2)] #
-  act_snps <- apply(act_snps,2,as.character)#
-  act_snps <- apply(act_snps,2,as.numeric)#
-  act_snps <- apply(act_snps,2,maj_min_fix2)#
-  SNPs_reformat <- as.data.frame(cbind(st,ones,act_snps))#
-  SNPs_reformat[,-1] <- apply(SNPs_reformat[,-1],2,as.character)#
-  SNPs_reformat[,-1] <- apply(SNPs_reformat[,-1],2,as.numeric)#
-  SNPs_reformat#
-#
-}
-maj_min_fix
-maj_min_fix2 <- function(x){#
-    if(mean(x, na.rm = TRUE) > 0.5){#
-      x <- -1*(x-1)#
-    }#
-    x#
-  }
-data <- data_reformat2(raw_data = df)
-graphstats <- graph_theory(data = data, stats = c("cGD", "betweenness", "closeness"), plot = FALSE)
 stats <- holoStats(out, popDF, cores = 1)
-?read_population
-data
-data[1:10,1:10]
-indat <- apply(data[,-c(1,2)], 2, as.numeric)
-indat2 <- matrix(data = NA, nrow = nrow(indat)/2, ncol = ncol(indat))
-allele1row <- seq(1,nrow(indat),2)
-for(r in 1:nrow(indat2)){#
-    indat2[r,] <- indat[allele1row[r],]+indat[(allele1row[r]+1),]#
-  }
-pops <- as.character(data$st[allele1row])
-lat <- rep(NA, nrow(indat2))
-long <- rep(NA, nrow(indat2))
-colnames(indat2) <- paste0("loc",c(1:ncol(indat2)))
-writeme <- data.frame(Population = pops, Latitude = lat, Longitude = long, indat2)
-if (FALSE)
-{#
-    tmpfilename <- paste0("tmpsnp-",round(runif(1),5),".csv")#
-    write.csv(writeme, tmpfilename, quote = FALSE, row.names = FALSE)#
-    indat3 <- read_population(tmpfilename, type = "snp", locus.columns = c(4:ncol(writeme)))#
-    file.remove(tmpfilename)#
-  } else {# use text connection#
-    vec=  c(paste0(paste(names(writeme),collapse=","),"\n"),sapply(1:nrow(writeme),function(l){paste0(paste(writeme[l,],collapse=", "),"\n")}))#
-    indat3 <- read_population(textConnection(vec), type = "snp", locus.columns = c(4:ncol(writeme)))#
-  }
-indat3$Population <- writeme$Population
-indat4 <- to_mv(indat3)
-pops <- indat3$Population
-myg <- popgraph(x = indat4, groups = pops)
-?to_mv
-indat4[1:10, 1:10]
-indat3[1:10,1:10]
-indat4 <- to_mv(indat3)
-indat4 <- to_mv(indat3, leave.as.na = TRUE)
-myg <- popgraph(x = indat4, groups = pops)
-popgraph
-?svd

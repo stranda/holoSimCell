@@ -13,7 +13,7 @@ chooseRefugeCells(r)
 A vector of five cell IDs associated with the user-specified refuge location
 }
 \description{
-Interactive function allowing a user to identify specific cells on the landscape, which are subsequently used as starting locations for a forward-time demographic simulation.
+Interactive function allowing a user to identify specific cells on the landscape, which can be used as starting locations for a forward-time demographic simulation.
 }
 \details{
 Interactive function using locator() to identify cell IDs from user input. Assumes refugia include a central cell and adjacent cells in each cardinal direction (5 total).

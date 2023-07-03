@@ -2,7 +2,7 @@
 % Please edit documentation in R/def_grid2.R
 \name{def_grid_pred2}
 \alias{def_grid_pred2}
-\title{Takes multiple spatial inputs (range shapefiles, enm rasters) and makes a grid for the genetic simulations}
+\title{Convert raster suitability to habitat suitability surface for simulations}
 \usage{
 def_grid_pred2(
   pred = NULL,
@@ -18,6 +18,34 @@ def_grid_pred2(
 
 \item{raster.proj}{the proj.4 string to impose on the raster enm (if not already specified) (defaults albers)}
 }
+\value{
+Returns a landscape object with the following components:
+\itemize{
+\item{\code{details}} {Data frame with the spatial extent of the landscape grid}
+\item{\code{occupied}} {Vector of population IDs for occupied cells in the landscape grid}
+\item{\code{empty}} {Vector of population IDs for empty cells in the landscape grid}
+\item{\code{sampled}} {Vector of population IDs for sampled populations in the landscape grid}
+\item{\code{hab_suit}} {Matrix with species habitat suitability (ranging from zero to one) through time. Rows in the matrix correspond to discrete time units and columns correspond to cells in the landscape}
+\item{\code{sumrast}} {Raster that stores the extent and resolution of the simulation landscape}
+\item{\code{samplocsrast}} {Raster showing the locations of cells that correspond to sampled populations}
+\item{\code{samplocs}} {Simple feature encoding spatial vector data related to the sampling populations and a data frame with metadata of the sampling populations (population id, number of individuals, type of spatial data and coordinates)}
+\item{\code{sampdf}} {Data frame with the spatial location of the sampling populations in the landscape grid}
+\item{\code{NAmask}} {A RasterBrick object used to mask cells that are unsuitable (e.g., covered by glaciers, out of the study region, in large lakes or oceans)}
+}
+}
 \description{
 Takes multiple spatial inputs (range shapefiles, enm rasters) and makes a grid for the genetic simulations
+}
+\details{
+Takes a raster stack and converts into the internal habitat suitability matrix (rows are time and columns represent cell IDs). This object is returned along with rasters delineating the locations of genetic samples and sum of suitabilities for each cell through time. These are all returned from the function as a new 'landscape' object, which formst he main input into /code{getpophist2.cells}.
+}
+\examples{
+library(holoSimCell)
+rs <- raster::brick(system.file("extdata/rasters/ccsm_160kmExtent_maxent.tif", package = "holoSimCell"))
+newrs <- newLandscapeDim(rs,0.45)
+land <- def_grid_pred2(pred=newrs, samps=transSampLoc(pts, range.epsg=4326, raster.proj=crs(rs)@projargs), raster.proj=crs(rs)@projargs)
+
+}
+\seealso{
+\code{\link{ashSetupLandscape}}, \code{\link{getpophist2.cells}}
 }

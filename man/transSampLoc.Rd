@@ -2,7 +2,7 @@
 % Please edit documentation in R/def_grid2.R
 \name{transSampLoc}
 \alias{transSampLoc}
-\title{transform samppts to raster projection.}
+\title{Re-project sample locations into simulation projection}
 \usage{
 transSampLoc(
   samppts = NULL,
@@ -18,6 +18,23 @@ transSampLoc(
 
 \item{raster.proj}{proj4 string for the underlying raster}
 }
+\value{
+Feature collection with location of sampled populations converted to the coordinate reference system used in the simulation landscape
+}
 \description{
-transform samppts to raster projection.
+transform samppts to raster projection matching coordinate reference system of the simulation landscape.
+}
+\details{
+Takes a dataframe of sample locations in a projection given by \code{range.epsg} (for example, \code{range.epsg = 4326} corresponds to WGS84; see \url{https://epsg.io}) and reprojects into the projection given in \code{raster.proj}. Depends on the \code{sf} package to make the conversion.
+}
+\examples{
+library(holoSimCell)
+rs <- raster::brick(system.file("extdata/rasters/ccsm_160kmExtent_maxent.tif", package = "holoSimCell"))
+newrs <- newLandscapeDim(rs,0.45)
+samps <- transSampLoc(pts, range.epsg=4326, raster.proj=crs(rs)@projargs)
+land <- def_grid_pred2(pred=newrs, samps=samps, raster.proj=crs(rs)@projargs)
+
+}
+\seealso{
+\code{\link{ashSetupLandscape}}, \code{\link{def_grid_pred2}}, \code{\link{getpophist2.cells}}, \url{https://epsg.io}
 }

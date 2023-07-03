@@ -1,21 +1,36 @@
-#Function to impose a grid on a shapefile (as in species range)
-
-#Shapefiles used to be downloaded from: https://gec.cr.usgs.gov/data/little/
-#But that link is now dead
-
-#It appears that they can be downloaded from: https://www.fs.fed.us/nrs/atlas/littlefia/#
-#But not from this site (all dead links): http://www.atozmapsdata2.com/downloads/Country/Modern/C-USA-USGSTreeSpecies-index.html
-#There is also a GitHub repository with archived data from the top site above: https://github.com/wpetry/USTreeAtlas
-
-#GitHub is likely the preferred solution -- https://github.com/wpetry/USTreeAtlas
-
-#There may be some CRS issues in here.  Where can I find the CRS in a shapefile???  
-                                        #Doesn't appear to be in the fraxpenn folder
+#' Convert raster suitability to habitat suitability surface for simulations
+#'
 #' Takes multiple spatial inputs (range shapefiles, enm rasters) and makes a grid for the genetic simulations
+#'
 #' @param pred is a raster stack with layers of hab suitability (assumes [0-1] with larger numbers better suitability)
 #' @param samps locations of actual genetic samples.  SpatialPoints object assumed in same proj as raster input
 #' @param raster.proj the proj.4 string to impose on the raster enm (if not already specified) (defaults albers)
-#' 
+#'  
+#' @details Takes a raster stack and converts into the internal habitat suitability matrix (rows are time and columns represent cell IDs). This object is returned along with rasters delineating the locations of genetic samples and sum of suitabilities for each cell through time. These are all returned from the function as a new 'landscape' object, which formst he main input into /code{getpophist2.cells}.
+#'
+#' @return
+#' Returns a landscape object with the following components:
+#' \itemize{
+#' \item{\code{details}} {Data frame with the spatial extent of the landscape grid}
+#' \item{\code{occupied}} {Vector of population IDs for occupied cells in the landscape grid}
+#' \item{\code{empty}} {Vector of population IDs for empty cells in the landscape grid}
+#' \item{\code{sampled}} {Vector of population IDs for sampled populations in the landscape grid}
+#' \item{\code{hab_suit}} {Matrix with species habitat suitability (ranging from zero to one) through time. Rows in the matrix correspond to discrete time units and columns correspond to cells in the landscape}
+#' \item{\code{sumrast}} {Raster that stores the extent and resolution of the simulation landscape}
+#' \item{\code{samplocsrast}} {Raster showing the locations of cells that correspond to sampled populations}
+#' \item{\code{samplocs}} {Simple feature encoding spatial vector data related to the sampling populations and a data frame with metadata of the sampling populations (population id, number of individuals, type of spatial data and coordinates)}
+#' \item{\code{sampdf}} {Data frame with the spatial location of the sampling populations in the landscape grid}
+#' \item{\code{NAmask}} {A RasterBrick object used to mask cells that are unsuitable (e.g., covered by glaciers, out of the study region, in large lakes or oceans)}
+#' }
+#'
+#' @examples
+#' library(holoSimCell)
+#' rs <- raster::brick(system.file("extdata/rasters/ccsm_160kmExtent_maxent.tif", package = "holoSimCell"))
+#' newrs <- newLandscapeDim(rs,0.45)
+#' land <- def_grid_pred2(pred=newrs, samps=transSampLoc(pts, range.epsg=4326, raster.proj=crs(rs)@projargs), raster.proj=crs(rs)@projargs)
+#'
+#' @seealso \code{\link{ashSetupLandscape}}, \code{\link{getpophist2.cells}}
+#'
 #' @export
 def_grid_pred2 = function(pred=NULL,
                           samps = NULL,
@@ -82,10 +97,28 @@ def_grid_pred2 = function(pred=NULL,
     sampstruct
 }
 
-##' transform samppts to raster projection.
-##' @param samppts a dataframe with 5 cols: pop, abbrev, lat, long, and N
-##' @param range.epsg epsg number for the projection in which the points are encoded (default 4326 -> wgs84)
-##' @param raster.proj proj4 string for the underlying raster
+#' Re-project sample locations into simulation projection
+#'
+#' transform samppts to raster projection matching coordinate reference system of the simulation landscape.
+#'
+#' @param samppts a dataframe with 5 cols: pop, abbrev, lat, long, and N
+#' @param range.epsg epsg number for the projection in which the points are encoded (default 4326 -> wgs84)
+#' @param raster.proj proj4 string for the underlying raster
+#'
+#' @details Takes a dataframe of sample locations in a projection given by \code{range.epsg} (for example, \code{range.epsg = 4326} corresponds to WGS84; see \url{https://epsg.io}) and reprojects into the projection given in \code{raster.proj}. Depends on the \code{sf} package to make the conversion.
+#'
+#' @return Feature collection with location of sampled populations converted to the coordinate reference system used in the simulation landscape
+#'
+#' @examples
+#' library(holoSimCell)
+#' rs <- raster::brick(system.file("extdata/rasters/ccsm_160kmExtent_maxent.tif", package = "holoSimCell"))
+#' newrs <- newLandscapeDim(rs,0.45)
+#' samps <- transSampLoc(pts, range.epsg=4326, raster.proj=crs(rs)@projargs)
+#' land <- def_grid_pred2(pred=newrs, samps=samps, raster.proj=crs(rs)@projargs)
+#'
+#' @seealso \code{\link{ashSetupLandscape}}, \code{\link{def_grid_pred2}}, \code{\link{getpophist2.cells}}, \url{https://epsg.io}
+#'
+#' @export
 
 transSampLoc <- function(samppts=NULL,
                          range.epsg=4326,
@@ -100,13 +133,27 @@ transSampLoc <- function(samppts=NULL,
 }
 
 
-#### resample to lower resolution
-#### Adam may have a function for this
-##' resample the landscape to new dimensions given by continuous scaling number 'fac'
-##' @param rs a raster brick object to resample
-##' @param fac is a number that is multiplied times the number of cols to calculate new dims
-##' @description This function depends on enmSdm's 'rastWithSquareCells()' function to do the resampling to
-##' a square-celled landscape of a particular resolution.  IOW the output raster has square cells.  Or at least close to square cells.
+#' Resample a raster brick into a new resolution
+#'
+#' resample the landscape to new dimensions given by continuous scaling number \code{fac}
+#'
+#' @param rs a raster brick object to resample
+#' @param fac is a number that is multiplied times the number of cols to calculate new dims
+#'
+#' @details Takes a raster brick and resamples into a new resolution more coarse than the current raster brick resolution. \code{fac} is a factor on the interval 0-1 that determines how many cells in the new raster brick, relative to the original raster brick. For example, \code{fac = 0.5} would take the number of cells in each dimension in the original raster brick and reduce the same extent into 50% of the cells. This function depends on enmSdm's /code{rastWithSquareCells} function to do the resampling to a square-celled landscape of a particular resolution. IOW the output raster has square cells. Or at least close to square cells.
+#'
+#' @return Raster brick with resolution specified by the combination of the input landscape (\code{rs}) and the rescaling parameter (\code{fac})
+#'
+#' @examples
+#' library(holoSimCell)
+#' rs <- raster::brick(system.file("extdata/rasters/ccsm_160kmExtent_maxent.tif", package = "holoSimCell"))
+#' newrs <- newLandscapeDim(rs,0.45)
+#' land <- def_grid_pred2(pred=newrs, samps=transSampLoc(pts, range.epsg=4326, raster.proj=crs(rs)@projargs), raster.proj=crs(rs)@projargs)
+#'
+#' @seealso \code{\link{ashSetupLandscape}}, \code{\link{def_grid_pred2}}, \code{\link{getpophist2.cells}}
+#'
+#' @export
+
 
 newLandscapeDim <- function(rs, fac=1.0)
 {
