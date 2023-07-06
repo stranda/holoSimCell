@@ -14,7 +14,7 @@ plotCellsOnSuit(cells, landscape, timeslice = 1)
 \item{timeslice}{(default = 1), the layer of the landscape that corresponds to a time step (generation) in the simulation}
 }
 \value{
-Returns a plot illustrating the simulated landscape at a particular point in time.  The simulation landscape is shown in light yellow (corresponding to open, or unglaciated, habitat) and cells queried are shown in maroon.
+Returns a plot illustrating the simulated landscape at a particular point in time.  The simulation landscape (open, or unglaciated habitat) is shown in orange, glaciated regions are shown in light blue, and cells queried are shown in maroon.
 }
 \description{
 Illustration of location of specific cells on the forward simulation landscape.

@@ -10,7 +10,7 @@
 #' This function allows the user to visualize the location of specific cells on the simulation landscape.  We have found this useful for confirming the location of refugial cells in our simulations.
 #'
 #' @return
-#' Returns a plot illustrating the simulated landscape at a particular point in time.  The simulation landscape is shown in light yellow (corresponding to open, or unglaciated, habitat) and cells queried are shown in maroon.
+#' Returns a plot illustrating the simulated landscape at a particular point in time.  The simulation landscape (open, or unglaciated habitat) is shown in orange, glaciated regions are shown in light blue, and cells queried are shown in maroon.
 #' 
 #' @examples
 #' library(holoSimCell)
@@ -26,7 +26,12 @@ plotCellsOnSuit <- function(cells,landscape,timeslice=1)
 {
     hs=landscape$hab_suit[timeslice,]
     hs=as.numeric(hs>0)
+    if(length(unique(hs)) == 2) {
+        colorschem = c("orange", "maroon")
+    } else {
+        colorschem = c("light blue", "orange", "maroon")
+    }
     hs[cells] <- 2
     m <- matrix(hs,nrow=landscape$details$x.dim,ncol=landscape$details$y.dim,byrow=F)
-    image(x=c(1:landscape$detail$x.dim),y=c(1:landscape$details$y.dim),z=m,xlab="Columns",ylab="Rows")
+    image(x=c(1:landscape$detail$x.dim),y=c(1:landscape$details$y.dim),z=m,xlab="Columns",ylab="Rows", col = colorschem)
 }

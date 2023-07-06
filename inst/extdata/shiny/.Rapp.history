@@ -1,3 +1,4 @@
+brewer.pal(ncol(matrix[,-1]), "Spectral")
 library(grDevices)
 rainbow(n = ncol(matrix[,-1]))
 barplot(t(as.matrix(matrix[,-1])), col = grDevices::rainbow(n = ncol(matrix[,-1])))
@@ -268,24 +269,5 @@ library(eDNAoccupancy)
 6*50*2*2
 6*50*2
 setwd("~/Desktop/GitHub/holoSimCell")
-devtools::document()
-?assignRefugiaFromAbundanceRaster
-library(raster)#
-abund <- brick(system.file("extdata/rasters/ccsm_160kmExtent_maxent.tif", package = "holoSimCell"))#
-abund <- abund[[1]]#
-#
-load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[1]]$file))#
-sim <- landscape$sumrast#
-#
-threshold <- 0.6#
-refs <- assignRefugiaFromAbundanceRaster(abund, sim, threshold)#
-#
-cols <- c('red', 'orange', 'yellow', 'green', 'blue', 'purple', 'gray',#
-	'chartreuse', 'darkgreen', 'cornflowerblue', 'goldenrod3', 'black',#
-	'steelblue3', 'forestgreen', 'pink', 'cyan', 'darkred')#
-#
-par(mfrow=c(1, 2))#
-#
-col <- cols[1:maxValue(refs$sim[['refugiaId']])]#
-plot(refs$simulationScale[['refugiaId']], col=col, main='refuge ID')#
-plot(refs$simulationScale[['refugiaAbund']], main='refuge abundance')
+devtools::load_all()
+forwardGUI()

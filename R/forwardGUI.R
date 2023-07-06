@@ -4,7 +4,7 @@
 #' 
 #' @details
 #' \itemize{
-#' Opens a shiny interface that allows the user to vary model parameters and visualize a simulated colonization history.  Parameters include:
+#' Opens a shiny interface that allows the user to vary model parameters and visualize a simulated colonization history.  Parameters are set using the "Setup and run simulation tab" and include:
 #' \item{\code{Scale of short-dist}} {The scale parameter for the short-distance component of the dispersal kernel, expressed as a percentage of cell width.}
 #' \item{\code{Shape of short-dist}} {The shape parameter for the short-distance component of the dispersal kernel.}
 #' \item{\code{Scale of long-dist}} {The mean distance for long-distance dispersal events, expressed as a fraction of cell width.}
@@ -13,6 +13,10 @@
 #' \item{\code{carry capacity}} {The carrying capacity of grid cells on the landscape.  Assumes all cells are equally suitable (no ENM or pollen surface incorporated).}
 #' \item{\code{Refuge?}} {One of several options for the location of glacial refugia.  Populations in 5 cells in each specified area are present at the start of demographic simulations.  Options include: Pennsylvania (PA), Georgia (GA), Texas (TX), or all of the above (ALL).}
 #' }
+#'
+#' After the simulation is complete, plots of the population history can be viewed using the "Examine history in detail" tab. On this tab, the user can specify the starting generation for the figure and the number of generations to illustrate.
+#'
+#' @seealso \code{\link{getpophist2.cells}}, \code{\link{plothist}}
 #'
 #' @export
 
