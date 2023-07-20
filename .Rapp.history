@@ -1,52 +1,3 @@
-library(grDevices)
-rainbow(n = ncol(matrix[,-1]))
-barplot(t(as.matrix(matrix[,-1])), col = grDevices::rainbow(n = ncol(matrix[,-1])))
-barplot(t(as.matrix(matrix[,-1])), col = grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.5))
-barplot(t(as.matrix(matrix[,-1])), col = grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6))
-legend("topleft", ncol = 4, cex = 0.75, legend = colnames(matrix[,-1]), fill = rainbow(n = ncol(matrix[,-1]), alpha = 0.6))
-barplot(t(as.matrix(matrix[,-1])), col = grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6))
-legend("topleft", ncol = 3, cex = 0.75, bty = "n", legend = colnames(matrix[,-1]), fill = rainbow(n = ncol(matrix[,-1]), alpha = 0.6))
-barplot(t(as.matrix(matrix[,-1])), col = grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6))li
-library(colorRamps)
-matlab.like2(26)
-matlab.like2(26, alpha = 0.6)
-barplot(t(as.matrix(matrix[,-1])), col = mypal, xlab = matrix$Sample)
-mypal <- colorRamps::matlab.like2(ncol(matrix[,-1])))
-barplot(t(as.matrix(matrix[,-1])), col = mypal, xlab = matrix$Sample)
-mypal <- colorRamps::matlab.like2(ncol(matrix[,-1])))
-mypal <- colorRamps::matlab.like2(ncol(matrix[,-1]))
-barplot(t(as.matrix(matrix[,-1])), col = mypal, xlab = matrix$Sample)
-mypal <- colorRamps::matlab.like2(ncol(matrix[,-1]))
-barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), col = mypal, xlab = matrix$Sample)
-mypal <- colorRamps::matlab.like2(ncol(matrix[,-1]))
-barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), col = mypal, names = matrix$Sample, las = 3)
-mypal <- grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6)
-barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), col = mypal, names = matrix$Sample, las = 3)
-legend("topleft", ncol = 3, cex = 0.75, bty = "n", legend = colnames(matrix[,-1][,order(colnames(matrix[,-1]))]), fill = mypal)
-mypal <- rev(grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6))
-barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), col = mypal, names = matrix$Sample, las = 3)
-legend("topleft", ncol = 3, cex = 0.75, bty = "n", legend = colnames(matrix[,-1][,order(colnames(matrix[,-1]))]), fill = mypal)
-mypal <- grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6)
-mylabs <- colnames(matrix[,-1][,order(colnames(matrix[,-1]))])
-mypal[mylabs == "Petromyzontidae_unclassified"] <- "black"
-mypal[mylabs == "Salvelinus_namaycush"] <- "white"
-barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), col = mypal, names = matrix$Sample, las = 3)
-legend("topleft", ncol = 3, cex = 0.75, bty = "n", legend = colnames(matrix[,-1][,order(colnames(matrix[,-1]))]), fill = mypal)
-par(mar = c(10,5,2,2))
-mypal <- grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6)
-mylabs <- colnames(matrix[,-1][,order(colnames(matrix[,-1]))])
-mypal[mylabs == "Petromyzontidae_unclassified"] <- "black"
-mypal[mylabs == "Salvelinus_namaycush"] <- "grey"
-barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), col = mypal, names = gsub(".12S","",matrix$Sample), las = 3, cex.lab = 0.7)
-legend("topleft", ncol = 3, cex = 0.75, bty = "n", legend = colnames(matrix[,-1][,order(colnames(matrix[,-1]))]), fill = mypal)
-matrix[matrix$Sample == "25_NoBlock_HP5.12S",]
-par(mar = c(10,5,2,2))
-mypal <- grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6)
-mylabs <- colnames(matrix[,-1][,order(colnames(matrix[,-1]))])
-mypal[mylabs == "Petromyzontidae_unclassified"] <- "black"
-mypal[mylabs == "Salvelinus_namaycush"] <- "grey"
-barplot(t(as.matrix(matrix[,-1][,order(colnames(matrix[,-1]))])), col = mypal, names = gsub(".12S","",matrix$Sample), las = 3, cex.axis = 0.7)
-legend("topleft", ncol = 3, cex = 0.75, bty = "n", legend = colnames(matrix[,-1][,order(colnames(matrix[,-1]))]), fill = mypal)
 par(mar = c(10,5,2,2))
 mypal <- grDevices::rainbow(n = ncol(matrix[,-1]), alpha = 0.6)
 mylabs <- colnames(matrix[,-1][,order(colnames(matrix[,-1]))])
@@ -267,25 +218,74 @@ devtools::install_github("RobertDorazio/eDNAoccupancy", force = TRUE)
 library(eDNAoccupancy)
 6*50*2*2
 6*50*2
-setwd("~/Desktop/GitHub/holoSimCell")
-devtools::document()
-?assignRefugiaFromAbundanceRaster
+library(enmSdm)
+readOGR()
+install.packages("enmSdmX")
+library(enmSdmX)
+vignette(package= "enmSdmX")
+?gTouches
 library(raster)#
-abund <- brick(system.file("extdata/rasters/ccsm_160kmExtent_maxent.tif", package = "holoSimCell"))#
-abund <- abund[[1]]#
+library(rgdal)#
+library(maps)#
+library(mapdata)#
+library(dismo)  #
+library(maptools)#
+library(rgbif)#
+library(rvertnet)#
+library(sp)#
+library(sf)#
+library(maxnet)#
+library(rgeos)#
+library(geosphere)#
+library(scales)#
 #
-load(file=paste0(system.file(package="holoSimCell"),"/extdata/landscapes/",pollenPulls[[1]]$file))#
-sim <- landscape$sumrast#
-#
-threshold <- 0.6#
-refs <- assignRefugiaFromAbundanceRaster(abund, sim, threshold)#
-#
-cols <- c('red', 'orange', 'yellow', 'green', 'blue', 'purple', 'gray',#
-	'chartreuse', 'darkgreen', 'cornflowerblue', 'goldenrod3', 'black',#
-	'steelblue3', 'forestgreen', 'pink', 'cyan', 'darkred')#
-#
-par(mfrow=c(1, 2))#
-#
-col <- cols[1:maxValue(refs$sim[['refugiaId']])]#
-plot(refs$simulationScale[['refugiaId']], col=col, main='refuge ID')#
-plot(refs$simulationScale[['refugiaAbund']], main='refuge abundance')
+# custom#
+library(omnibus)#
+library(legendary)#
+library(statisfactory)
+?SpatialPointsDataFrame
+?gTouches
+?extent
+?setMinMax
+?projection
+?writeRaster
+?stack
+?extract
+?elimCellDups
+?randomPoints
+?maxnet
+?predict
+help(package = "enmSdmX")
+?elimCellDups
+?elimCellDuplicates
+help(package = "enmSdmX")
+library(enmSdmX)
+readOGR()
+?maxnet
+?SpatialPointsDataFrame
+library(sp)
+library(eDNAoccupancy)
+?occModel
+occModel
+?scaleData
+?occModel
+12+9+4
+5+6+15
+536*4425
+library(maps)
+map(database = "states")
+map(database = "state")
+setwd("~/Desktop/GitHub/holoSimCell")
+devtools::load_all()
+pwise.het
+?anova
+loc.mafreq
+mafreq
+pwise.fst
+pwisehet
+pwise.het
+loc.mafreq
+pwise.het
+pwise.fst.loc
+?Fst
+?colMeans
