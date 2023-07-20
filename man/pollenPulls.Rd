@@ -16,7 +16,7 @@ A list of 200 pointers to files containing predictions of green ash abundance th
 \details{
 \itemize{
 Each element is a list of two elements:	
-	\item file. A text \code{.rda} file that stores the landscape object associated with this draw from the posterior.
+	\item file. A text \code{.rda} file that stores the landscape object associated with this draw from the posterior. Refers to landscapes located in \code{system.file(package="holoSimCell","extdata/landscapes")}
 	\item refs. A vector of refuge cell IDs.
 }
 }

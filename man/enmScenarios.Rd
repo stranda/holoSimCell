@@ -21,11 +21,11 @@ A two-element list that describes 24 different ENMs used in simulations from Cas
 	\item ext. The buffer around occurrence points used to define background regions (in km)
 	\item algo. The niche modeling algorithm used in the model
 	\item threshold. The threshold used to define refuge cells, cells with suitability above this value at the LGM are occupied at the start of a simulation
-\item cbi. Continuous Boyce Index - a measure of ENM performance
-\item tss. True Skill Statistic - a measure of ENM performance
-\item se. ?????
-\item sp. ?????
-\item auc. The area under the receiver-operator curve - a measure of ENM performance
+\item cbi. Continuous Boyce Index - a measure of model accuracy, ranges from -1 to 1, with values >0 being better than random
+\item tss. True Skill Statistic - a measure of model accuracy, ranges from -1 to 1, with values >0 being better than random
+\item se. Sensitivity - proportion of present sites correctly predicted when the threshold is applied
+\item sp. Specificity - proportion of absent sites correctly predicted when the threshold is applied
+\item auc. The area under the curve - a measure of model accuracy, ranges from 0 to 1, with values >0.5 being better than random
 \item meanRefugeAbund. Average habitat suitability of cells classified as refugia (given the defined threshold)
 \item rasterStackName. A text string name for the ENM, describes GCM, extent, and algorithm used. Refers to landscapes located in \code{system.file(package="holoSimCell","extdata/landscapes")}
 }
