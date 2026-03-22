@@ -1,8 +1,8 @@
 Package: holoSimCell
 Type: Package
 Title: Linked demographic/genetic simulation
-Version: 0.1.4
-Date: 2020-07-20
+Version: 0.1.6
+Date: 2026-03-21
 Author: Allan Strand, John Robinson
 Maintainer: Allan Strand <stranda@cofc.edu>
 Description: One paragraph description of what the package does as one
@@ -22,7 +22,7 @@ Depends: R (>= 4.0),
 	 ape,
 	 omnibus,
 	 statisfactory,
-	 enmSdm,
+	 enmSdmX,
 	 strataG,
 	 shiny,
 	 raster,
@@ -37,7 +37,7 @@ Depends: R (>= 4.0),
 	 gstudio
 Remotes: adamlilith/omnibus,
 	 adamlilith/statisfactory,
-	 adamlilith/enmSdm,
+	 adamlilith/enmSdmX,
 	 dyerlab/popgraph,
 	 stranda/gstudio,
 	 EricArcher/strataG

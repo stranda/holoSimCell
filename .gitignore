@@ -5,3 +5,10 @@
 src/*.o
 src/*.so
 src/*.dll
+/inst/extdata/ashpaper/COFC/
+/inst/extdata/ashpaper/MSU/
+/inst/extdata/ashpaper/OLD/testing.rda
+/inst/extdata/ashpaper/OSG/
+/inst/extdata/ashpaper/Rplots.pdf
+/inst/extdata/ashpaper/analyze-demo.R
+*.R~
